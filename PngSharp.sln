@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PngSharp", "PngSharp\PngSharp.csproj", "{2E0154AE-98E9-42C6-B309-79E6C81CF4C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PngSharpTests", "PngSharpTests\PngSharpTests.csproj", "{8BFDB692-0740-40E6-8C7C-1FA290AF24FA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2E0154AE-98E9-42C6-B309-79E6C81CF4C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E0154AE-98E9-42C6-B309-79E6C81CF4C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E0154AE-98E9-42C6-B309-79E6C81CF4C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E0154AE-98E9-42C6-B309-79E6C81CF4C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BFDB692-0740-40E6-8C7C-1FA290AF24FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BFDB692-0740-40E6-8C7C-1FA290AF24FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BFDB692-0740-40E6-8C7C-1FA290AF24FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BFDB692-0740-40E6-8C7C-1FA290AF24FA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
