@@ -111,4 +111,9 @@ public static class PngSpec
     {
         return chunkHeader.Name == HeaderName_IEND;
     }
+
+    public static bool IsIDATChunkHeader(ChunkHeader chunkHeader)
+    {
+        return chunkHeader.Name == "IDAT";
+    }
 }

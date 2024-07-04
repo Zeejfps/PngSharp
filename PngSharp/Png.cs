@@ -21,37 +21,35 @@ public static class Png
         reader.BeginReadChunk(out var chunkHeader);
         if (!PngSpec.IsIHDRChunkHeader(chunkHeader))
             throw new Exception("Malformed png file");
-        
         var ihgrChunkData = reader.ReadIhdrChunkData();
         reader.EndReadChunk();
         
         reader.BeginReadChunk(out chunkHeader);
-        {
-            var data = reader.ReadSrgbChunkData();
-        }
+        Console.WriteLine(chunkHeader);
+        var sRgbData = reader.ReadSrgbChunkData();
         reader.EndReadChunk();
         
         reader.BeginReadChunk(out chunkHeader);
         {
+            Console.WriteLine(chunkHeader);
             var data = reader.ReadGamaChunkData();
         }
         reader.EndReadChunk();
 
         reader.BeginReadChunk(out chunkHeader);
         {
+            Console.WriteLine(chunkHeader);
             var data = reader.ReadPhysChunkData();
         }
         reader.EndReadChunk();
 
         using var imageDataStream = new MemoryStream();
         reader.BeginReadChunk(out chunkHeader);
+        while (PngSpec.IsIDATChunkHeader(chunkHeader))
         {
             reader.ReadIdatChunkDataIntoStream(chunkHeader, imageDataStream);
-        }
-        reader.EndReadChunk();
-
-        reader.BeginReadChunk(out chunkHeader);
-        {
+            reader.EndReadChunk();
+            reader.BeginReadChunk(out chunkHeader);
             Console.WriteLine(chunkHeader);
         }
         reader.EndReadChunk();

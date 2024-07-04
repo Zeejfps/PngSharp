@@ -3,7 +3,7 @@ using System.Text;
 using PngSharp;
 
 var container = new PngImageDataContainer();
-container.LoadFromFile("Assets/sprite_atlas_128x64.png");
+container.LoadFromFile("Assets/sprite_atlas.png");
 
 SaveToPAM("test.pam", container.PixelData, container.Width, container.Height);
 
