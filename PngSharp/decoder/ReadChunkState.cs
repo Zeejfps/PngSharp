@@ -43,5 +43,8 @@ internal class ReadChunkState(PngDecoder decoder) : IDecoderState
             reader.EndReadChunk();
             return;
         }
+
+        reader.ReadChunkData(header.ChunkSizeInBytes);
+        reader.EndReadChunk();
     }
 }

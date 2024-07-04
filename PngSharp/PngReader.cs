@@ -57,7 +57,7 @@ public sealed class PngReader
         var chunkName = ReadAsciiString(4);
         header = new PngSpec.ChunkHeader
         {
-            ChunkSizeInBytes = chunkSize,
+            ChunkSizeInBytes = (int)chunkSize,
             Name = chunkName
         };
     }
@@ -137,5 +137,10 @@ public sealed class PngReader
     {
         ReadBytesBigEndian(9);
         return "asdf";
+    }
+
+    public void ReadChunkData(int sizeInBytes)
+    {
+        ReadBytesBigEndian(sizeInBytes);
     }
 }

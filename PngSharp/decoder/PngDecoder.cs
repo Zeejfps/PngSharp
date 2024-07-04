@@ -20,9 +20,11 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     {
         Reader = new PngReader(stream);
         State = new ReadSignatureState(this);
+        
         ReadIhdrChunkState = new ReadIhdrChunkState(this);
         ReadChunkState = new ReadChunkState(this);
         DoneState = new DoneState();
+        
         CompressedPixelDataStream = new MemoryStream();
         PixelDataStream = new MemoryStream();
     }
