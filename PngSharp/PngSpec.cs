@@ -2,11 +2,18 @@
 
 public static class PngSpec
 {
+    private const string HeaderName_IHDR = "IHDR";
+    private const string HeaderName_IEND = "IEND";
     private static byte[] PNG_SIGNATURE = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
     
     public static bool IsPngFile(ReadOnlySpan<byte> sig)
     {
         return sig.SequenceEqual(PNG_SIGNATURE.AsSpan());
+    }
+
+    public static bool IsIHDRChunkHeader(ChunkHeader header)
+    {
+        return header.Name == HeaderName_IHDR;
     }
     
     public readonly struct ChunkHeader
@@ -68,35 +75,17 @@ public static class PngSpec
     
     public enum InterlaceMethod : byte
     {
-        /// <summary>
-        /// No interlace.
-        /// </summary>
         None = 0,
-        /// <summary>
-        /// Adam7 interlace.
-        /// </summary>
         Adam7 = 1
     }
     
-    [Flags]
     public enum ColorType : byte
     {
-        /// <summary>
-        /// Grayscale.
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Colors are stored in a palette rather than directly in the data.
-        /// </summary>
-        PaletteUsed = 1,
-        /// <summary>
-        /// The image uses color.
-        /// </summary>
-        ColorUsed = 2,
-        /// <summary>
-        /// The image has an alpha channel.
-        /// </summary>
-        AlphaChannelUsed = 4
+        Grayscale = 0,
+        TrueColor = 2,
+        IndexedColor = 3,
+        GrayscaleWithAlpha = 4,
+        TrueColorWithAlpha = 6,
     }
     
     public enum CompressionMethod : byte
@@ -116,5 +105,10 @@ public static class PngSpec
         Up,
         Average,
         Paeth
+    }
+
+    public static bool IsIENDChunkHeader(ChunkHeader chunkHeader)
+    {
+        return chunkHeader.Name == HeaderName_IEND;
     }
 }

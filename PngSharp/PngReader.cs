@@ -99,7 +99,7 @@ public sealed class PngReader
     {
         var bytesRead = m_Stream.Read(m_Buffer, 0, byteCount);
         if (bytesRead != byteCount)
-            throw new Exception($"Failed to read signature. Read {bytesRead} bytes, expected {byteCount}");
+            throw new Exception($"Failed to read png. Read {bytesRead} bytes, expected {byteCount}");
         return m_Buffer.AsSpan(0, byteCount);
     }
     
@@ -107,7 +107,7 @@ public sealed class PngReader
     {
         var bytesRead = m_Stream.Read(m_Buffer, 0, byteCount);
         if (bytesRead != byteCount)
-            throw new Exception($"Failed to read signature. Read {bytesRead} bytes, expected {byteCount}");
+            throw new Exception($"Failed to read png. Read {bytesRead} bytes, expected {byteCount}");
         var buffer = m_Buffer.AsSpan(0, byteCount);
         buffer.Reverse();
         return buffer;

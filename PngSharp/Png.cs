@@ -7,7 +7,7 @@ public interface IPngImageDataContainer
     void Load(int width, int height, byte[] pixelData);
 }
 
-public static class IPngImageDataContainerExtensions
+public static class Png
 {
     public static void LoadFromFile(this IPngImageDataContainer container, string pathToFile)
     {
@@ -18,43 +18,41 @@ public static class IPngImageDataContainerExtensions
         if (!isPng)
             throw new Exception("Invalid PNG signature");
         
-        PngSpec.ImageData imageData;
-        reader.BeginReadChunk(out var header);
-        {
-            Console.WriteLine(header);
-            imageData = reader.ReadIhdrChunkData();
-            Console.WriteLine($"{header.Name} Data: {imageData}");
-        }
+        reader.BeginReadChunk(out var chunkHeader);
+        if (!PngSpec.IsIHDRChunkHeader(chunkHeader))
+            throw new Exception("Malformed png file");
+        
+        var ihgrChunkData = reader.ReadIhdrChunkData();
         reader.EndReadChunk();
-
-        reader.BeginReadChunk(out header);
+        
+        reader.BeginReadChunk(out chunkHeader);
         {
             var data = reader.ReadSrgbChunkData();
         }
         reader.EndReadChunk();
-
-        reader.BeginReadChunk(out header);
+        
+        reader.BeginReadChunk(out chunkHeader);
         {
             var data = reader.ReadGamaChunkData();
         }
         reader.EndReadChunk();
 
-        reader.BeginReadChunk(out header);
+        reader.BeginReadChunk(out chunkHeader);
         {
             var data = reader.ReadPhysChunkData();
         }
         reader.EndReadChunk();
 
         using var imageDataStream = new MemoryStream();
-        reader.BeginReadChunk(out header);
+        reader.BeginReadChunk(out chunkHeader);
         {
-            reader.ReadIdatChunkDataIntoStream(header, imageDataStream);
+            reader.ReadIdatChunkDataIntoStream(chunkHeader, imageDataStream);
         }
         reader.EndReadChunk();
 
-        reader.BeginReadChunk(out header);
+        reader.BeginReadChunk(out chunkHeader);
         {
-            Console.WriteLine(header);
+            Console.WriteLine(chunkHeader);
         }
         reader.EndReadChunk();
 
@@ -67,13 +65,13 @@ public static class IPngImageDataContainerExtensions
         }
 
         decompressedDataStream.Position = 0;
-        var decoder = new PngScanLineDecoder(imageData, decompressedDataStream);
+        var decoder = new PngScanLineDecoder(ihgrChunkData, decompressedDataStream);
 
         var outputStream = new MemoryStream();
-        for (var i = 0; i < imageData.Height; i++)
+        for (var i = 0; i < ihgrChunkData.Height; i++)
             decoder.DecodeScanlineTo(outputStream);
         
         var pixelData = outputStream.ToArray();
-        container.Load((int)imageData.Width, (int)imageData.Height, pixelData);
+        container.Load((int)ihgrChunkData.Width, (int)ihgrChunkData.Height, pixelData);
     }
 }
