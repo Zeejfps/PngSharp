@@ -4,6 +4,10 @@ public static class PngSpec
 {
     private const string HeaderName_IHDR = "IHDR";
     private const string HeaderName_IEND = "IEND";
+    private const string HeaderName_IDAT = "IDAT";
+    private const string HeaderName_SRGB = "sRGB";
+    private const string HeaderName_GAMA = "gAMA";
+    private const string HeaderName_PHYS = "pHYs";
     private static byte[] PNG_SIGNATURE = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
     
     public static bool IsValidPngFileSignature(ReadOnlySpan<byte> sig)
@@ -114,6 +118,21 @@ public static class PngSpec
 
     public static bool IsIDATChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == "IDAT";
+        return chunkHeader.Name == HeaderName_IDAT;
+    }
+
+    public static bool IsSRGBChunkHeader(ChunkHeader chunkHeader)
+    {
+        return chunkHeader.Name == HeaderName_SRGB;
+    }
+
+    public static bool IsGAMAChunkHeader(ChunkHeader chunkHeader)
+    {
+        return chunkHeader.Name == HeaderName_GAMA;
+    }
+
+    public static bool IsPHYSChunkHeader(ChunkHeader chunkHeader)
+    {
+        return chunkHeader.Name == HeaderName_PHYS;
     }
 }

@@ -4,16 +4,10 @@ namespace PngSharp;
 
 public sealed class PngReader
 {
-    public static PngReader ReadFromFile(string pathToFile)
-    {
-        var fileStream = new FileStream(pathToFile, FileMode.Open, FileAccess.Read);
-        return new PngReader(fileStream);
-    }
-
     private readonly Stream m_Stream;
     private readonly byte[] m_Buffer;
 
-    private PngReader(Stream stream)
+    public PngReader(Stream stream)
     {
         m_Stream = stream;
         m_Buffer = new byte[512];

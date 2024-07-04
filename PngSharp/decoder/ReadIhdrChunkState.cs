@@ -4,6 +4,8 @@ internal class ReadIhdrChunkState(PngDecoder decoder) : IDecoderState
 {
     public void Execute()
     {
+        Console.WriteLine($"Executing {GetType()} State");
+
         var reader = decoder.Reader;
         reader.BeginReadChunk(out var header);
         if (!PngSpec.IsIHDRChunkHeader(header))

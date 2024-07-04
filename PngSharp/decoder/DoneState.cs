@@ -1,6 +1,6 @@
 ﻿namespace PngSharp.PngSharp;
 
-internal sealed class DecompressAndUnfilterDataState(PngDecoder decoder) : IDecoderState
+internal sealed class DoneState : IDecoderState
 {
     public void Execute()
     {
