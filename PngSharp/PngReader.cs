@@ -19,12 +19,12 @@ public sealed class PngReader
         m_Buffer = new byte[512];
     }
     
-    public ReadOnlySpan<byte> ReadSig()
+    public ReadOnlySpan<byte> ReadSignature()
     {
         return ReadBytesLittleEndian(8);
     }
 
-    public PngSpec.ImageData ReadIhdrChunkData()
+    public PngSpec.IhdrChunkData ReadIhdrChunkData()
     {
         var width = ReadUInt32();
         var height = ReadUInt32();
@@ -34,7 +34,7 @@ public sealed class PngReader
         var filterMethod = ReadByte();
         var interlaceMethod = ReadByte();
         
-        return new PngSpec.ImageData
+        return new PngSpec.IhdrChunkData
         {
             Width = width,
             Height = height,
@@ -124,6 +124,11 @@ public sealed class PngReader
             stream.Write(m_Buffer, 0, bytesRead);
             remainingBytesToRead -= bytesRead;
         }
+    }
+
+    public void ReadIdatChunkData(byte[] buffer)
+    {
+        m_Stream.Read(buffer);
     }
 
     public PngSpec.GammaChunkData ReadGamaChunkData()

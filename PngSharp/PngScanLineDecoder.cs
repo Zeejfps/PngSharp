@@ -10,7 +10,7 @@ public class PngScanLineDecoder
     private readonly int m_BytesPerPixel;
     private bool m_IsFirstScanLine;
     
-    public PngScanLineDecoder(PngSpec.ImageData imageData, Stream stream)
+    public PngScanLineDecoder(PngSpec.IhdrChunkData imageData, Stream stream)
     {
         m_Stream = stream;
         var imageWidth = imageData.Width;

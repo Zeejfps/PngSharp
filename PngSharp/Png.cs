@@ -12,9 +12,9 @@ public static class Png
     public static void LoadFromFile(this IPngImageDataContainer container, string pathToFile)
     {
         var reader = PngReader.ReadFromFile(pathToFile);
-        var sig = reader.ReadSig();
+        var sig = reader.ReadSignature();
 
-        var isPng = PngSpec.IsPngFile(sig);
+        var isPng = PngSpec.IsValidPngFileSignature(sig);
         if (!isPng)
             throw new Exception("Invalid PNG signature");
         

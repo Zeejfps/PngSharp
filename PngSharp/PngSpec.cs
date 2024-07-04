@@ -6,7 +6,7 @@ public static class PngSpec
     private const string HeaderName_IEND = "IEND";
     private static byte[] PNG_SIGNATURE = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
     
-    public static bool IsPngFile(ReadOnlySpan<byte> sig)
+    public static bool IsValidPngFileSignature(ReadOnlySpan<byte> sig)
     {
         return sig.SequenceEqual(PNG_SIGNATURE.AsSpan());
     }
@@ -27,7 +27,7 @@ public static class PngSpec
         }
     }
     
-    public readonly struct ImageData
+    public readonly struct IhdrChunkData
     {
         public uint Width { get; init; }
         public uint Height { get; init; }
