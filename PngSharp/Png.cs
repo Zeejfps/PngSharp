@@ -2,71 +2,33 @@
 
 namespace PngSharp;
 
-public interface IPngImageDataContainer
+public interface IDecodedPng
 {
-    void Load(int width, int height, Stream pixelDataStream);
+    int Width { get; }
+    int Height { get; }
+    byte[] PixelData { get; }
 }
 
 public static class Png
 {
-    public static void LoadFromFile(this IPngImageDataContainer container, string pathToFile)
+    public static IDecodedPng DecodeFromFile(string pathToFile)
     {
         using var fileStream = new FileStream(pathToFile, FileMode.Open);
         using var decoder = new PngDecoder(fileStream);
-        while (!decoder.IsDone)
-            decoder.Update();
+        decoder.Decode();
+        var imageWidth = (int)decoder.IhdrChunkData.Width;
+        var imageHeight = (int)decoder.IhdrChunkData.Height;
+        var pixelData = new byte[imageWidth * imageHeight * decoder.BytesPerPixel];
+        Console.WriteLine(decoder.PixelDataStream.Length);
+        decoder.PixelDataStream.Position = 0;
+        var pixelsRead = decoder.PixelDataStream.Read(pixelData);
+        Console.WriteLine(pixelsRead);
         
-        container.Load((int)decoder.IhdrChunkData.Width, (int)decoder.IhdrChunkData.Height, decoder.PixelDataStream);
-
-        // var reader = PngReader.ReadFromFile(pathToFile);
-        // var sig = reader.ReadSignature();
-        //
-        // var isPng = PngSpec.IsValidPngFileSignature(sig);
-        // if (!isPng)
-        //     throw new Exception("Invalid PNG signature");
-        //
-        // reader.BeginReadChunk(out var chunkHeader);
-        // if (!PngSpec.IsIHDRChunkHeader(chunkHeader))
-        //     throw new Exception($"Malformed png file. Expected IHDR chunk, Got: {chunkHeader.Name}");
-        // var ihgrChunkData = reader.ReadIhdrChunkData();
-        // reader.EndReadChunk();
-        //
-        // reader.BeginReadChunk(out chunkHeader);
-        // Console.WriteLine(chunkHeader);
-        // var sRgbChunkData = reader.ReadSrgbChunkData();
-        // reader.EndReadChunk();
-        //
-        // reader.BeginReadChunk(out chunkHeader);
-        // Console.WriteLine(chunkHeader);
-        // var gamaChunkData = reader.ReadGamaChunkData();
-        // reader.EndReadChunk();
-        //
-        // reader.BeginReadChunk(out chunkHeader);
-        // Console.WriteLine(chunkHeader);
-        // var physChunkData = reader.ReadPhysChunkData();
-        // reader.EndReadChunk();
-        //
-        // using var imageDataStream = new MemoryStream();
-        // reader.BeginReadChunk(out chunkHeader);
-        // while (PngSpec.IsIDATChunkHeader(chunkHeader))
-        // {
-        //     reader.ReadIdatChunkDataIntoStream(chunkHeader, imageDataStream);
-        //     reader.EndReadChunk();
-        //     reader.BeginReadChunk(out chunkHeader);
-        //     Console.WriteLine(chunkHeader);
-        // }
-        // reader.EndReadChunk();
-        //
-        // // NOTE(Zee): 2 offset here is because of the ZLIB header
-        // imageDataStream.Seek(2, SeekOrigin.Begin);
-        // using var deflateStream = new DeflateStream(imageDataStream, CompressionMode.Decompress);
-        // var decoder = new PngScanLineDecoder(ihgrChunkData, deflateStream);
-        //
-        // var outputStream = new MemoryStream();
-        // for (var i = 0; i < ihgrChunkData.Height; i++)
-        //     decoder.DecodeScanlineTo(outputStream);
-        //
-        // var pixelData = outputStream.ToArray();
-        // container.Load((int)ihgrChunkData.Width, (int)ihgrChunkData.Height, pixelData);
+        return new DecodedPng
+        {
+            Width = imageWidth,
+            Height = imageHeight,
+            PixelData = pixelData
+        };
     }
 }

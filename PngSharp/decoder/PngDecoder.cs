@@ -15,6 +15,7 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public bool IsDone => State == DoneState;
     
     public IDecoderState DoneState { get; }
+    public int BytesPerPixel => 4;
 
     public PngDecoder(Stream stream)
     {
@@ -29,21 +30,21 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
         PixelDataStream = new MemoryStream();
     }
 
-    public void Update()
+    public void Decode()
     {
-        if (IsDone)
-            return;
-        
-        State.Execute();
+        while (!IsDone)
+            State.Execute();
     }
-
+    
     public void Dispose()
     {
         CompressedPixelDataStream.Dispose();
+        PixelDataStream.Dispose();
     }
 
     public async ValueTask DisposeAsync()
     {
         await CompressedPixelDataStream.DisposeAsync();
+        await PixelDataStream.DisposeAsync();
     }
 }

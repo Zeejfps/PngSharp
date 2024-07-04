@@ -2,10 +2,9 @@
 using System.Text;
 using PngSharp;
 
-var container = new PngImageDataContainer();
-container.LoadFromFile("Assets/sprite_atlas.png");
+var decodedPng = Png.DecodeFromFile("Assets/sprite_atlas.png");
 
-SaveToPAM("test.pam", container.PixelData, container.Width, container.Height);
+SaveToPAM("test.pam", decodedPng.PixelData, decodedPng.Width, decodedPng.Height);
 
 string ToHexString(ReadOnlySpan<byte> bytes)
 {
