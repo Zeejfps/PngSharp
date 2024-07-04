@@ -51,7 +51,7 @@ public sealed class PngReader
         return (byte)m_Stream.ReadByte();
     }
 
-    public bool BeginReadChunk(out PngSpec.ChunkHeader header)
+    public void BeginReadChunk(out PngSpec.ChunkHeader header)
     {
         var chunkSize = ReadUInt32();
         var chunkName = ReadAsciiString(4);
@@ -60,7 +60,6 @@ public sealed class PngReader
             ChunkSizeInBytes = chunkSize,
             Name = chunkName
         };
-        return true;
     }
 
     public PngSpec.SrgbChunkData ReadSrgbChunkData()
@@ -85,7 +84,7 @@ public sealed class PngReader
 
     private string ReadAsciiString(int sizeInBytes)
     {
-        var buffer = ReadBytesLittleEndian(4);
+        var buffer = ReadBytesLittleEndian(sizeInBytes);
         return Encoding.ASCII.GetString(buffer);
     }
 
