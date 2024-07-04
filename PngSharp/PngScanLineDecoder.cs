@@ -1,6 +1,6 @@
 ﻿namespace PngSharp;
 
-public class PngDecoder
+public class PngScanLineDecoder
 {
     private readonly Stream m_Stream;
     private readonly byte[] m_CurrentFilteredScanLine;
@@ -10,7 +10,7 @@ public class PngDecoder
     private readonly int m_BytesPerPixel;
     private bool m_IsFirstScanLine;
     
-    public PngDecoder(PngSpec.ImageData imageData, Stream stream)
+    public PngScanLineDecoder(PngSpec.ImageData imageData, Stream stream)
     {
         m_Stream = stream;
         var imageWidth = imageData.Width;
@@ -24,9 +24,7 @@ public class PngDecoder
     public void DecodeScanlineTo(Stream outStream)
     {
         m_Stream.ReadExactly(m_CurrentFilteredScanLine);
-        //Console.WriteLine($"Decoding unfiltered scan line of size: {m_CurrentFilteredScanLine.Length}");
         var type = (PngSpec.AdaptiveFilteringType)m_CurrentFilteredScanLine[0];
-        //Console.WriteLine($"Filter Type: {type}");
         
         Func<byte, int, byte> reverseFilterFunc = type switch
         {

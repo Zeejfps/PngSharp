@@ -83,12 +83,6 @@ public sealed class PngReader
         ReadCrc();
     }
 
-    private Int32 ReadInt32()
-    {
-        var buffer = ReadBytesBigEndian(4);
-        return BitConverter.ToInt32(buffer);
-    }
-    
     private UInt32 ReadUInt32()
     {
         var buffer = ReadBytesBigEndian(4);
