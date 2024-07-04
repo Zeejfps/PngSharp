@@ -1,6 +1,6 @@
 ﻿namespace PngSharp.Decoder;
 
-public class PngScanLineDecoder
+internal class PngScanLineDecoder
 {
     private readonly Stream m_Stream;
     private readonly byte[] m_CurrentFilteredScanLine;

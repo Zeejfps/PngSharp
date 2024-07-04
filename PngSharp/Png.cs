@@ -2,10 +2,16 @@
 
 namespace PngSharp;
 
+public enum PixelFormat
+{
+    RGBA
+}
+
 public interface IDecodedPng
 {
     int Width { get; }
     int Height { get; }
+    PixelFormat PixelFormat { get; }
     byte[] PixelData { get; }
 }
 
@@ -27,6 +33,7 @@ public static class Png
         {
             Width = imageWidth,
             Height = imageHeight,
+            PixelFormat = PixelFormat.RGBA,
             PixelData = pixelData
         };
     }
