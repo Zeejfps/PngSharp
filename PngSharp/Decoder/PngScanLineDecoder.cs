@@ -1,4 +1,4 @@
-﻿namespace PngSharp;
+﻿namespace PngSharp.Decoder;
 
 public class PngScanLineDecoder
 {

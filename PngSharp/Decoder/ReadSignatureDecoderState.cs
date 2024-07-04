@@ -1,4 +1,4 @@
-﻿namespace PngSharp.PngSharp;
+﻿namespace PngSharp.Decoder;
 
 internal class ReadSignatureState(PngDecoder decoder) : IDecoderState
 {

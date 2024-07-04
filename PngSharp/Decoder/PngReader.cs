@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace PngSharp;
+namespace PngSharp.Decoder;
 
 public sealed class PngReader
 {

@@ -1,4 +1,4 @@
-﻿namespace PngSharp;
+﻿namespace PngSharp.Decoder;
 
 internal sealed class DecodedPng : IDecodedPng
 {

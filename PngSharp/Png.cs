@@ -1,4 +1,4 @@
-﻿using PngSharp.PngSharp;
+﻿using PngSharp.Decoder;
 
 namespace PngSharp;
 
@@ -19,10 +19,9 @@ public static class Png
         var imageWidth = (int)decoder.IhdrChunkData.Width;
         var imageHeight = (int)decoder.IhdrChunkData.Height;
         var pixelData = new byte[imageWidth * imageHeight * decoder.BytesPerPixel];
-        Console.WriteLine(decoder.PixelDataStream.Length);
         decoder.PixelDataStream.Position = 0;
         var pixelsRead = decoder.PixelDataStream.Read(pixelData);
-        Console.WriteLine(pixelsRead);
+        // TODO: verify pixelsRead matches?
         
         return new DecodedPng
         {

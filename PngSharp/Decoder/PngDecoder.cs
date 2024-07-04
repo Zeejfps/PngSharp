@@ -1,4 +1,4 @@
-﻿namespace PngSharp.PngSharp;
+﻿namespace PngSharp.Decoder;
 
 internal sealed class PngDecoder : IDisposable, IAsyncDisposable
 {

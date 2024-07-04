@@ -1,4 +1,4 @@
-﻿namespace PngSharp.PngSharp;
+﻿namespace PngSharp.Decoder;
 
 internal class ReadIhdrChunkState(PngDecoder decoder) : IDecoderState
 {
