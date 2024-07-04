@@ -58,14 +58,8 @@ public static class Png
 
         // NOTE(Zee): 2 offset here is because of the ZLIB header
         imageDataStream.Seek(2, SeekOrigin.Begin);
-        using var decompressedDataStream = new MemoryStream();
-        using (var deflateStream = new DeflateStream(imageDataStream, CompressionMode.Decompress))
-        {
-            deflateStream.CopyTo(decompressedDataStream);
-        }
-
-        decompressedDataStream.Position = 0;
-        var decoder = new PngScanLineDecoder(ihgrChunkData, decompressedDataStream);
+        using var deflateStream = new DeflateStream(imageDataStream, CompressionMode.Decompress);
+        var decoder = new PngScanLineDecoder(ihgrChunkData, deflateStream);
 
         var outputStream = new MemoryStream();
         for (var i = 0; i < ihgrChunkData.Height; i++)
