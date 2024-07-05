@@ -72,6 +72,11 @@ public static class PngSpec
         }
     }
 
+    public readonly struct PhysChunkData
+    {
+        
+    }
+
     public enum RenderingIntent : byte
     {
         Perceptual,

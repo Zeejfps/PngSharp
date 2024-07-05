@@ -119,11 +119,6 @@ public sealed class PngReader
         }
     }
 
-    public void ReadIdatChunkData(byte[] buffer)
-    {
-        m_Stream.Read(buffer);
-    }
-
     public PngSpec.GammaChunkData ReadGamaChunkData()
     {
         var value = ReadUInt32();
@@ -133,10 +128,13 @@ public sealed class PngReader
         };
     }
 
-    public object ReadPhysChunkData()
+    public PngSpec.PhysChunkData ReadPhysChunkData()
     {
         ReadBytesBigEndian(9);
-        return "asdf";
+        return new PngSpec.PhysChunkData
+        {
+            
+        };
     }
 
     public void ReadChunkData(int totalBytesToRead)
