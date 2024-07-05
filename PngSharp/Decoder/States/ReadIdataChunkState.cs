@@ -6,7 +6,7 @@ internal sealed class ReadIdataChunkState(PngSpec.ChunkHeader header, PngDecoder
     {
         var reader = decoder.Reader;
         reader.ReadIdatChunkDataIntoStream(header, decoder.CompressedPixelDataStream);
-        reader.EndReadChunk();
+        reader.ReadCrc();
         decoder.State = decoder.ReadChunkState;
     }
 }

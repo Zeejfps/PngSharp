@@ -5,6 +5,7 @@ public static class PngSpec
     private const string HeaderName_IHDR = "IHDR";
     private const string HeaderName_IEND = "IEND";
     private const string HeaderName_IDAT = "IDAT";
+    private const string HeaderName_PLTE = "PLTE";
     private const string HeaderName_SRGB = "sRGB";
     private const string HeaderName_GAMA = "gAMA";
     private const string HeaderName_PHYS = "pHYs";
@@ -152,5 +153,10 @@ public static class PngSpec
     public static bool IsPHYSChunkHeader(ChunkHeader chunkHeader)
     {
         return chunkHeader.Name == HeaderName_PHYS;
+    }
+    
+    public static bool IsPLTEChunkHeader(ChunkHeader chunkHeader)
+    {
+        return chunkHeader.Name == HeaderName_PLTE;
     }
 }

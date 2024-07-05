@@ -40,18 +40,13 @@ public sealed class PngReader
         };
     }
 
-    private void ReadCrc()
-    {
-        ReadBytesBigEndian(4);
-    }
-
     private byte ReadByte()
     {
         // NOTE(Zee): Potential bug -1 is returned?
         return (byte)m_Stream.ReadByte();
     }
 
-    public void BeginReadChunk(out PngSpec.ChunkHeader header)
+    public void ReadChunkHeader(out PngSpec.ChunkHeader header)
     {
         var chunkSize = ReadUInt32();
         var chunkName = ReadAsciiString(4);
@@ -71,9 +66,9 @@ public sealed class PngReader
         };
     }
 
-    public void EndReadChunk()
+    public uint ReadCrc()
     {
-        ReadCrc();
+        return ReadUInt32();
     }
 
     private UInt32 ReadUInt32()

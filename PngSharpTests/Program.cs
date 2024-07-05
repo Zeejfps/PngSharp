@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using PngSharp;
 
-var decodedPng = Png.DecodeFromFile("Assets/diamond_helm_grayscale.png");
+var decodedPng = Png.DecodeFromFile("Assets/test_64x64.png");
 
 Console.WriteLine(decodedPng.PixelFormat);
 

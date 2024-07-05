@@ -5,12 +5,12 @@ internal sealed class ReadChunkState(PngDecoder decoder) : IDecoderState
     public void Execute()
     {
         var reader = decoder.Reader;
-        reader.BeginReadChunk(out var header);
+        reader.ReadChunkHeader(out var header);
         Console.WriteLine(header);
         
         if (PngSpec.IsIENDChunkHeader(header))
         {
-            reader.EndReadChunk();
+            reader.ReadCrc();
             decoder.State = new DecodePixelDataState(decoder);
             return;
         }
@@ -24,25 +24,25 @@ internal sealed class ReadChunkState(PngDecoder decoder) : IDecoderState
         if (PngSpec.IsSRGBChunkHeader(header))
         {
             reader.ReadSrgbChunkData();
-            reader.EndReadChunk();
+            reader.ReadCrc();
             return;
         }
 
         if (PngSpec.IsGAMAChunkHeader(header))
         {
             reader.ReadGamaChunkData();
-            reader.EndReadChunk();
+            reader.ReadCrc();
             return;
         }
         
         if (PngSpec.IsPHYSChunkHeader(header))
         {
             reader.ReadPhysChunkData();
-            reader.EndReadChunk();
+            reader.ReadCrc();
             return;
         }
 
         reader.ReadChunkData(header.ChunkSizeInBytes);
-        reader.EndReadChunk();
+        reader.ReadCrc();
     }
 }
