@@ -1,5 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.Text;
+﻿using System.Text;
 using PngSharp;
 
 var decodedPng = Png.DecodeFromFile("Assets/sprite_atlas.png");
