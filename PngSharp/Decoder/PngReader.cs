@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace PngSharp.Decoder;
+namespace PngSharp;
 
 public sealed class PngReader
 {
@@ -139,8 +139,13 @@ public sealed class PngReader
         return "asdf";
     }
 
-    public void ReadChunkData(int sizeInBytes)
+    public void ReadChunkData(int totalBytesToRead)
     {
-        ReadBytesBigEndian(sizeInBytes);
+        while (totalBytesToRead > 0)
+        {
+            var bytesToRead = m_Buffer.Length < totalBytesToRead ? m_Buffer.Length : totalBytesToRead;
+            var bytesRead = m_Stream.Read(m_Buffer, 0, bytesToRead);
+            totalBytesToRead -= bytesRead;
+        }
     }
 }
