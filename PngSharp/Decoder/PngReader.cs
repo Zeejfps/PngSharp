@@ -1,30 +1,24 @@
 ﻿using System.Text;
 
-namespace PngSharp;
+namespace PngSharp.Decoder;
 
 public sealed class PngReader
 {
-    public static PngReader ReadFromFile(string pathToFile)
-    {
-        var fileStream = new FileStream(pathToFile, FileMode.Open, FileAccess.Read);
-        return new PngReader(fileStream);
-    }
-
     private readonly Stream m_Stream;
     private readonly byte[] m_Buffer;
 
-    private PngReader(Stream stream)
+    public PngReader(Stream stream)
     {
         m_Stream = stream;
         m_Buffer = new byte[512];
     }
     
-    public ReadOnlySpan<byte> ReadSig()
+    public ReadOnlySpan<byte> ReadSignature()
     {
         return ReadBytesLittleEndian(8);
     }
 
-    public PngSpec.ImageData ReadIhdrChunkData()
+    public PngSpec.IhdrChunkData ReadIhdrChunkData()
     {
         var width = ReadUInt32();
         var height = ReadUInt32();
@@ -34,7 +28,7 @@ public sealed class PngReader
         var filterMethod = ReadByte();
         var interlaceMethod = ReadByte();
         
-        return new PngSpec.ImageData
+        return new PngSpec.IhdrChunkData
         {
             Width = width,
             Height = height,
@@ -57,16 +51,15 @@ public sealed class PngReader
         return (byte)m_Stream.ReadByte();
     }
 
-    public bool BeginReadChunk(out PngSpec.ChunkHeader header)
+    public void BeginReadChunk(out PngSpec.ChunkHeader header)
     {
         var chunkSize = ReadUInt32();
         var chunkName = ReadAsciiString(4);
         header = new PngSpec.ChunkHeader
         {
-            ChunkSizeInBytes = chunkSize,
+            ChunkSizeInBytes = (int)chunkSize,
             Name = chunkName
         };
-        return true;
     }
 
     public PngSpec.SrgbChunkData ReadSrgbChunkData()
@@ -91,7 +84,7 @@ public sealed class PngReader
 
     private string ReadAsciiString(int sizeInBytes)
     {
-        var buffer = ReadBytesLittleEndian(4);
+        var buffer = ReadBytesLittleEndian(sizeInBytes);
         return Encoding.ASCII.GetString(buffer);
     }
 
@@ -126,6 +119,11 @@ public sealed class PngReader
         }
     }
 
+    public void ReadIdatChunkData(byte[] buffer)
+    {
+        m_Stream.Read(buffer);
+    }
+
     public PngSpec.GammaChunkData ReadGamaChunkData()
     {
         var value = ReadUInt32();
@@ -139,5 +137,10 @@ public sealed class PngReader
     {
         ReadBytesBigEndian(9);
         return "asdf";
+    }
+
+    public void ReadChunkData(int sizeInBytes)
+    {
+        ReadBytesBigEndian(sizeInBytes);
     }
 }

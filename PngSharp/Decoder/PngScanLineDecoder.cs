@@ -1,6 +1,6 @@
-﻿namespace PngSharp;
+﻿namespace PngSharp.Decoder;
 
-public class PngScanLineDecoder
+internal class PngScanLineDecoder
 {
     private readonly Stream m_Stream;
     private readonly byte[] m_CurrentFilteredScanLine;
@@ -10,7 +10,7 @@ public class PngScanLineDecoder
     private readonly int m_BytesPerPixel;
     private bool m_IsFirstScanLine;
     
-    public PngScanLineDecoder(PngSpec.ImageData imageData, Stream stream)
+    public PngScanLineDecoder(PngSpec.IhdrChunkData imageData, Stream stream)
     {
         m_Stream = stream;
         var imageWidth = imageData.Width;
