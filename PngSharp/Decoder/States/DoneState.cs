@@ -1,4 +1,4 @@
-﻿namespace PngSharp.Decoder;
+﻿namespace PngSharp.Decoder.States;
 
 internal sealed class DoneState : IDecoderState
 {

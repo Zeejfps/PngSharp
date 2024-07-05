@@ -1,6 +1,6 @@
 ﻿using System.IO.Compression;
 
-namespace PngSharp.Decoder;
+namespace PngSharp.Decoder.States;
 
 internal sealed class DecodePixelDataState(PngDecoder decoder) : IDecoderState
 {

@@ -3,6 +3,8 @@ using PngSharp;
 
 var decodedPng = Png.DecodeFromFile("Assets/diamond_helm_grayscale.png");
 
+Console.WriteLine(decodedPng.PixelFormat);
+
 SaveToPAM("test.pam", decodedPng.PixelData, decodedPng.Width, decodedPng.Height);
 
 string ToHexString(ReadOnlySpan<byte> bytes)
@@ -23,7 +25,7 @@ void SaveToPAM(string filename, byte[] rgbaData, int width, int height)
         bw.Write(Encoding.ASCII.GetBytes("MAXVAL 255\n"));
         bw.Write(Encoding.ASCII.GetBytes("TUPLTYPE RGB_ALPHA\n"));
         bw.Write(Encoding.ASCII.GetBytes("ENDHDR\n"));
-
+        
         // Write image data
         bw.Write(rgbaData);
     }

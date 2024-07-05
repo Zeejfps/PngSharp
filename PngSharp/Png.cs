@@ -28,6 +28,11 @@ public interface IDecodedPng
     PixelFormat PixelFormat { get; }
     
     /// <summary>
+    /// How many bytes in the <seealso cref="PixelData"/> array reprsent a single pixel
+    /// </summary>
+    int BytesPerPixel { get; }
+    
+    /// <summary>
     /// Order of bytes is determined by <seealso cref="PixelFormat"/>.
     /// Ex: RGBA format stores the pixels in [R,G,B,A] where each byte represents a color channel
     /// </summary>
@@ -52,12 +57,14 @@ public static class Png
         decoder.PixelDataStream.Position = 0;
         var pixelsRead = decoder.PixelDataStream.Read(pixelData);
         // TODO: verify pixelsRead matches?
+        var pixelFormat = decoder.GetPixelFormat();
         
         return new DecodedPng
         {
             Width = imageWidth,
             Height = imageHeight,
-            PixelFormat = PixelFormat.RGBA,
+            BytesPerPixel = decoder.BytesPerPixel,
+            PixelFormat = pixelFormat,
             PixelData = pixelData
         };
     }

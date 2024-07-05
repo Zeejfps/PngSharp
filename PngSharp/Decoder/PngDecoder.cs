@@ -1,4 +1,6 @@
-﻿namespace PngSharp.Decoder;
+﻿using PngSharp.Decoder.States;
+
+namespace PngSharp.Decoder;
 
 internal sealed class PngDecoder : IDisposable, IAsyncDisposable
 {
@@ -46,5 +48,21 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     {
         await CompressedPixelDataStream.DisposeAsync();
         await PixelDataStream.DisposeAsync();
+    }
+
+    public PixelFormat GetPixelFormat()
+    {
+        return IhdrChunkData.ColorType switch
+        {
+            PngSpec.ColorType.Grayscale => PixelFormat.Grayscale,
+            PngSpec.ColorType.TrueColor => PixelFormat.RGB,
+            PngSpec.ColorType.IndexedColor =>
+                // TODO: Fix
+                // NOTE(Zee): Is this suppose to be RGBA?
+                PixelFormat.RGBA,
+            PngSpec.ColorType.GrayscaleWithAlpha => PixelFormat.GrayscaleWithAlpha,
+            PngSpec.ColorType.TrueColorWithAlpha => PixelFormat.RGBA,
+            _ => throw new ArgumentOutOfRangeException(nameof(IhdrChunkData))
+        };
     }
 }
