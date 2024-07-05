@@ -14,7 +14,9 @@ internal class PngScanLineDecoder
     {
         m_Stream = stream;
         var imageWidth = imageData.Width;
-        m_BytesPerPixel = 4;
+        m_BytesPerPixel = imageData.GetBytesPerPixel();
+        Console.WriteLine($"Color Type: {imageData.ColorType}");
+        Console.WriteLine($"Bytes Per Pixel: {m_BytesPerPixel}");
         var stride = imageWidth * m_BytesPerPixel;
         m_CurrentFilteredScanLine = new byte[stride + 1];
         m_PreviousUnfilteredScanLine = new byte[stride];

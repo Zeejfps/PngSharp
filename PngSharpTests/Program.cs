@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using PngSharp;
 
-var decodedPng = Png.DecodeFromFile("Assets/diamond_helm_extra_small.png");
+var decodedPng = Png.DecodeFromFile("Assets/diamond_helm_grayscale.png");
 
 SaveToPAM("test.pam", decodedPng.PixelData, decodedPng.Width, decodedPng.Height);
 

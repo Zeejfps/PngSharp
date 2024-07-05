@@ -15,7 +15,7 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public bool IsDone => State == DoneState;
     
     public IDecoderState DoneState { get; }
-    public int BytesPerPixel => 4;
+    public int BytesPerPixel => IhdrChunkData.GetBytesPerPixel();
 
     public PngDecoder(Stream stream)
     {
