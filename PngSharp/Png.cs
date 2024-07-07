@@ -78,4 +78,9 @@ public static class Png
             PixelData = pixelData
         };
     }
+
+    public static void EncodeToStream(IDecodedPng decodedPng, Stream stream)
+    {
+        
+    }
 }
