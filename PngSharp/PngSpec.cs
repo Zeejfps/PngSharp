@@ -2,13 +2,17 @@
 
 public static class PngSpec
 {
-    private const string HeaderName_IHDR = "IHDR";
-    private const string HeaderName_IEND = "IEND";
-    private const string HeaderName_IDAT = "IDAT";
-    private const string HeaderName_PLTE = "PLTE";
-    private const string HeaderName_SRGB = "sRGB";
-    private const string HeaderName_GAMA = "gAMA";
-    private const string HeaderName_PHYS = "pHYs";
+    public static class HeaderNames
+    {
+        public const string IHDR = "IHDR";
+        public const string IEND = "IEND";
+        public const string IDAT = "IDAT";
+        public const string PLTE = "PLTE";
+        public const string SRGB = "sRGB";
+        public const string GAMA = "gAMA";
+        public const string PHYS = "pHYs";
+    }
+   
     private static byte[] PNG_SIGNATURE = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
     
     public readonly struct ChunkHeader
@@ -127,36 +131,36 @@ public static class PngSpec
 
     public static bool IsIHDRChunkHeader(ChunkHeader header)
     {
-        return header.Name == HeaderName_IHDR;
+        return header.Name == HeaderNames.IHDR;
     }
 
     public static bool IsIENDChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderName_IEND;
+        return chunkHeader.Name == HeaderNames.IEND;
     }
 
     public static bool IsIDATChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderName_IDAT;
+        return chunkHeader.Name == HeaderNames.IDAT;
     }
 
     public static bool IsSRGBChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderName_SRGB;
+        return chunkHeader.Name == HeaderNames.SRGB;
     }
 
     public static bool IsGAMAChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderName_GAMA;
+        return chunkHeader.Name == HeaderNames.GAMA;
     }
 
     public static bool IsPHYSChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderName_PHYS;
+        return chunkHeader.Name == HeaderNames.PHYS;
     }
     
     public static bool IsPLTEChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderName_PLTE;
+        return chunkHeader.Name == HeaderNames.PLTE;
     }
 }

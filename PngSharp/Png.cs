@@ -1,4 +1,5 @@
 ﻿using PngSharp.Decoder;
+using PngSharp.Encoder;
 
 namespace PngSharp;
 
@@ -79,8 +80,15 @@ public static class Png
         };
     }
 
+    public static void EncodeToFile(IDecodedPng decodedPng, string pathToFile)
+    {
+        using var fileStream = new FileStream(pathToFile, FileMode.Create);
+        EncodeToStream(decodedPng, fileStream);
+    }
+
     public static void EncodeToStream(IDecodedPng decodedPng, Stream stream)
     {
-        
+        var encoder = new PngEncoder(decodedPng);
+        encoder.Encode();
     }
 }
