@@ -25,9 +25,11 @@ internal sealed class PngEncoder
         });
 
         using var memStream = new MemoryStream(m_Png.PixelData);
-        using var compressedDataStream = new DeflateStream(memStream, CompressionMode.Compress);
-        EncodePixels(compressedDataStream, memStream);
-        m_PngWriter.WriteIDATChunk(compressedDataStream);
+        using var compressionStream = new DeflateStream(memStream, CompressionMode.Compress);
+        EncodePixels(compressionStream, memStream);
+        using var compressedDataStream = new MemoryStream();
+        compressionStream.CopyTo(compressedDataStream);
+        m_PngWriter.WriteIDATChunk(compressedDataStream.ToArray());
         
         m_PngWriter.WriteIENDChunk();
     }
