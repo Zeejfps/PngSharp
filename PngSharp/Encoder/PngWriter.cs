@@ -5,10 +5,15 @@ namespace PngSharp.Encoder;
 internal sealed class PngWriter
 {
     private readonly Stream m_Stream;
-    
+
+    public PngWriter(Stream stream)
+    {
+        m_Stream = stream;
+    }
+
     public void WriteSignature()
     {
-        
+        m_Stream.Write(PngSpec.PNG_SIGNATURE);
     }
     
     public void WriteIHDRChunk(PngSpec.IhdrChunkData data)
@@ -20,9 +25,9 @@ internal sealed class PngWriter
         });
         WriteUInt32(data.Width);
         WriteUInt32(data.Height);
-        //WriteByte(data.)
-        //WriteByte(data.)
-        //WriteByte(data.)
+        WriteByte(data.BitDepth);
+        WriteByte((byte)data.ColorType);
+        WriteByte((byte)data.CompressionMethod);
         WriteByte((byte)PngSpec.CompressionMethod.DeflateWithSlidingWindow);
         WriteByte((byte)PngSpec.InterlaceMethod.None);
     }
