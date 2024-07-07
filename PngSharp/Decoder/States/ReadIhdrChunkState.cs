@@ -1,9 +1,17 @@
 ﻿namespace PngSharp.Decoder.States;
 
-internal sealed class ReadIhdrChunkState(PngDecoder decoder) : IDecoderState
+internal sealed class ReadIhdrChunkState : IDecoderState
 {
+    private readonly PngDecoder m_Decoder;
+    
+    public ReadIhdrChunkState(PngDecoder decoder)
+    {
+        m_Decoder = decoder;
+    }
+    
     public void Execute()
     {
+        var decoder = m_Decoder;
         var reader = decoder.Reader;
         reader.ReadChunkHeader(out var header);
         if (!PngSpec.IsIHDRChunkHeader(header))

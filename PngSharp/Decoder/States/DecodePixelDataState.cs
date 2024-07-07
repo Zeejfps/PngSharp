@@ -2,10 +2,18 @@
 
 namespace PngSharp.Decoder.States;
 
-internal sealed class DecodePixelDataState(PngDecoder decoder) : IDecoderState
+internal sealed class DecodePixelDataState : IDecoderState
 {
+    private readonly PngDecoder m_Decoder;
+    
+    public DecodePixelDataState(PngDecoder decoder)
+    {
+        m_Decoder = decoder;
+    }
+    
     public void Execute()
     {
+        var decoder = m_Decoder;
         var compressedPixelData = decoder.CompressedPixelDataStream;
         compressedPixelData.Seek(2, SeekOrigin.Begin);
         using var deflateStream = new DeflateStream(compressedPixelData, CompressionMode.Decompress);

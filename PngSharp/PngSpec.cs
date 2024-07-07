@@ -9,7 +9,7 @@ public static class PngSpec
     private const string HeaderName_SRGB = "sRGB";
     private const string HeaderName_GAMA = "gAMA";
     private const string HeaderName_PHYS = "pHYs";
-    private static byte[] PNG_SIGNATURE = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+    private static byte[] PNG_SIGNATURE = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
     
     public readonly struct ChunkHeader
     {
