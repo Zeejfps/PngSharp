@@ -49,7 +49,17 @@ public static class Png
     public static IDecodedPng DecodeFromFile(string pathToFile)
     {
         using var fileStream = new FileStream(pathToFile, FileMode.Open);
-        using var decoder = new PngDecoder(fileStream);
+        return DecodeFromStream(fileStream);
+    }
+    
+    /// <summary>
+    /// Decodes a PNG image from a stream
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
+    public static IDecodedPng DecodeFromStream(Stream stream)
+    {
+        using var decoder = new PngDecoder(stream);
         decoder.Decode();
         var imageWidth = (int)decoder.IhdrChunkData.Width;
         var imageHeight = (int)decoder.IhdrChunkData.Height;
