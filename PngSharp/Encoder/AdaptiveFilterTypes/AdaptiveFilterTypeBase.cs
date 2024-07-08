@@ -1,20 +1,20 @@
 ﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
 
-internal abstract class AdaptiveFilter : IAdaptiveFilter
+internal abstract class AdaptiveFilterTypeBase : IAdaptiveFilterType
 {
     private readonly int m_BytesPerPixel;
     
-    protected AdaptiveFilter(int bytesPerPixel)
+    protected AdaptiveFilterTypeBase(int bytesPerPixel)
     {
         m_BytesPerPixel = bytesPerPixel;
     }
 
-    public abstract PngSpec.AdaptiveFilterType Type { get; }
+    public abstract PngSpec.AdaptiveFilterTypeKind Kind { get; }
 
     public void Apply(Span<byte> filteredRowBuffer, Span<byte> currentRowBuffer, Span<byte> previousRowBuffer)
     {
         var length = currentRowBuffer.Length;
-        filteredRowBuffer[0] = (byte)Type; 
+        filteredRowBuffer[0] = (byte)Kind; 
         for (var i = 0; i < length; i++)
             filteredRowBuffer[i + 1] = ComputeValue(currentRowBuffer, previousRowBuffer, i);
     }

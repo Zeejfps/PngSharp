@@ -48,13 +48,6 @@ internal sealed class PngEncoder
     private void EncodePixels(Stream outputStream, Stream inputStream)
     {
         m_AdaptiveFilter.Apply(outputStream, inputStream);
-        // int bytesRead;
-        // while ((bytesRead = inputStream.Read(m_Buffer, 0, m_Buffer.Length)) > 0)
-        // {
-        //     outputStream.WriteByte((byte)PngSpec.AdaptiveFilterType.None);
-        //     outputStream.Write(m_Buffer, 0, bytesRead);
-        // }
-        //
     }
 
     private PngSpec.ColorType PixelFormatToColorType(PixelFormat pixelFormat)

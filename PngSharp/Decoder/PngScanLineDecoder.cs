@@ -26,15 +26,15 @@ internal class PngScanLineDecoder
     public void DecodeScanlineTo(Stream outStream)
     {
         m_Stream.ReadExactly(m_CurrentFilteredScanLine);
-        var type = (PngSpec.AdaptiveFilterType)m_CurrentFilteredScanLine[0];
+        var type = (PngSpec.AdaptiveFilterTypeKind)m_CurrentFilteredScanLine[0];
         
         Func<byte, int, byte> reverseFilterFunc = type switch
         {
-            PngSpec.AdaptiveFilterType.None => ReverseNone,
-            PngSpec.AdaptiveFilterType.Sub => ReverseSub,
-            PngSpec.AdaptiveFilterType.Up => ReverseUp,
-            PngSpec.AdaptiveFilterType.Average => ReverseAverage,
-            PngSpec.AdaptiveFilterType.Paeth => ReversePaeth,
+            PngSpec.AdaptiveFilterTypeKind.None => ReverseNone,
+            PngSpec.AdaptiveFilterTypeKind.Sub => ReverseSub,
+            PngSpec.AdaptiveFilterTypeKind.Up => ReverseUp,
+            PngSpec.AdaptiveFilterTypeKind.Average => ReverseAverage,
+            PngSpec.AdaptiveFilterTypeKind.Paeth => ReversePaeth,
             _ => throw new ArgumentOutOfRangeException()
         };
 

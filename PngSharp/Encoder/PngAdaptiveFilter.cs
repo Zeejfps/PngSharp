@@ -11,8 +11,8 @@ internal sealed class PngAdaptiveFilter
     private readonly Memory<byte> m_PrevRow;
     private readonly Memory<byte> m_OutputRow;
     
-    private readonly IAdaptiveFilter[] m_FirstRowFilterTypes;
-    private readonly IAdaptiveFilter[] m_AllFilterTypes;
+    private readonly IAdaptiveFilterType[] m_FirstRowFilterTypes;
+    private readonly IAdaptiveFilterType[] m_AllFilterTypes;
     
     public PngAdaptiveFilter(int width, int height, int bytesPerPixel)
     {
@@ -26,17 +26,17 @@ internal sealed class PngAdaptiveFilter
         m_OutputRow = new Memory<byte>(m_Buffer, strideUnfiltered, strideFiltered);
         m_PrevRow = new Memory<byte>(m_Buffer, strideUnfiltered + strideFiltered, strideFiltered);
 
-        m_FirstRowFilterTypes = new IAdaptiveFilter[]
+        m_FirstRowFilterTypes = new IAdaptiveFilterType[]
         {
-            new AdaptiveFilterNone(bytesPerPixel),
-            new AdaptiveFilterSub(bytesPerPixel),
+            new AdaptiveFilterTypeNone(bytesPerPixel),
+            new AdaptiveFilterTypeSub(bytesPerPixel),
         };
         
-        m_AllFilterTypes = new IAdaptiveFilter[]
+        m_AllFilterTypes = new IAdaptiveFilterType[]
         {
-            new AdaptiveFilterNone(bytesPerPixel),
-            new AdaptiveFilterSub(bytesPerPixel),
-            new AdaptiveFilterUp(bytesPerPixel),
+            new AdaptiveFilterTypeNone(bytesPerPixel),
+            new AdaptiveFilterTypeSub(bytesPerPixel),
+            new AdaptiveFilterTypeUp(bytesPerPixel),
         };
     }
 
@@ -70,10 +70,10 @@ internal sealed class PngAdaptiveFilter
         }
     }
 
-    private IAdaptiveFilter ChooseFilter(IEnumerable<IAdaptiveFilter> filters)
+    private IAdaptiveFilterType ChooseFilter(IEnumerable<IAdaptiveFilterType> filters)
     {
         var outputRow = m_OutputRow.Span;
-        IAdaptiveFilter bestFilter = null;
+        IAdaptiveFilterType bestFilter = null;
         var score = double.MaxValue;
         foreach (var filter in filters)
         {
@@ -86,7 +86,7 @@ internal sealed class PngAdaptiveFilter
             }
         }
         
-        Console.WriteLine($"Best filter score: {score}, Filter: {bestFilter.Type}");
+        Console.WriteLine($"Best filter score: {score}, Filter: {bestFilter.Kind}");
         return bestFilter;
     }
 

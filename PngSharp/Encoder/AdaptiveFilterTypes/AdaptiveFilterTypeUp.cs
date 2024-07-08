@@ -1,12 +1,12 @@
 ﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
 
-internal sealed class AdaptiveFilterUp : AdaptiveFilter
+internal sealed class AdaptiveFilterTypeUp : AdaptiveFilterTypeBase
 {
-    public AdaptiveFilterUp(int bytesPerPixel) : base(bytesPerPixel)
+    public AdaptiveFilterTypeUp(int bytesPerPixel) : base(bytesPerPixel)
     {
     }
 
-    public override PngSpec.AdaptiveFilterType Type => PngSpec.AdaptiveFilterType.Up;
+    public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.Up;
 
     protected override byte ComputeValue(Span<byte> currentRowBuffer, Span<byte> previousRowBuffer, int currentIndex)
     {

@@ -1,12 +1,12 @@
 ﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
 
-internal sealed class AdaptiveFilterNone : AdaptiveFilter
+internal sealed class AdaptiveFilterTypeNone : AdaptiveFilterTypeBase
 {
-    public AdaptiveFilterNone(int bytesPerPixel) : base(bytesPerPixel)
+    public AdaptiveFilterTypeNone(int bytesPerPixel) : base(bytesPerPixel)
     {
     }
 
-    public override PngSpec.AdaptiveFilterType Type => PngSpec.AdaptiveFilterType.None;
+    public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.None;
 
     protected override byte ComputeValue(Span<byte> currentRowBuffer, Span<byte> previousRowBuffer, int currentIndex)
     {
