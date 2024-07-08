@@ -1,6 +1,6 @@
 ﻿namespace PngSharp.Encoder;
 
-public class PngFilter
+public class PngAdaptiveFilter
 {
     private readonly byte[] m_Buffer;
 
@@ -13,7 +13,7 @@ public class PngFilter
     private readonly IAdaptiveFilter[] m_FirstRowFilters;
     private readonly IAdaptiveFilter[] m_AllFilters;
     
-    public PngFilter(int width, int height, int bytesPerPixel)
+    public PngAdaptiveFilter(int width, int height, int bytesPerPixel)
     {
         m_Height = height;
         
@@ -71,12 +71,13 @@ public class PngFilter
 
     private IAdaptiveFilter ChooseFilter(IEnumerable<IAdaptiveFilter> filters)
     {
+        var outputRow = m_OutputRow.Span;
         IAdaptiveFilter bestFilter = null;
         var score = -1.0;
         foreach (var filter in filters)
         {
-            filter.Apply(m_OutputRow.Span, m_CurrentRow.Span, m_PrevRow.Span);
-            var thisFiltersScore = ComputeScore(m_OutputRow.Span);
+            filter.Apply(outputRow, m_CurrentRow.Span, m_PrevRow.Span);
+            var thisFiltersScore = ComputeScore(outputRow);
             if (thisFiltersScore > score)
             {
                 score = thisFiltersScore;
@@ -84,20 +85,20 @@ public class PngFilter
             }
         }
         
-        Console.WriteLine($"Best filter score: {score}");
+        Console.WriteLine($"Best filter score: {score}, Filter: {bestFilter.Type}");
         return bestFilter;
     }
 
-    private double ComputeScore(ReadOnlySpan<byte> rowFiltered)
+    private double ComputeScore(ReadOnlySpan<byte> row)
     {
-        if (rowFiltered.Length == 0) return 0;
+        if (row.Length == 0) return 0;
 
         int totalRuns = 0;
         int currentRunLength = 1;
 
-        for (int i = 1; i < rowFiltered.Length; i++)
+        for (int i = 1; i < row.Length; i++)
         {
-            if (rowFiltered[i] == rowFiltered[i - 1])
+            if (row[i] == row[i - 1])
             {
                 currentRunLength++;
             }
@@ -110,6 +111,6 @@ public class PngFilter
 
         totalRuns += currentRunLength; // Add the last run
 
-        return (double)rowFiltered.Length / totalRuns;
+        return (double)row.Length / totalRuns;
     }
 }

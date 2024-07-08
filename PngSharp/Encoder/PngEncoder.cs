@@ -7,12 +7,14 @@ internal sealed class PngEncoder
     private readonly IDecodedPng m_Png;
     private readonly PngWriter m_PngWriter;
     private readonly byte[] m_Buffer;
+    private readonly PngAdaptiveFilter m_AdaptiveFilter;
 
     public PngEncoder(IDecodedPng png, Stream stream)
     {
         m_Png = png;
         m_PngWriter = new PngWriter(stream);
         m_Buffer = new byte[png.Width * png.BytesPerPixel];
+        m_AdaptiveFilter = new PngAdaptiveFilter(m_Png.Width, m_Png.Height, m_Png.BytesPerPixel);
     }
     
     public void Encode()
@@ -45,13 +47,14 @@ internal sealed class PngEncoder
     
     private void EncodePixels(Stream outputStream, Stream inputStream)
     {
-        int bytesRead;
-        while ((bytesRead = inputStream.Read(m_Buffer, 0, m_Buffer.Length)) > 0)
-        {
-            outputStream.WriteByte((byte)PngSpec.AdaptiveFilterType.None);
-            outputStream.Write(m_Buffer, 0, bytesRead);
-        }
-        
+        m_AdaptiveFilter.Apply(outputStream, inputStream);
+        // int bytesRead;
+        // while ((bytesRead = inputStream.Read(m_Buffer, 0, m_Buffer.Length)) > 0)
+        // {
+        //     outputStream.WriteByte((byte)PngSpec.AdaptiveFilterType.None);
+        //     outputStream.Write(m_Buffer, 0, bytesRead);
+        // }
+        //
     }
 
     private PngSpec.ColorType PixelFormatToColorType(PixelFormat pixelFormat)
