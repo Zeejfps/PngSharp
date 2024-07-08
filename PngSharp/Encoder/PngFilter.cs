@@ -6,12 +6,12 @@ public class PngFilter
 
     private int m_Height;
     
-    private readonly Memory<byte> m_CurrentRowUnfiltered;
-    private readonly Memory<byte> m_PrevRowFiltered;
-    private readonly Memory<byte> m_OutputRowFiltered;
+    private readonly Memory<byte> m_CurrentRow;
+    private readonly Memory<byte> m_PrevRow;
+    private readonly Memory<byte> m_OutputRow;
     
     private readonly IAdaptiveFilter[] m_FirstRowFilters;
-    private readonly IAdaptiveFilter[] m_AdaptiveFilters;
+    private readonly IAdaptiveFilter[] m_AllFilters;
     
     public PngFilter(int width, int height, int bytesPerPixel)
     {
@@ -21,9 +21,9 @@ public class PngFilter
         var strideFiltered = strideUnfiltered + 1;
         m_Buffer = new byte[strideUnfiltered + strideFiltered + strideFiltered];
 
-        m_CurrentRowUnfiltered = new Memory<byte>(m_Buffer, 0, strideUnfiltered);
-        m_OutputRowFiltered = new Memory<byte>(m_Buffer, strideUnfiltered, strideFiltered);
-        m_PrevRowFiltered = new Memory<byte>(m_Buffer, strideUnfiltered + strideFiltered, strideFiltered);
+        m_CurrentRow = new Memory<byte>(m_Buffer, 0, strideUnfiltered);
+        m_OutputRow = new Memory<byte>(m_Buffer, strideUnfiltered, strideFiltered);
+        m_PrevRow = new Memory<byte>(m_Buffer, strideUnfiltered + strideFiltered, strideFiltered);
 
         m_FirstRowFilters = new IAdaptiveFilter[]
         {
@@ -31,7 +31,7 @@ public class PngFilter
             new AdaptiveFilterSub(bytesPerPixel),
         };
         
-        m_AdaptiveFilters = new IAdaptiveFilter[]
+        m_AllFilters = new IAdaptiveFilter[]
         {
             new AdaptiveFilterNone(bytesPerPixel),
             new AdaptiveFilterSub(bytesPerPixel),
@@ -42,19 +42,30 @@ public class PngFilter
     public void Apply(Stream outputStream, Stream inputStream)
     {
         var height = m_Height;
-        
-        // TODO: Handle first row more gracefully?
-        inputStream.ReadExactly(m_CurrentRowUnfiltered.Span);
-        var filter = ChooseFilter(m_FirstRowFilters);
-        filter.Apply(m_OutputRowFiltered.Span, m_CurrentRowUnfiltered.Span, m_PrevRowFiltered.Span);
-        outputStream.Write(m_OutputRowFiltered.Span);
+        var currRow = m_CurrentRow.Span;
+        var prevRow = m_PrevRow.Span;
+        var outputRow = m_OutputRow.Span;
 
+        // TODO: Handle first row more gracefully?
+        inputStream.ReadExactly(currRow);
+        var filter = ChooseFilter(m_FirstRowFilters);
+        filter.Apply(outputRow, currRow, prevRow[1..]);
+        outputStream.Write(outputRow);
+
+        var t = prevRow;
+        prevRow = outputRow;
+        outputRow = t;
+        
         for (var i = 1; i < height; i++)
         {
-            inputStream.ReadExactly(m_CurrentRowUnfiltered.Span);
-            filter = ChooseFilter(m_AdaptiveFilters);
-            filter.Apply(m_OutputRowFiltered.Span, m_CurrentRowUnfiltered.Span, m_PrevRowFiltered.Span);
-            outputStream.Write(m_OutputRowFiltered.Span);
+            inputStream.ReadExactly(currRow);
+            filter = ChooseFilter(m_AllFilters);
+            filter.Apply(outputRow, currRow, prevRow[1..]);
+            outputStream.Write(outputRow);
+                
+            t = prevRow;
+            prevRow = outputRow;
+            outputRow = t;
         }
     }
 
@@ -64,8 +75,8 @@ public class PngFilter
         var score = -1.0;
         foreach (var filter in filters)
         {
-            filter.Apply(m_OutputRowFiltered.Span, m_CurrentRowUnfiltered.Span, m_PrevRowFiltered.Span);
-            var thisFiltersScore = ComputeScore(m_OutputRowFiltered.Span);
+            filter.Apply(m_OutputRow.Span, m_CurrentRow.Span, m_PrevRow.Span);
+            var thisFiltersScore = ComputeScore(m_OutputRow.Span);
             if (thisFiltersScore > score)
             {
                 score = thisFiltersScore;
