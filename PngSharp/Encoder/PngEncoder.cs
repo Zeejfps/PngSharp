@@ -36,7 +36,7 @@ internal sealed class PngEncoder
         Console.WriteLine($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);
         using var compressedDataStream = new MemoryStream();
-        using var compressionStream = new DeflateStream(compressedDataStream, CompressionMode.Compress);
+        using var compressionStream = new ZLibStream(compressedDataStream, CompressionMode.Compress);
         EncodePixels(compressionStream, pixelDataStream);
         compressionStream.Flush();
         Console.WriteLine($"Compressed Size: {compressedDataStream.Length} bytes");
