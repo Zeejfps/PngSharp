@@ -73,12 +73,12 @@ public class PngAdaptiveFilter
     {
         var outputRow = m_OutputRow.Span;
         IAdaptiveFilter bestFilter = null;
-        var score = -1.0;
+        var score = double.MaxValue;
         foreach (var filter in filters)
         {
             filter.Apply(outputRow, m_CurrentRow.Span, m_PrevRow.Span);
             var thisFiltersScore = ComputeScore(outputRow);
-            if (thisFiltersScore > score)
+            if (thisFiltersScore < score)
             {
                 score = thisFiltersScore;
                 bestFilter = filter;
@@ -91,26 +91,9 @@ public class PngAdaptiveFilter
 
     private double ComputeScore(ReadOnlySpan<byte> row)
     {
-        if (row.Length == 0) return 0;
-
-        int totalRuns = 0;
-        int currentRunLength = 1;
-
-        for (int i = 1; i < row.Length; i++)
-        {
-            if (row[i] == row[i - 1])
-            {
-                currentRunLength++;
-            }
-            else
-            {
-                totalRuns += currentRunLength;
-                currentRunLength = 1;
-            }
-        }
-
-        totalRuns += currentRunLength; // Add the last run
-
-        return (double)row.Length / totalRuns;
+        var sum = 0.0;
+        for (var i = 1; i < row.Length; i++)
+            sum += Math.Abs(row[i]);
+        return sum;
     }
 }
