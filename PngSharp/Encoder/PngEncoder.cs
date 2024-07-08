@@ -31,11 +31,13 @@ internal sealed class PngEncoder
             InterlaceMethod = PngSpec.InterlaceMethod.None, // TODO: Make dynamic?
             BitDepth = 8, // TODO: Make dynamic
         });
-        //
+        Console.WriteLine($"Pixels: {png.PixelData.Length}");
         using var pixelDataStream = new MemoryStream(png.PixelData);
         using var compressedDataStream = new MemoryStream();
         using var compressionStream = new DeflateStream(compressedDataStream, CompressionMode.Compress);
         EncodePixels(compressionStream, pixelDataStream);
+        compressionStream.Flush();
+        Console.WriteLine($"Compressed: {compressedDataStream.Length}");
         writer.WriteIDATChunk(compressedDataStream.ToArray());
         
         writer.WriteIENDChunk();
@@ -43,9 +45,13 @@ internal sealed class PngEncoder
     
     private void EncodePixels(Stream outputStream, Stream inputStream)
     {
-        var bytesRead = inputStream.Read(m_Buffer);
-        outputStream.WriteByte((byte)PngSpec.AdaptiveFilteringType.None);
-        outputStream.Write(m_Buffer);
+        int bytesRead;
+        while ((bytesRead = inputStream.Read(m_Buffer, 0, m_Buffer.Length)) > 0)
+        {
+            outputStream.WriteByte((byte)PngSpec.AdaptiveFilteringType.None);
+            outputStream.Write(m_Buffer, 0, bytesRead);
+        }
+        
     }
 
     private PngSpec.ColorType PixelFormatToColorType(PixelFormat pixelFormat)
