@@ -69,8 +69,8 @@ internal sealed class PngWriter
 
     private void WriteChunkHeader(PngSpec.ChunkHeader header)
     {
-        WriteHeaderName(header.Name);
         WriteUInt32((uint)header.ChunkSizeInBytes);
+        WriteHeaderName(header.Name);
     }
 
     private void WriteByte(byte b)
