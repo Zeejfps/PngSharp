@@ -17,7 +17,8 @@ internal sealed class ReadIhdrChunkState : IDecoderState
         if (!PngSpec.IsIHDRChunkHeader(header))
             throw new Exception("Expected IHDR chunk");
         var data = reader.ReadIhdrChunkData(); 
-        reader.ReadCrc();
+        var crc = reader.ReadCrc();
+        Console.WriteLine($"IHDR Chunk CRC: {crc}");
 
         decoder.IhdrChunkData = data;
         decoder.State = new ReadChunkState(decoder);
