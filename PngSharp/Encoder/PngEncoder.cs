@@ -6,14 +6,12 @@ internal sealed class PngEncoder
 {
     private readonly IDecodedPng m_Png;
     private readonly PngWriter m_PngWriter;
-    private readonly byte[] m_Buffer;
     private readonly PngAdaptiveFilter m_AdaptiveFilter;
 
     public PngEncoder(IDecodedPng png, Stream stream)
     {
         m_Png = png;
         m_PngWriter = new PngWriter(stream);
-        m_Buffer = new byte[png.Width * png.BytesPerPixel];
         m_AdaptiveFilter = new PngAdaptiveFilter(m_Png.Width, m_Png.Height, m_Png.BytesPerPixel);
     }
     
