@@ -5,10 +5,12 @@ namespace PngSharp.Encoder;
 internal sealed class PngWriter
 {
     private readonly Stream m_Stream;
+    private readonly PngCrcBuilder m_CrcBuilder;
 
     public PngWriter(Stream stream)
     {
         m_Stream = stream;
+        m_CrcBuilder = new PngCrcBuilder();
     }
 
     public void WriteSignature()
@@ -18,6 +20,7 @@ internal sealed class PngWriter
     
     public void WriteIHDRChunk(PngSpec.IhdrChunkData data)
     {
+        m_CrcBuilder.Begin();
         WriteChunkHeader(new PngSpec.ChunkHeader
         {
             Name = PngSpec.HeaderNames.IHDR,
@@ -30,15 +33,14 @@ internal sealed class PngWriter
         WriteByte((byte)data.CompressionMethod);
         WriteByte((byte)PngSpec.CompressionMethod.DeflateWithSlidingWindow);
         WriteByte((byte)PngSpec.InterlaceMethod.None);
-    }
-
-    private void WriteByte(byte b)
-    {
-        m_Stream.WriteByte(b);
+        
+        var crc = m_CrcBuilder.End();
+        WriteUInt32(crc);
     }
 
     public void WriteIDATChunk(ReadOnlySpan<byte> data)
     {
+        m_CrcBuilder.Begin();
         var sizeInBytes = data.Length;
         WriteChunkHeader(new PngSpec.ChunkHeader
         {
@@ -46,15 +48,22 @@ internal sealed class PngWriter
             ChunkSizeInBytes = sizeInBytes
         });
         m_Stream.Write(data);
+        m_CrcBuilder.Update(data);
+        
+        var crc = m_CrcBuilder.End();
+        WriteUInt32(crc);
     }
 
     public void WriteIENDChunk()
     {
+        m_CrcBuilder.Begin();
         WriteChunkHeader(new PngSpec.ChunkHeader
         {
             Name = PngSpec.HeaderNames.IEND,
             ChunkSizeInBytes = 0
         });
+        var crc = m_CrcBuilder.End();
+        WriteUInt32(crc);
         m_Stream.Flush();
     }
 
@@ -64,10 +73,17 @@ internal sealed class PngWriter
         WriteUInt32((uint)header.ChunkSizeInBytes);
     }
 
+    private void WriteByte(byte b)
+    {
+        m_Stream.WriteByte(b);
+        m_CrcBuilder.Update(b);
+    }
+
     private void WriteHeaderName(string name)
     {
-        var valueBytes = Encoding.ASCII.GetBytes(name);
+        var valueBytes = Encoding.ASCII.GetBytes(name).AsSpan();
         m_Stream.Write(valueBytes);
+        m_CrcBuilder.Update(valueBytes);
     }
 
     private void WriteUInt32(uint value)
@@ -76,5 +92,6 @@ internal sealed class PngWriter
         // TODO: verify endines
         bytes.Reverse();
         m_Stream.Write(bytes);
+        m_CrcBuilder.Update(bytes);
     }
 }
