@@ -2,55 +2,76 @@
 
 public class PngFilter
 {
-    private readonly byte[] m_CurrentUnfilteredScanLine;
-    private byte[] m_PreviousFilteredScanLine;
-    private byte[] m_CurrentFilteredScanLine;
+    private readonly byte[] m_Buffer;
 
+    private int m_Height;
     private bool m_IsFirstScanLine;
     private readonly int m_BytesPerPixel;
 
     private readonly AdaptiveFilterNone m_AdaptiveFilterNone;
     private readonly AdaptiveFilterSub m_AdaptiveFilterSub;
+
+    private readonly Memory<byte> m_CurrentRowUnfiltered;
+    private readonly Memory<byte> m_PrevRowFiltered;
+    private readonly Memory<byte> m_OutputRowFiltered;
+    private readonly Memory<byte> m_TempRowUnfiltered;
+
+    private readonly IAdaptiveFilter[] m_AdaptiveFilters;
     
-    public PngFilter(int width, int bytesPerPixel)
+    public PngFilter(int width, int height, int bytesPerPixel)
     {
+        m_Height = height;
         var stride = width * bytesPerPixel;
-        m_CurrentUnfilteredScanLine = new byte[stride];
-        m_PreviousFilteredScanLine = new byte[stride + 1];
-        m_CurrentFilteredScanLine = new byte[stride + 1];
+        m_Buffer = new byte[stride + stride + 1 + stride + 1 + stride + 1];
+
+        m_CurrentRowUnfiltered = new Memory<byte>(m_Buffer, 0, stride);
+        m_OutputRowFiltered = new Memory<byte>(m_Buffer, stride, stride + 1);
+        m_PrevRowFiltered = new Memory<byte>(m_Buffer, stride + stride + 1, stride + 1);
+            
         m_BytesPerPixel = bytesPerPixel;
         m_IsFirstScanLine = true;
 
         m_AdaptiveFilterNone = new AdaptiveFilterNone(bytesPerPixel);
         m_AdaptiveFilterSub = new AdaptiveFilterSub(bytesPerPixel);
-    }
 
-    private void ApplyFilter(Span<byte> filteredRowBuffer, PngSpec.AdaptiveFilterType filterType, ReadOnlySpan<byte> unfilteredRowBuffer)
-    {
-        IAdaptiveFilter filter = filterType switch
+        m_AdaptiveFilters = new IAdaptiveFilter[]
         {
-            PngSpec.AdaptiveFilterType.None => m_AdaptiveFilterNone,
-            PngSpec.AdaptiveFilterType.Sub => m_AdaptiveFilterSub,
-            PngSpec.AdaptiveFilterType.Up => m_AdaptiveFilterNone,
-            PngSpec.AdaptiveFilterType.Average => m_AdaptiveFilterNone,
-            PngSpec.AdaptiveFilterType.Paeth => m_AdaptiveFilterNone,
-            _ => throw new ArgumentOutOfRangeException()
+            m_AdaptiveFilterNone,
+            m_AdaptiveFilterSub,
         };
-
-        filter.Apply(m_CurrentFilteredScanLine, m_CurrentUnfilteredScanLine, m_PreviousFilteredScanLine);
-    }
-    
-    private byte GetUpLeftByteValue(int currByteIndex)
-    {
-        if (m_IsFirstScanLine || currByteIndex < m_BytesPerPixel)
-            return 0;
-        return m_PreviousFilteredScanLine[currByteIndex - m_BytesPerPixel];
     }
 
-    private byte GetUpValue(int currByteIndex)
+    public void Apply(Stream inputStream)
     {
-        if (m_IsFirstScanLine)
-            return 0;
-        return m_PreviousFilteredScanLine[currByteIndex];
+        var height = m_Height;
+        for (var i = 0; i < height; i++)
+        {
+            inputStream.ReadExactly(m_CurrentRowUnfiltered.Span);
+            var filter = ChooseFilter();
+            filter.Apply(m_OutputRowFiltered.Span, m_CurrentRowUnfiltered.Span, m_PrevRowFiltered.Span);
+        }
+    }
+
+    private IAdaptiveFilter ChooseFilter()
+    {
+        IAdaptiveFilter bestFilter = m_AdaptiveFilterNone;
+        var score = 0;
+        foreach (var filter in m_AdaptiveFilters)
+        {
+            filter.Apply(m_OutputRowFiltered.Span, m_CurrentRowUnfiltered.Span, m_PrevRowFiltered.Span);
+            var thisFiltersScore = ComputeScore(m_OutputRowFiltered.Span);
+            if (thisFiltersScore > score)
+            {
+                score = thisFiltersScore;
+                bestFilter = filter;
+            }
+        }
+
+        return bestFilter;
+    }
+
+    private int ComputeScore(ReadOnlySpan<byte> span)
+    {
+        throw new NotImplementedException();
     }
 }
