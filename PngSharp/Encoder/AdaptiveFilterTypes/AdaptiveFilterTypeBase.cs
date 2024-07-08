@@ -28,7 +28,7 @@ public abstract class AdaptiveFilterTypeBase : IAdaptiveFilterType
         return currentRowBuffer[currByteIndex - m_BytesPerPixel];
     }
     
-    protected int GetAboveValue(Span<byte> previousRowBuffer, int currentIndex)
+    protected byte GetAboveValue(Span<byte> previousRowBuffer, int currentIndex)
     {
         return previousRowBuffer[currentIndex];
     }
