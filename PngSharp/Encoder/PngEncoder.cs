@@ -2,7 +2,7 @@
 
 namespace PngSharp.Encoder;
 
-internal sealed class PngEncoder
+internal sealed class PngEncoder : IDisposable, IAsyncDisposable
 {
     private readonly IDecodedPng m_Png;
     private readonly PngWriter m_PngWriter;
@@ -58,5 +58,15 @@ internal sealed class PngEncoder
             PixelFormat.GrayscaleWithAlpha => PngSpec.ColorType.GrayscaleWithAlpha,
             _ => throw new ArgumentOutOfRangeException(nameof(pixelFormat), pixelFormat, null)
         };
+    }
+
+    public void Dispose()
+    {
+        m_PngWriter.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await m_PngWriter.DisposeAsync();
     }
 }

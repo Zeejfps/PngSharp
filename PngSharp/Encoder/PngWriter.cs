@@ -2,7 +2,7 @@
 
 namespace PngSharp.Encoder;
 
-internal sealed class PngWriter
+internal sealed class PngWriter : IDisposable, IAsyncDisposable
 {
     private readonly Stream m_Stream;
     private readonly PngCrcBuilder m_CrcBuilder;
@@ -98,5 +98,15 @@ internal sealed class PngWriter
     {
         m_Stream.Write(data);
         m_CrcBuilder.Update(data);
+    }
+
+    public void Dispose()
+    {
+        m_Stream.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await m_Stream.DisposeAsync();
     }
 }
