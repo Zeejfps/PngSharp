@@ -5,58 +5,64 @@ public class PngFilter
     private readonly byte[] m_Buffer;
 
     private int m_Height;
-    private bool m_IsFirstScanLine;
-    private readonly int m_BytesPerPixel;
-
-    private readonly AdaptiveFilterNone m_AdaptiveFilterNone;
-    private readonly AdaptiveFilterSub m_AdaptiveFilterSub;
-
+    
     private readonly Memory<byte> m_CurrentRowUnfiltered;
     private readonly Memory<byte> m_PrevRowFiltered;
     private readonly Memory<byte> m_OutputRowFiltered;
-    private readonly Memory<byte> m_TempRowUnfiltered;
-
+    
+    private readonly IAdaptiveFilter[] m_FirstRowFilters;
     private readonly IAdaptiveFilter[] m_AdaptiveFilters;
     
     public PngFilter(int width, int height, int bytesPerPixel)
     {
         m_Height = height;
-        var stride = width * bytesPerPixel;
-        m_Buffer = new byte[stride + stride + 1 + stride + 1 + stride + 1];
+        
+        var strideUnfiltered = width * bytesPerPixel;
+        var strideFiltered = strideUnfiltered + 1;
+        m_Buffer = new byte[strideUnfiltered + strideFiltered + strideFiltered];
 
-        m_CurrentRowUnfiltered = new Memory<byte>(m_Buffer, 0, stride);
-        m_OutputRowFiltered = new Memory<byte>(m_Buffer, stride, stride + 1);
-        m_PrevRowFiltered = new Memory<byte>(m_Buffer, stride + stride + 1, stride + 1);
-            
-        m_BytesPerPixel = bytesPerPixel;
-        m_IsFirstScanLine = true;
+        m_CurrentRowUnfiltered = new Memory<byte>(m_Buffer, 0, strideUnfiltered);
+        m_OutputRowFiltered = new Memory<byte>(m_Buffer, strideUnfiltered, strideFiltered);
+        m_PrevRowFiltered = new Memory<byte>(m_Buffer, strideUnfiltered + strideFiltered, strideFiltered);
 
-        m_AdaptiveFilterNone = new AdaptiveFilterNone(bytesPerPixel);
-        m_AdaptiveFilterSub = new AdaptiveFilterSub(bytesPerPixel);
-
+        m_FirstRowFilters = new IAdaptiveFilter[]
+        {
+            new AdaptiveFilterNone(bytesPerPixel),
+            new AdaptiveFilterSub(bytesPerPixel),
+        };
+        
         m_AdaptiveFilters = new IAdaptiveFilter[]
         {
-            m_AdaptiveFilterNone,
-            m_AdaptiveFilterSub,
+            new AdaptiveFilterNone(bytesPerPixel),
+            new AdaptiveFilterSub(bytesPerPixel),
+            new AdaptiveFilterUp(bytesPerPixel),
         };
     }
 
-    public void Apply(Stream inputStream)
+    public void Apply(Stream outputStream, Stream inputStream)
     {
         var height = m_Height;
-        for (var i = 0; i < height; i++)
+        
+        // TODO: Handle first row more gracefully?
+        inputStream.ReadExactly(m_CurrentRowUnfiltered.Span);
+        var filter = ChooseFilter(m_FirstRowFilters);
+        filter.Apply(m_OutputRowFiltered.Span, m_CurrentRowUnfiltered.Span, m_PrevRowFiltered.Span);
+        outputStream.Write(m_OutputRowFiltered.Span);
+
+        for (var i = 1; i < height; i++)
         {
             inputStream.ReadExactly(m_CurrentRowUnfiltered.Span);
-            var filter = ChooseFilter();
+            filter = ChooseFilter(m_AdaptiveFilters);
             filter.Apply(m_OutputRowFiltered.Span, m_CurrentRowUnfiltered.Span, m_PrevRowFiltered.Span);
+            outputStream.Write(m_OutputRowFiltered.Span);
         }
     }
 
-    private IAdaptiveFilter ChooseFilter()
+    private IAdaptiveFilter ChooseFilter(IEnumerable<IAdaptiveFilter> filters)
     {
-        IAdaptiveFilter bestFilter = m_AdaptiveFilterNone;
-        var score = 0;
-        foreach (var filter in m_AdaptiveFilters)
+        IAdaptiveFilter bestFilter = null;
+        var score = -1.0;
+        foreach (var filter in filters)
         {
             filter.Apply(m_OutputRowFiltered.Span, m_CurrentRowUnfiltered.Span, m_PrevRowFiltered.Span);
             var thisFiltersScore = ComputeScore(m_OutputRowFiltered.Span);
@@ -66,12 +72,33 @@ public class PngFilter
                 bestFilter = filter;
             }
         }
-
+        
+        Console.WriteLine($"Best filter score: {score}");
         return bestFilter;
     }
 
-    private int ComputeScore(ReadOnlySpan<byte> span)
+    private double ComputeScore(ReadOnlySpan<byte> rowFiltered)
     {
-        throw new NotImplementedException();
+        if (rowFiltered.Length == 0) return 0;
+
+        int totalRuns = 0;
+        int currentRunLength = 1;
+
+        for (int i = 1; i < rowFiltered.Length; i++)
+        {
+            if (rowFiltered[i] == rowFiltered[i - 1])
+            {
+                currentRunLength++;
+            }
+            else
+            {
+                totalRuns += currentRunLength;
+                currentRunLength = 1;
+            }
+        }
+
+        totalRuns += currentRunLength; // Add the last run
+
+        return (double)rowFiltered.Length / totalRuns;
     }
 }

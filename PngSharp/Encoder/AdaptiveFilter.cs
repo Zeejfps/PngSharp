@@ -2,10 +2,8 @@
 
 public abstract class AdaptiveFilter : IAdaptiveFilter
 {
-    protected readonly int m_BytesPerPixel;
-
-    private bool m_IsFirstScanLine;
-
+    private readonly int m_BytesPerPixel;
+    
     protected AdaptiveFilter(int bytesPerPixel)
     {
         m_BytesPerPixel = bytesPerPixel;
@@ -16,6 +14,7 @@ public abstract class AdaptiveFilter : IAdaptiveFilter
     public void Apply(Span<byte> filteredRowBuffer, Span<byte> currentRowBuffer, Span<byte> previousRowBuffer)
     {
         var length = currentRowBuffer.Length;
+        filteredRowBuffer[0] = (byte)Type; 
         for (var i = 0; i < length; i++)
             filteredRowBuffer[i + 1] = ComputeValue(currentRowBuffer, previousRowBuffer, i);
     }
@@ -31,14 +30,12 @@ public abstract class AdaptiveFilter : IAdaptiveFilter
     
     protected int GetAboveValue(Span<byte> previousRowBuffer, int currentIndex)
     {
-        // if (m_IsFirstScanLine)
-        //     return 0;
         return previousRowBuffer[currentIndex];
     }
     
     private byte GetUpLeftByteValue(ReadOnlySpan<byte> prevRow, int currByteIndex)
     {
-        if (m_IsFirstScanLine || currByteIndex < m_BytesPerPixel)
+        if (currByteIndex < m_BytesPerPixel)
             return 0;
         return prevRow[currByteIndex - m_BytesPerPixel];
     }
