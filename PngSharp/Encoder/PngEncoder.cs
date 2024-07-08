@@ -48,7 +48,7 @@ internal sealed class PngEncoder
         int bytesRead;
         while ((bytesRead = inputStream.Read(m_Buffer, 0, m_Buffer.Length)) > 0)
         {
-            outputStream.WriteByte((byte)PngSpec.AdaptiveFilteringType.None);
+            outputStream.WriteByte((byte)PngSpec.AdaptiveFilterType.None);
             outputStream.Write(m_Buffer, 0, bytesRead);
         }
         
