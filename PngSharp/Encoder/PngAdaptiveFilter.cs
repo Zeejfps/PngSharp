@@ -20,11 +20,11 @@ internal sealed class PngAdaptiveFilter
         
         var strideUnfiltered = width * bytesPerPixel;
         var strideFiltered = strideUnfiltered + 1;
-        m_Buffer = new byte[strideUnfiltered + strideFiltered + strideFiltered];
+        m_Buffer = new byte[strideUnfiltered + strideUnfiltered + strideFiltered];
 
         m_CurrentRow = new Memory<byte>(m_Buffer, 0, strideUnfiltered);
-        m_OutputRow = new Memory<byte>(m_Buffer, strideUnfiltered, strideFiltered);
-        m_PrevRow = new Memory<byte>(m_Buffer, strideUnfiltered + strideFiltered, strideFiltered);
+        m_PrevRow = new Memory<byte>(m_Buffer, strideUnfiltered, strideUnfiltered);
+        m_OutputRow = new Memory<byte>(m_Buffer, strideUnfiltered + strideUnfiltered, strideFiltered);
 
         m_FirstRowFilterTypes = new IAdaptiveFilterType[]
         {
@@ -51,34 +51,37 @@ internal sealed class PngAdaptiveFilter
         // TODO: Handle first row more gracefully?
         inputStream.ReadExactly(currRow);
         var filter = ChooseFilter(m_FirstRowFilterTypes);
-        filter.Apply(outputRow, currRow, prevRow[1..]);
+        filter.Apply(outputRow, currRow, prevRow);
         outputStream.Write(outputRow);
 
         var t = prevRow;
-        prevRow = outputRow;
-        outputRow = t;
-        
+        prevRow = currRow;
+        currRow = t;
+ 
         for (var i = 1; i < height; i++)
         {
             inputStream.ReadExactly(currRow);
-            filter = ChooseFilter(m_AllFilterTypes);
-            filter.Apply(outputRow, currRow, prevRow[1..]);
+            filter =  ChooseFilter(m_AllFilterTypes);
+            filter.Apply(outputRow, currRow, prevRow);
             outputStream.Write(outputRow);
-                
+
             t = prevRow;
-            prevRow = outputRow;
-            outputRow = t;
+            prevRow = currRow;
+            currRow = t;
         }
     }
 
     private IAdaptiveFilterType ChooseFilter(IEnumerable<IAdaptiveFilterType> filters)
     {
+        var currentRow = m_CurrentRow.Span;
+        var prevRow = m_PrevRow.Span;
         var outputRow = m_OutputRow.Span;
-        IAdaptiveFilterType bestFilter = null;
         var score = double.MaxValue;
+        
+        IAdaptiveFilterType bestFilter = null;
         foreach (var filter in filters)
         {
-            filter.Apply(outputRow, m_CurrentRow.Span, m_PrevRow.Span);
+            filter.Apply(outputRow, currentRow, prevRow);
             var thisFiltersScore = ComputeScore(outputRow);
             if (thisFiltersScore < score)
             {
