@@ -55,17 +55,18 @@ internal sealed class PngWriter
             Name = PngSpec.HeaderNames.IEND,
             ChunkSizeInBytes = 0
         });
+        m_Stream.Flush();
     }
 
     private void WriteChunkHeader(PngSpec.ChunkHeader header)
     {
-        WriteString(header.Name);
-        WriteUInt32(0);
+        WriteHeaderName(header.Name);
+        WriteUInt32((uint)header.ChunkSizeInBytes);
     }
 
-    private void WriteString(string value)
+    private void WriteHeaderName(string name)
     {
-        var valueBytes = Encoding.ASCII.GetBytes(value);
+        var valueBytes = Encoding.ASCII.GetBytes(name);
         m_Stream.Write(valueBytes);
     }
 

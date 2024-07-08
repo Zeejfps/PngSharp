@@ -31,14 +31,14 @@ internal sealed class PngEncoder
             InterlaceMethod = PngSpec.InterlaceMethod.None, // TODO: Make dynamic?
             BitDepth = 8, // TODO: Make dynamic
         });
-
-        using var pixelDataStream = new MemoryStream(m_Png.PixelData);
+        //
+        using var pixelDataStream = new MemoryStream(png.PixelData);
         using var compressedDataStream = new MemoryStream();
         using var compressionStream = new DeflateStream(compressedDataStream, CompressionMode.Compress);
         EncodePixels(compressionStream, pixelDataStream);
-        m_PngWriter.WriteIDATChunk(compressedDataStream.ToArray());
+        writer.WriteIDATChunk(compressedDataStream.ToArray());
         
-        m_PngWriter.WriteIENDChunk();
+        writer.WriteIENDChunk();
     }
     
     private void EncodePixels(Stream outputStream, Stream inputStream)
