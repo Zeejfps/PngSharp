@@ -1,6 +1,6 @@
-﻿namespace PngSharp.Encoder;
+﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
 
-public interface IAdaptiveFilter
+internal interface IAdaptiveFilter
 {
     PngSpec.AdaptiveFilterType Type { get; }
     void Apply(Span<byte> filteredRowBuffer, Span<byte> currentRowBuffer, Span<byte> previousRowBuffer);

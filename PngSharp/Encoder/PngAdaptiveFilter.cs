@@ -1,17 +1,18 @@
-﻿namespace PngSharp.Encoder;
+﻿using PngSharp.Encoder.AdaptiveFilterTypes;
 
-public class PngAdaptiveFilter
+namespace PngSharp.Encoder;
+
+internal sealed class PngAdaptiveFilter
 {
+    private readonly int m_Height;
     private readonly byte[] m_Buffer;
 
-    private int m_Height;
-    
     private readonly Memory<byte> m_CurrentRow;
     private readonly Memory<byte> m_PrevRow;
     private readonly Memory<byte> m_OutputRow;
     
-    private readonly IAdaptiveFilter[] m_FirstRowFilters;
-    private readonly IAdaptiveFilter[] m_AllFilters;
+    private readonly IAdaptiveFilter[] m_FirstRowFilterTypes;
+    private readonly IAdaptiveFilter[] m_AllFilterTypes;
     
     public PngAdaptiveFilter(int width, int height, int bytesPerPixel)
     {
@@ -25,13 +26,13 @@ public class PngAdaptiveFilter
         m_OutputRow = new Memory<byte>(m_Buffer, strideUnfiltered, strideFiltered);
         m_PrevRow = new Memory<byte>(m_Buffer, strideUnfiltered + strideFiltered, strideFiltered);
 
-        m_FirstRowFilters = new IAdaptiveFilter[]
+        m_FirstRowFilterTypes = new IAdaptiveFilter[]
         {
             new AdaptiveFilterNone(bytesPerPixel),
             new AdaptiveFilterSub(bytesPerPixel),
         };
         
-        m_AllFilters = new IAdaptiveFilter[]
+        m_AllFilterTypes = new IAdaptiveFilter[]
         {
             new AdaptiveFilterNone(bytesPerPixel),
             new AdaptiveFilterSub(bytesPerPixel),
@@ -48,7 +49,7 @@ public class PngAdaptiveFilter
 
         // TODO: Handle first row more gracefully?
         inputStream.ReadExactly(currRow);
-        var filter = ChooseFilter(m_FirstRowFilters);
+        var filter = ChooseFilter(m_FirstRowFilterTypes);
         filter.Apply(outputRow, currRow, prevRow[1..]);
         outputStream.Write(outputRow);
 
@@ -59,7 +60,7 @@ public class PngAdaptiveFilter
         for (var i = 1; i < height; i++)
         {
             inputStream.ReadExactly(currRow);
-            filter = ChooseFilter(m_AllFilters);
+            filter = ChooseFilter(m_AllFilterTypes);
             filter.Apply(outputRow, currRow, prevRow[1..]);
             outputStream.Write(outputRow);
                 

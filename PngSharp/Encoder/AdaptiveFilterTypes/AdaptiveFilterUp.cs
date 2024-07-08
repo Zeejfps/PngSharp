@@ -1,4 +1,4 @@
-﻿namespace PngSharp.Encoder;
+﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
 
 internal sealed class AdaptiveFilterUp : AdaptiveFilter
 {

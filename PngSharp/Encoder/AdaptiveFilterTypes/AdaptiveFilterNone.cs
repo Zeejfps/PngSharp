@@ -1,6 +1,6 @@
-﻿namespace PngSharp.Encoder;
+﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
 
-public sealed class AdaptiveFilterNone : AdaptiveFilter
+internal sealed class AdaptiveFilterNone : AdaptiveFilter
 {
     public AdaptiveFilterNone(int bytesPerPixel) : base(bytesPerPixel)
     {
