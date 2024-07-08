@@ -1,6 +1,6 @@
 ﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
 
-internal abstract class AdaptiveFilterTypeBase : IAdaptiveFilterType
+public abstract class AdaptiveFilterTypeBase : IAdaptiveFilterType
 {
     private readonly int m_BytesPerPixel;
     

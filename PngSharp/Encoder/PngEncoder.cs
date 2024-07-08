@@ -33,13 +33,13 @@ internal sealed class PngEncoder
             InterlaceMethod = PngSpec.InterlaceMethod.None, // TODO: Make dynamic?
             BitDepth = 8, // TODO: Make dynamic
         });
-        Console.WriteLine($"Pixels: {png.PixelData.Length}");
+        Console.WriteLine($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);
         using var compressedDataStream = new MemoryStream();
         using var compressionStream = new DeflateStream(compressedDataStream, CompressionMode.Compress);
         EncodePixels(compressionStream, pixelDataStream);
         compressionStream.Flush();
-        Console.WriteLine($"Compressed: {compressedDataStream.Length}");
+        Console.WriteLine($"Compressed Size: {compressedDataStream.Length} bytes");
         writer.WriteIDATChunk(compressedDataStream.ToArray());
         
         writer.WriteIENDChunk();

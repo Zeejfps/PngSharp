@@ -37,6 +37,7 @@ internal sealed class PngAdaptiveFilter
             new AdaptiveFilterTypeNone(bytesPerPixel),
             new AdaptiveFilterTypeSub(bytesPerPixel),
             new AdaptiveFilterTypeUp(bytesPerPixel),
+            new AdaptiveFilterTypeAverage(bytesPerPixel)
         };
     }
 
