@@ -1,4 +1,6 @@
-﻿namespace PngSharp.Decoder.States;
+﻿using PngSharp.Common;
+
+namespace PngSharp.Decoder.States;
 
 internal sealed class ReadChunkState : IDecoderState
 {

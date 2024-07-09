@@ -1,5 +1,5 @@
 ﻿using System.IO.Compression;
-using PngSharp.AdaptiveFilter;
+using PngSharp.Common.AdaptiveFilter;
 
 namespace PngSharp.Decoder.States;
 
@@ -25,12 +25,6 @@ internal sealed class DecodePixelDataState : IDecoderState
             decoder.IhdrChunkData.GetBytesPerPixel());
         
         adaptiveFilter.Reverse(decoder.PixelDataStream, decompressionStream);
-        //decoder.PixelDataStream.Flush();
-        
-        // var scanLineDecoder = new PngScanLineDecoder(decoder.IhdrChunkData, deflateStream);
-        // for (var i = 0; i < decoder.IhdrChunkData.Height; i++)
-        //     scanLineDecoder.DecodeScanlineTo(decoder.PixelDataStream);
-
         decoder.State = decoder.DoneState;
     }
 }

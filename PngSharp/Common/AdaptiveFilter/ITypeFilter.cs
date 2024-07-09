@@ -1,4 +1,4 @@
-﻿namespace PngSharp.AdaptiveFilter;
+﻿namespace PngSharp.Common.AdaptiveFilter;
 
 internal interface ITypeFilter
 {

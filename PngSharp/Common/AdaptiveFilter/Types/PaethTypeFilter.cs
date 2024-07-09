@@ -1,4 +1,4 @@
-﻿namespace PngSharp.AdaptiveFilter.Types;
+﻿namespace PngSharp.Common.AdaptiveFilter.Types;
 
 internal class PaethTypeFilter : FilterBase
 {

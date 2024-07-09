@@ -1,5 +1,6 @@
 ﻿using System.IO.Compression;
-using PngSharp.AdaptiveFilter;
+using PngSharp.Common;
+using PngSharp.Common.AdaptiveFilter;
 
 namespace PngSharp.Encoder;
 

@@ -1,4 +1,4 @@
-﻿namespace PngSharp;
+﻿namespace PngSharp.Common;
 
 /// <summary>
 /// 32-bit Cyclic Redundancy Code used by the PNG for checking the data is intact.
@@ -6,11 +6,11 @@
 public sealed class PngCrcBuilder
 {
     private const uint Polynomial = 0xEDB88320;
-    private static readonly uint[] Lookup;
+    private static readonly uint[] s_Lookup;
 
     static PngCrcBuilder()
     {
-        Lookup = new uint[256];
+        s_Lookup = new uint[256];
         for (uint i = 0; i < 256; i++)
         {
             var value = i;
@@ -22,7 +22,7 @@ public sealed class PngCrcBuilder
                     value >>= 1;
             }
 
-            Lookup[i] = value;
+            s_Lookup[i] = value;
         }
     }
 
@@ -37,7 +37,7 @@ public sealed class PngCrcBuilder
     {
         var crc32 = m_Crc32;
         var index = (crc32 ^ b) & 0xFF;
-        crc32 = (crc32 >> 8) ^ Lookup[index];
+        crc32 = (crc32 >> 8) ^ s_Lookup[index];
         m_Crc32 = crc32;
     }
     
@@ -47,7 +47,7 @@ public sealed class PngCrcBuilder
         foreach (var b in data)
         {
             var index = (crc32 ^ b) & 0xFF;
-            crc32 = (crc32 >> 8) ^ Lookup[index];
+            crc32 = (crc32 >> 8) ^ s_Lookup[index];
         }
         m_Crc32 = crc32;
     }
@@ -55,7 +55,6 @@ public sealed class PngCrcBuilder
     public uint End()
     {
         var crc32 = m_Crc32 ^ uint.MaxValue;
-        Console.WriteLine($"CRC: {crc32}");
         return crc32;
     }
 }
