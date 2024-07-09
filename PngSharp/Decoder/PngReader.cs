@@ -24,7 +24,7 @@ public sealed class PngReader
 
     public ReadOnlySpan<byte> ReadSignature()
     {
-        return ReadBytesLittleEndian(8);
+        return ReadBytes(8);
     }
 
     public IhdrChunkData ReadIhdrChunkData()
@@ -85,34 +85,26 @@ public sealed class PngReader
 
     private UInt32 ReadUInt32()
     {
-        var buffer = ReadBytesBigEndian(4);
+        var buffer = ReadBytes(4);
+        if (BitConverter.IsLittleEndian)
+            buffer.Reverse();
+        
         return BitConverter.ToUInt32(buffer);
     }
 
     private string ReadAsciiString(int sizeInBytes)
     {
-        var buffer = ReadBytesLittleEndian(sizeInBytes);
+        var buffer = ReadBytes(sizeInBytes);
         return Encoding.ASCII.GetString(buffer);
     }
 
-    private ReadOnlySpan<byte> ReadBytesLittleEndian(int byteCount)
+    private Span<byte> ReadBytes(int byteCount)
     {
         var bytesRead = m_Stream.Read(m_Buffer, 0, byteCount);
         if (bytesRead != byteCount)
             throw new Exception($"Failed to read png. Read {bytesRead} bytes, expected {byteCount}");
         var buffer = m_Buffer.AsSpan(0, byteCount);
         m_Crc32.Update(buffer);
-        return buffer;
-    }
-    
-    private ReadOnlySpan<byte> ReadBytesBigEndian(int byteCount)
-    {
-        var bytesRead = m_Stream.Read(m_Buffer, 0, byteCount);
-        if (bytesRead != byteCount)
-            throw new Exception($"Failed to read png. Read {bytesRead} bytes, expected {byteCount}");
-        var buffer = m_Buffer.AsSpan(0, byteCount);
-        m_Crc32.Update(buffer);
-        buffer.Reverse();
         return buffer;
     }
 
