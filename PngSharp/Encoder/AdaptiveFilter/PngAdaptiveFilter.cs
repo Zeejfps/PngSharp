@@ -34,10 +34,42 @@ internal sealed class PngAdaptiveFilter
 
     public void Reverse(Stream outputStream, Stream inputStream)
     {
-        // var height = m_Height;
-        // var currRow = m_CurrentRow.Span;
-        // var prevRow = m_PrevRow.Span;
-        // var outputRow = m_OutputRow.Span;
+        var width = m_Width;
+        var height = m_Height;
+        var bytesPerPixel = m_BytesPerPixel;
+        var firstRowFilters = m_FirstRowFilterTypes;
+        var allFilters = m_AllFilterTypes;
+        
+        var strideUnfiltered = width * bytesPerPixel;
+        var strideFiltered = strideUnfiltered + 1;
+        var buffer = new byte[strideUnfiltered + strideUnfiltered + strideFiltered];
+        var outputRow = new Span<byte>(buffer, 0, strideUnfiltered);
+        var prevRow = new Span<byte>(buffer, strideUnfiltered, strideUnfiltered);
+        var currRow = new Span<byte>(buffer, strideUnfiltered + strideUnfiltered, strideFiltered);
+
+        // TODO: Handle first row more gracefully?
+        inputStream.ReadExactly(currRow);
+        var filterKind = (PngSpec.AdaptiveFilterTypeKind)currRow[0];
+        var filter = GetFilterByKind(filterKind);
+        filter.Reverse(outputRow, currRow[1..], prevRow);
+        outputStream.Write(outputRow);
+        var t = prevRow;
+        prevRow = outputRow;
+        outputRow = t;
+
+    }
+
+    private ITypeFilter GetFilterByKind(PngSpec.AdaptiveFilterTypeKind kind)
+    {
+        return kind switch
+        {
+            PngSpec.AdaptiveFilterTypeKind.None => new NoneTypeFilter(m_BytesPerPixel),
+            PngSpec.AdaptiveFilterTypeKind.Sub => new SubTypeFilter(m_BytesPerPixel),
+            PngSpec.AdaptiveFilterTypeKind.Up => new UpTypeFilter(m_BytesPerPixel),
+            PngSpec.AdaptiveFilterTypeKind.Average => new AverageTypeFilter(m_BytesPerPixel),
+            PngSpec.AdaptiveFilterTypeKind.Paeth => new PaethTypeFilter(m_BytesPerPixel),
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+        };
     }
 
     public void Apply(Stream outputStream, Stream inputStream)

@@ -14,4 +14,12 @@ internal sealed class UpTypeFilter : FilterBase
         var x = currentRowBuffer[currentIndex];
         return (byte)(x - above);
     }
+
+    protected override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
+    {
+        var x = currentRow[currByteIndex];
+        var upValue = GetAboveValue(prevRow, currByteIndex);
+        return (byte)(x + upValue);
+    }
+    
 }

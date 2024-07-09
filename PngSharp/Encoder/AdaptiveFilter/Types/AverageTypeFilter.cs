@@ -14,4 +14,13 @@ public class AverageTypeFilter : FilterBase
         var x = currentRowBuffer[currentIndex];
         return (byte)(x - ((left + above) / 2));
     }
+
+    protected override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
+    {
+        var x = currentRow[currByteIndex];
+        var left = GetLeftValue(currentRow, currByteIndex);
+        var above = GetAboveValue(prevRow, currByteIndex);
+        var reconValue = (byte)(left + above * 0.5);
+        return (byte)(x + reconValue);
+    }
 }

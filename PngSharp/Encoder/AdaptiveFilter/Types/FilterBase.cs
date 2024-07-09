@@ -19,8 +19,18 @@ public abstract class FilterBase : ITypeFilter
             filteredRowBuffer[i + 1] = ComputeValue(currentRowBuffer, previousRowBuffer, i);
     }
 
-    protected abstract byte ComputeValue(ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer, int currentIndex);
-    
+    public void Reverse(Span<byte> outputRow, ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow)
+    {
+        var length = outputRow.Length;
+        for (var i = 0; i < length; i++)
+            outputRow[i] = ReverseValue(currentRow, prevRow, i);
+
+    }
+
+    protected abstract byte ComputeValue(ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer, int currByteIndex);
+    protected abstract byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex);
+
+
     protected byte GetLeftValue(ReadOnlySpan<byte> currentRowBuffer, int currByteIndex)
     {
         if (currByteIndex < m_BytesPerPixel)

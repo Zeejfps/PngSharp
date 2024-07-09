@@ -12,4 +12,9 @@ internal sealed class NoneTypeFilter : FilterBase
     {
         return currentRowBuffer[currentIndex];
     }
+
+    protected override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currentByteIndex)
+    {
+        return currentRow[currentByteIndex];
+    }
 }
