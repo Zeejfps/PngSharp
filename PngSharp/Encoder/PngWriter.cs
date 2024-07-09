@@ -127,7 +127,8 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     {
         var bytes = BitConverter.GetBytes(value).AsSpan();
         // TODO: verify endines
-        bytes.Reverse();
+        if (BitConverter.IsLittleEndian)
+            bytes.Reverse();
         WriteBytes(bytes);
     }
 

@@ -58,9 +58,10 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         Console.WriteLine($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);
         using var compressedDataStream = new MemoryStream();
-        using var compressionStream = new ZLibStream(compressedDataStream, CompressionMode.Compress);
+        using var compressionStream = new ZLibStream(compressedDataStream, CompressionLevel.Optimal);
         EncodePixels(compressionStream, pixelDataStream);
         compressionStream.Flush();
+        compressedDataStream.Flush();
         Console.WriteLine($"Compressed Size: {compressedDataStream.Length} bytes");
         writer.WriteIDATChunk(compressedDataStream.ToArray());
         
