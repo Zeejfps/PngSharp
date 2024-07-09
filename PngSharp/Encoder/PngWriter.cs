@@ -2,7 +2,7 @@
 
 namespace PngSharp.Encoder;
 
-internal sealed class PngWriter
+internal sealed class PngWriter : IDisposable, IAsyncDisposable
 {
     private readonly Stream m_Stream;
     private readonly PngCrcBuilder m_CrcBuilder;
@@ -34,8 +34,7 @@ internal sealed class PngWriter
         WriteByte((byte)PngSpec.CompressionMethod.DeflateWithSlidingWindow);
         WriteByte((byte)PngSpec.InterlaceMethod.None);
         
-        var crc = m_CrcBuilder.End();
-        WriteUInt32(crc);
+        WriteCrc32();
     }
 
     public void WriteIDATChunk(ReadOnlySpan<byte> data)
@@ -47,11 +46,8 @@ internal sealed class PngWriter
             Name = PngSpec.HeaderNames.IDAT,
             ChunkSizeInBytes = sizeInBytes
         });
-        m_Stream.Write(data);
-        m_CrcBuilder.Update(data);
-        
-        var crc = m_CrcBuilder.End();
-        WriteUInt32(crc);
+        WriteBytes(data);
+        WriteCrc32();
     }
 
     public void WriteIENDChunk()
@@ -62,28 +58,26 @@ internal sealed class PngWriter
             Name = PngSpec.HeaderNames.IEND,
             ChunkSizeInBytes = 0
         });
-        var crc = m_CrcBuilder.End();
-        WriteUInt32(crc);
+        WriteCrc32();
         m_Stream.Flush();
     }
 
+    private void WriteCrc32()
+    {
+        var crc = m_CrcBuilder.End();
+        WriteUInt32(crc);
+    }
+    
     private void WriteChunkHeader(PngSpec.ChunkHeader header)
     {
         WriteUInt32((uint)header.ChunkSizeInBytes);
         WriteHeaderName(header.Name);
     }
 
-    private void WriteByte(byte b)
-    {
-        m_Stream.WriteByte(b);
-        m_CrcBuilder.Update(b);
-    }
-
     private void WriteHeaderName(string name)
     {
         var valueBytes = Encoding.ASCII.GetBytes(name).AsSpan();
-        m_Stream.Write(valueBytes);
-        m_CrcBuilder.Update(valueBytes);
+        WriteBytes(valueBytes);
     }
 
     private void WriteUInt32(uint value)
@@ -91,7 +85,28 @@ internal sealed class PngWriter
         var bytes = BitConverter.GetBytes(value).AsSpan();
         // TODO: verify endines
         bytes.Reverse();
-        m_Stream.Write(bytes);
-        m_CrcBuilder.Update(bytes);
+        WriteBytes(bytes);
+    }
+    
+    private void WriteByte(byte b)
+    {
+        m_Stream.WriteByte(b);
+        m_CrcBuilder.Update(b);
+    }
+    
+    private void WriteBytes(ReadOnlySpan<byte> data)
+    {
+        m_Stream.Write(data);
+        m_CrcBuilder.Update(data);
+    }
+
+    public void Dispose()
+    {
+        m_Stream.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await m_Stream.DisposeAsync();
     }
 }

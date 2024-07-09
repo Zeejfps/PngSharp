@@ -1,0 +1,42 @@
+﻿namespace PngSharp.Encoder.AdaptiveFilter.Types;
+
+public abstract class FilterBase : ITypeFilter
+{
+    private readonly int m_BytesPerPixel;
+    
+    protected FilterBase(int bytesPerPixel)
+    {
+        m_BytesPerPixel = bytesPerPixel;
+    }
+
+    public abstract PngSpec.AdaptiveFilterTypeKind Kind { get; }
+
+    public void Apply(Span<byte> filteredRowBuffer, ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer)
+    {
+        var length = currentRowBuffer.Length;
+        filteredRowBuffer[0] = (byte)Kind; 
+        for (var i = 0; i < length; i++)
+            filteredRowBuffer[i + 1] = ComputeValue(currentRowBuffer, previousRowBuffer, i);
+    }
+
+    protected abstract byte ComputeValue(ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer, int currentIndex);
+    
+    protected byte GetLeftValue(ReadOnlySpan<byte> currentRowBuffer, int currByteIndex)
+    {
+        if (currByteIndex < m_BytesPerPixel)
+            return 0;
+        return currentRowBuffer[currByteIndex - m_BytesPerPixel];
+    }
+    
+    protected byte GetAboveValue(ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
+    {
+        return previousRowBuffer[currentIndex];
+    }
+    
+    protected byte GetAboveLeftByteValue(ReadOnlySpan<byte> prevRow, int currByteIndex)
+    {
+        if (currByteIndex < m_BytesPerPixel)
+            return 0;
+        return prevRow[currByteIndex - m_BytesPerPixel];
+    }
+}

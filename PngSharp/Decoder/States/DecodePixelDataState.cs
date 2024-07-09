@@ -15,8 +15,8 @@ internal sealed class DecodePixelDataState : IDecoderState
     {
         var decoder = m_Decoder;
         var compressedPixelData = decoder.CompressedPixelDataStream;
-        compressedPixelData.Seek(2, SeekOrigin.Begin);
-        using var deflateStream = new DeflateStream(compressedPixelData, CompressionMode.Decompress);
+        compressedPixelData.Seek(0, SeekOrigin.Begin);
+        using var deflateStream = new ZLibStream(compressedPixelData, CompressionMode.Decompress);
         var scanLineDecoder = new PngScanLineDecoder(decoder.IhdrChunkData, deflateStream);
         for (var i = 0; i < decoder.IhdrChunkData.Height; i++)
             scanLineDecoder.DecodeScanlineTo(decoder.PixelDataStream);

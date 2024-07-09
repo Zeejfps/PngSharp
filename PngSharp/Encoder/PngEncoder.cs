@@ -1,18 +1,19 @@
 ﻿using System.IO.Compression;
+using PngSharp.Encoder.AdaptiveFilter;
 
 namespace PngSharp.Encoder;
 
-internal sealed class PngEncoder
+internal sealed class PngEncoder : IDisposable, IAsyncDisposable
 {
     private readonly IDecodedPng m_Png;
     private readonly PngWriter m_PngWriter;
-    private readonly byte[] m_Buffer;
+    private readonly PngAdaptiveFilter m_AdaptiveFilter;
 
     public PngEncoder(IDecodedPng png, Stream stream)
     {
         m_Png = png;
         m_PngWriter = new PngWriter(stream);
-        m_Buffer = new byte[png.Width * png.BytesPerPixel];
+        m_AdaptiveFilter = new PngAdaptiveFilter(m_Png.Width, m_Png.Height, m_Png.BytesPerPixel);
     }
     
     public void Encode()
@@ -31,13 +32,13 @@ internal sealed class PngEncoder
             InterlaceMethod = PngSpec.InterlaceMethod.None, // TODO: Make dynamic?
             BitDepth = 8, // TODO: Make dynamic
         });
-        Console.WriteLine($"Pixels: {png.PixelData.Length}");
+        Console.WriteLine($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);
         using var compressedDataStream = new MemoryStream();
-        using var compressionStream = new DeflateStream(compressedDataStream, CompressionMode.Compress);
+        using var compressionStream = new ZLibStream(compressedDataStream, CompressionMode.Compress);
         EncodePixels(compressionStream, pixelDataStream);
         compressionStream.Flush();
-        Console.WriteLine($"Compressed: {compressedDataStream.Length}");
+        Console.WriteLine($"Compressed Size: {compressedDataStream.Length} bytes");
         writer.WriteIDATChunk(compressedDataStream.ToArray());
         
         writer.WriteIENDChunk();
@@ -45,13 +46,7 @@ internal sealed class PngEncoder
     
     private void EncodePixels(Stream outputStream, Stream inputStream)
     {
-        int bytesRead;
-        while ((bytesRead = inputStream.Read(m_Buffer, 0, m_Buffer.Length)) > 0)
-        {
-            outputStream.WriteByte((byte)PngSpec.AdaptiveFilteringType.None);
-            outputStream.Write(m_Buffer, 0, bytesRead);
-        }
-        
+        m_AdaptiveFilter.Apply(outputStream, inputStream);
     }
 
     private PngSpec.ColorType PixelFormatToColorType(PixelFormat pixelFormat)
@@ -64,5 +59,15 @@ internal sealed class PngEncoder
             PixelFormat.GrayscaleWithAlpha => PngSpec.ColorType.GrayscaleWithAlpha,
             _ => throw new ArgumentOutOfRangeException(nameof(pixelFormat), pixelFormat, null)
         };
+    }
+
+    public void Dispose()
+    {
+        m_PngWriter.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await m_PngWriter.DisposeAsync();
     }
 }

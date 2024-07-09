@@ -115,7 +115,7 @@ public static class PngSpec
         AdaptiveFiltering = 0
     }
 
-    public enum AdaptiveFilteringType : byte
+    public enum AdaptiveFilterTypeKind : byte
     {
         None,
         Sub,

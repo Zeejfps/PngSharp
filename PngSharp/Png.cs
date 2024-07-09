@@ -88,7 +88,7 @@ public static class Png
 
     public static void EncodeToStream(IDecodedPng decodedPng, Stream stream)
     {
-        var encoder = new PngEncoder(decodedPng, stream);
+        using var encoder = new PngEncoder(decodedPng, stream);
         encoder.Encode();
     }
 }
