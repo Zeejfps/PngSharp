@@ -3,5 +3,5 @@
 internal interface ITypeFilter
 {
     PngSpec.AdaptiveFilterTypeKind Kind { get; }
-    void Apply(Span<byte> filteredRowBuffer, Span<byte> currentRowBuffer, Span<byte> previousRowBuffer);
+    void Apply(Span<byte> filteredRowBuffer, ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer);
 }

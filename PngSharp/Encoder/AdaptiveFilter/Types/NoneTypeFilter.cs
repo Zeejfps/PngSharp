@@ -8,7 +8,7 @@ internal sealed class NoneTypeFilter : FilterBase
 
     public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.None;
 
-    protected override byte ComputeValue(Span<byte> currentRowBuffer, Span<byte> previousRowBuffer, int currentIndex)
+    protected override byte ComputeValue(ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
     {
         return currentRowBuffer[currentIndex];
     }

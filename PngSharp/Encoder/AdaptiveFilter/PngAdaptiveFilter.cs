@@ -4,28 +4,18 @@ namespace PngSharp.Encoder.AdaptiveFilter;
 
 internal sealed class PngAdaptiveFilter
 {
+    private readonly int m_Width;
     private readonly int m_Height;
-    private readonly byte[] m_Buffer;
-
-    private readonly Memory<byte> m_CurrentRow;
-    private readonly Memory<byte> m_PrevRow;
-    private readonly Memory<byte> m_OutputRow;
-    
+    private readonly int m_BytesPerPixel;
     private readonly ITypeFilter[] m_FirstRowFilterTypes;
     private readonly ITypeFilter[] m_AllFilterTypes;
     
     public PngAdaptiveFilter(int width, int height, int bytesPerPixel)
     {
+        m_Width = width;
         m_Height = height;
+        m_BytesPerPixel = bytesPerPixel;
         
-        var strideUnfiltered = width * bytesPerPixel;
-        var strideFiltered = strideUnfiltered + 1;
-        m_Buffer = new byte[strideUnfiltered + strideUnfiltered + strideFiltered];
-
-        m_CurrentRow = new Memory<byte>(m_Buffer, 0, strideUnfiltered);
-        m_PrevRow = new Memory<byte>(m_Buffer, strideUnfiltered, strideUnfiltered);
-        m_OutputRow = new Memory<byte>(m_Buffer, strideUnfiltered + strideUnfiltered, strideFiltered);
-
         m_FirstRowFilterTypes = new ITypeFilter[]
         {
             new NoneTypeFilter(bytesPerPixel),
@@ -42,16 +32,32 @@ internal sealed class PngAdaptiveFilter
         };
     }
 
+    public void Reverse(Stream outputStream, Stream inputStream)
+    {
+        // var height = m_Height;
+        // var currRow = m_CurrentRow.Span;
+        // var prevRow = m_PrevRow.Span;
+        // var outputRow = m_OutputRow.Span;
+    }
+
     public void Apply(Stream outputStream, Stream inputStream)
     {
+        var width = m_Width;
         var height = m_Height;
-        var currRow = m_CurrentRow.Span;
-        var prevRow = m_PrevRow.Span;
-        var outputRow = m_OutputRow.Span;
+        var bytesPerPixel = m_BytesPerPixel;
+        var firstRowFilters = m_FirstRowFilterTypes;
+        var allFilters = m_AllFilterTypes;
+        
+        var strideUnfiltered = width * bytesPerPixel;
+        var strideFiltered = strideUnfiltered + 1;
+        var buffer = new byte[strideUnfiltered + strideUnfiltered + strideFiltered];
+        var currRow = new Span<byte>(buffer, 0, strideUnfiltered);
+        var prevRow = new Span<byte>(buffer, strideUnfiltered, strideUnfiltered);
+        var outputRow = new Span<byte>(buffer, strideUnfiltered + strideUnfiltered, strideFiltered);
 
         // TODO: Handle first row more gracefully?
         inputStream.ReadExactly(currRow);
-        var filter = ChooseFilter(m_FirstRowFilterTypes);
+        var filter = ChooseFilter(outputRow, currRow, prevRow, firstRowFilters);
         filter.Apply(outputRow, currRow, prevRow);
         outputStream.Write(outputRow);
 
@@ -62,7 +68,7 @@ internal sealed class PngAdaptiveFilter
         for (var i = 1; i < height; i++)
         {
             inputStream.ReadExactly(currRow);
-            filter =  ChooseFilter(m_AllFilterTypes);
+            filter =  ChooseFilter(outputRow, currRow, prevRow, allFilters);
             filter.Apply(outputRow, currRow, prevRow);
             outputStream.Write(outputRow);
 
@@ -72,11 +78,12 @@ internal sealed class PngAdaptiveFilter
         }
     }
 
-    private ITypeFilter ChooseFilter(IEnumerable<ITypeFilter> filters)
+    private ITypeFilter ChooseFilter(
+        Span<byte> outputRow, 
+        ReadOnlySpan<byte> currentRow, 
+        ReadOnlySpan<byte> prevRow, 
+        IEnumerable<ITypeFilter> filters)
     {
-        var currentRow = m_CurrentRow.Span;
-        var prevRow = m_PrevRow.Span;
-        var outputRow = m_OutputRow.Span;
         var score = double.MaxValue;
         
         ITypeFilter bestFilter = null;

@@ -7,7 +7,7 @@ public class AverageTypeFilter : FilterBase
     }
 
     public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.Average;
-    protected override byte ComputeValue(Span<byte> currentRowBuffer, Span<byte> previousRowBuffer, int currentIndex)
+    protected override byte ComputeValue(ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
     {
         var left = GetLeftValue(currentRowBuffer, currentIndex);
         var above = GetAboveValue(previousRowBuffer, currentIndex);

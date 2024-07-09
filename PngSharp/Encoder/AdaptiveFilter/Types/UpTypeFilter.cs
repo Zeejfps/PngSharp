@@ -8,7 +8,7 @@ internal sealed class UpTypeFilter : FilterBase
 
     public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.Up;
 
-    protected override byte ComputeValue(Span<byte> currentRowBuffer, Span<byte> previousRowBuffer, int currentIndex)
+    protected override byte ComputeValue(ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
     {
         var above = GetAboveValue(previousRowBuffer, currentIndex);
         var x = currentRowBuffer[currentIndex];

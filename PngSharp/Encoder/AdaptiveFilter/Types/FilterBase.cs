@@ -11,7 +11,7 @@ public abstract class FilterBase : ITypeFilter
 
     public abstract PngSpec.AdaptiveFilterTypeKind Kind { get; }
 
-    public void Apply(Span<byte> filteredRowBuffer, Span<byte> currentRowBuffer, Span<byte> previousRowBuffer)
+    public void Apply(Span<byte> filteredRowBuffer, ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer)
     {
         var length = currentRowBuffer.Length;
         filteredRowBuffer[0] = (byte)Kind; 
@@ -19,16 +19,16 @@ public abstract class FilterBase : ITypeFilter
             filteredRowBuffer[i + 1] = ComputeValue(currentRowBuffer, previousRowBuffer, i);
     }
 
-    protected abstract byte ComputeValue(Span<byte> currentRowBuffer, Span<byte> previousRowBuffer, int currentIndex);
+    protected abstract byte ComputeValue(ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer, int currentIndex);
     
-    protected byte GetLeftValue(Span<byte> currentRowBuffer, int currByteIndex)
+    protected byte GetLeftValue(ReadOnlySpan<byte> currentRowBuffer, int currByteIndex)
     {
         if (currByteIndex < m_BytesPerPixel)
             return 0;
         return currentRowBuffer[currByteIndex - m_BytesPerPixel];
     }
     
-    protected byte GetAboveValue(Span<byte> previousRowBuffer, int currentIndex)
+    protected byte GetAboveValue(ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
     {
         return previousRowBuffer[currentIndex];
     }
