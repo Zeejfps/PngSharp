@@ -1,8 +1,8 @@
 ﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
 
-internal sealed class AdaptiveFilterTypeSub : AdaptiveFilterTypeBase
+internal sealed class SubTypeFilter : FilterBase
 {
-    public AdaptiveFilterTypeSub(int bytesPerPixel) : base(bytesPerPixel) { }
+    public SubTypeFilter(int bytesPerPixel) : base(bytesPerPixel) { }
 
     public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.Sub;
 

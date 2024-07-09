@@ -1,10 +1,10 @@
 ﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
 
-public abstract class AdaptiveFilterTypeBase : IAdaptiveFilterType
+public abstract class FilterBase : ITypeFilter
 {
     private readonly int m_BytesPerPixel;
     
-    protected AdaptiveFilterTypeBase(int bytesPerPixel)
+    protected FilterBase(int bytesPerPixel)
     {
         m_BytesPerPixel = bytesPerPixel;
     }
@@ -33,7 +33,7 @@ public abstract class AdaptiveFilterTypeBase : IAdaptiveFilterType
         return previousRowBuffer[currentIndex];
     }
     
-    private byte GetUpLeftByteValue(ReadOnlySpan<byte> prevRow, int currByteIndex)
+    protected byte GetAboveLeftByteValue(ReadOnlySpan<byte> prevRow, int currByteIndex)
     {
         if (currByteIndex < m_BytesPerPixel)
             return 0;

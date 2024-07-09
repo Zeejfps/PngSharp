@@ -1,8 +1,8 @@
 ﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
 
-internal sealed class AdaptiveFilterTypeUp : AdaptiveFilterTypeBase
+internal sealed class UpTypeFilter : FilterBase
 {
-    public AdaptiveFilterTypeUp(int bytesPerPixel) : base(bytesPerPixel)
+    public UpTypeFilter(int bytesPerPixel) : base(bytesPerPixel)
     {
     }
 
