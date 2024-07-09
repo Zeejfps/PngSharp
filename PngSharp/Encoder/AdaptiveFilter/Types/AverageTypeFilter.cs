@@ -1,4 +1,4 @@
-﻿namespace PngSharp.Encoder.AdaptiveFilterTypes;
+﻿namespace PngSharp.Encoder.AdaptiveFilter.Types;
 
 public class AverageTypeFilter : FilterBase
 {
