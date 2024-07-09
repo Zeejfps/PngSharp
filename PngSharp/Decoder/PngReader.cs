@@ -11,13 +11,17 @@ public sealed class PngReader
 {
     private readonly Stream m_Stream;
     private readonly byte[] m_Buffer;
+    private readonly PngCrc32 m_Crc32;
 
     public PngReader(Stream stream)
     {
         m_Stream = stream;
         m_Buffer = new byte[512];
+        m_Crc32 = new PngCrc32();
     }
-    
+
+    public uint CurrentCrcValue => m_Crc32.Value;
+
     public ReadOnlySpan<byte> ReadSignature()
     {
         return ReadBytesLittleEndian(8);
@@ -48,12 +52,15 @@ public sealed class PngReader
     private byte ReadByte()
     {
         // NOTE(Zee): Potential bug -1 is returned?
-        return (byte)m_Stream.ReadByte();
+        var b = (byte)m_Stream.ReadByte();
+        m_Crc32.Update(b);
+        return b;
     }
 
     public void ReadChunkHeader(out ChunkHeader header)
     {
         var chunkSize = ReadUInt32();
+        m_Crc32.Reset();
         var chunkName = ReadAsciiString(4);
         header = new ChunkHeader
         {
@@ -93,7 +100,9 @@ public sealed class PngReader
         var bytesRead = m_Stream.Read(m_Buffer, 0, byteCount);
         if (bytesRead != byteCount)
             throw new Exception($"Failed to read png. Read {bytesRead} bytes, expected {byteCount}");
-        return m_Buffer.AsSpan(0, byteCount);
+        var buffer = m_Buffer.AsSpan(0, byteCount);
+        m_Crc32.Update(buffer);
+        return buffer;
     }
     
     private ReadOnlySpan<byte> ReadBytesBigEndian(int byteCount)
@@ -102,6 +111,7 @@ public sealed class PngReader
         if (bytesRead != byteCount)
             throw new Exception($"Failed to read png. Read {bytesRead} bytes, expected {byteCount}");
         var buffer = m_Buffer.AsSpan(0, byteCount);
+        m_Crc32.Update(buffer);
         buffer.Reverse();
         return buffer;
     }
@@ -130,13 +140,13 @@ public sealed class PngReader
 
     public PhysChunkData ReadPhysChunkData()
     {
-        var xAxisPPU = ReadUInt32();
-        var yAxisPPu = ReadUInt32();
+        var xAxisPpu = ReadUInt32();
+        var yAxisPpu = ReadUInt32();
         var unitSpecifier = ReadByte();
         return new PhysChunkData
         {
-            XAxisPPU = xAxisPPU,
-            YAxisPPU = yAxisPPu,
+            XAxisPPU = xAxisPpu,
+            YAxisPPU = yAxisPpu,
             UnitSpecifier = (UnitSpecifier)unitSpecifier
         };
     }

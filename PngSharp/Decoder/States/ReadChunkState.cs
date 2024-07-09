@@ -39,7 +39,9 @@ internal sealed class ReadChunkState : IDecoderState
         {
             var srgbData = reader.ReadSrgbChunkData();
             decoder.DecodedPng.Srgb = AncillaryChunk<SrgbChunkData>.Of(srgbData);
-            reader.ReadCrc();
+            var crc = reader.CurrentCrcValue;
+            var newCrc = reader.ReadCrc();
+            Console.WriteLine($"Our CRC: {crc}, Read CRC: {newCrc}");
             return;
         }
 
@@ -47,7 +49,9 @@ internal sealed class ReadChunkState : IDecoderState
         {
             var gamaData = reader.ReadGamaChunkData();
             decoder.DecodedPng.Gama = AncillaryChunk<GammaChunkData>.Of(gamaData);
-            reader.ReadCrc();
+            var crc = reader.CurrentCrcValue;
+            var newCrc = reader.ReadCrc();
+            Console.WriteLine($"Our CRC: {crc}, Read CRC: {newCrc}");
             return;
         }
         
@@ -55,7 +59,9 @@ internal sealed class ReadChunkState : IDecoderState
         {
             var physChunkData = reader.ReadPhysChunkData();
             decoder.DecodedPng.Phys = AncillaryChunk<PhysChunkData>.Of(physChunkData);
-            reader.ReadCrc();
+            var crc = reader.CurrentCrcValue;
+            var newCrc = reader.ReadCrc();
+            Console.WriteLine($"Our CRC: {crc}, Read CRC: {newCrc}");
             return;
         }
 
