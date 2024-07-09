@@ -16,6 +16,8 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public Stream CompressedPixelDataStream { get; }
     public Stream PixelDataStream { get; }
 
+    public AncillaryChunk<PngSpec.SrgbChunkData> Srgb { get; set; }
+    
     public bool IsDone => State == DoneState;
     
     public IDecoderState DoneState { get; }

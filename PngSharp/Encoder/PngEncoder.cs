@@ -34,6 +34,12 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             InterlaceMethod = PngSpec.InterlaceMethod.None, // TODO: Make dynamic?
             BitDepth = 8, // TODO: Make dynamic
         });
+
+        if (png.Srgb.TryGetData(out var srgbChunkData))
+        {
+            writer.WriteSRGBChunk(srgbChunkData);
+        }
+        
         Console.WriteLine($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);
         using var compressedDataStream = new MemoryStream();
@@ -49,18 +55,6 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
     private void EncodePixels(Stream outputStream, Stream inputStream)
     {
         m_AdaptiveFilter.Apply(outputStream, inputStream);
-    }
-
-    private PngSpec.ColorType PixelFormatToColorType(PixelFormat pixelFormat)
-    {
-        return pixelFormat switch
-        {
-            PixelFormat.RGBA => PngSpec.ColorType.TrueColorWithAlpha,
-            PixelFormat.RGB => PngSpec.ColorType.TrueColor,
-            PixelFormat.Grayscale => PngSpec.ColorType.Grayscale,
-            PixelFormat.GrayscaleWithAlpha => PngSpec.ColorType.GrayscaleWithAlpha,
-            _ => throw new ArgumentOutOfRangeException(nameof(pixelFormat), pixelFormat, null)
-        };
     }
 
     public void Dispose()

@@ -1,4 +1,5 @@
-﻿using PngSharp.Common;
+﻿using PngSharp.Api;
+using PngSharp.Common;
 
 namespace PngSharp.Decoder.States;
 
@@ -33,7 +34,8 @@ internal sealed class ReadChunkState : IDecoderState
 
         if (PngSpec.IsSRGBChunkHeader(header))
         {
-            reader.ReadSrgbChunkData();
+            var srgbData = reader.ReadSrgbChunkData();
+            decoder.Srgb = AncillaryChunk<PngSpec.SrgbChunkData>.Of(srgbData);
             reader.ReadCrc();
             return;
         }

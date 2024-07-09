@@ -143,8 +143,6 @@ internal sealed class PngAdaptiveFilter
                 bestFilter = filter;
             }
         }
-        
-        Console.WriteLine($"Best filter score: {score}, Filter: {bestFilter.Kind}");
         return bestFilter;
     }
 

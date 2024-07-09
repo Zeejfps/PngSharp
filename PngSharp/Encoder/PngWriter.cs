@@ -21,7 +21,6 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     
     public void WriteIHDRChunk(PngSpec.IhdrChunkData data)
     {
-        m_CrcBuilder.Begin();
         WriteChunkHeader(new PngSpec.ChunkHeader
         {
             Name = PngSpec.HeaderNames.IHDR,
@@ -40,7 +39,6 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
 
     public void WriteIDATChunk(ReadOnlySpan<byte> data)
     {
-        m_CrcBuilder.Begin();
         var sizeInBytes = data.Length;
         WriteChunkHeader(new PngSpec.ChunkHeader
         {
@@ -51,9 +49,19 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteCrc32();
     }
 
+    public void WriteSRGBChunk(PngSpec.SrgbChunkData srgbChunkData)
+    {
+        WriteChunkHeader(new PngSpec.ChunkHeader
+        {
+            Name = PngSpec.HeaderNames.SRGB,
+            ChunkSizeInBytes = 1
+        });
+        WriteByte((byte)srgbChunkData.RenderingIntent);
+        WriteCrc32();
+    }
+
     public void WriteIENDChunk()
     {
-        m_CrcBuilder.Begin();
         WriteChunkHeader(new PngSpec.ChunkHeader
         {
             Name = PngSpec.HeaderNames.IEND,
@@ -68,10 +76,11 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         var crc = m_CrcBuilder.End();
         WriteUInt32(crc);
     }
-    
+
     private void WriteChunkHeader(PngSpec.ChunkHeader header)
     {
-        WriteUInt32((uint)header.ChunkSizeInBytes);
+        WriteHeaderSize((uint)header.ChunkSizeInBytes);
+        m_CrcBuilder.Begin();
         WriteHeaderName(header.Name);
     }
 
@@ -81,6 +90,11 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteBytes(valueBytes);
     }
 
+    private void WriteHeaderSize(uint size)
+    {
+        WriteUInt32(size);
+    }
+    
     private void WriteUInt32(uint value)
     {
         var bytes = BitConverter.GetBytes(value).AsSpan();
@@ -88,13 +102,13 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         bytes.Reverse();
         WriteBytes(bytes);
     }
-    
+
     private void WriteByte(byte b)
     {
         m_Stream.WriteByte(b);
         m_CrcBuilder.Update(b);
     }
-    
+
     private void WriteBytes(ReadOnlySpan<byte> data)
     {
         m_Stream.Write(data);
