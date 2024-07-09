@@ -1,6 +1,4 @@
-﻿using PngSharp.Spec;
-
-namespace PngSharp.Common.AdaptiveFilter;
+﻿namespace PngSharp.Spec.AdaptiveFilter;
 
 internal interface ITypeFilter
 {

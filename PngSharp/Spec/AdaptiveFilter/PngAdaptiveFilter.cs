@@ -1,7 +1,6 @@
-﻿using PngSharp.Common.AdaptiveFilter.Types;
-using PngSharp.Spec;
+﻿using PngSharp.Spec.AdaptiveFilter.Types;
 
-namespace PngSharp.Common.AdaptiveFilter;
+namespace PngSharp.Spec.AdaptiveFilter;
 
 internal sealed class PngAdaptiveFilter
 {

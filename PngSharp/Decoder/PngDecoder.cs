@@ -1,7 +1,7 @@
 ﻿using PngSharp.Api;
-using PngSharp.Common;
 using PngSharp.Decoder.States;
 using PngSharp.Spec;
+using PngSharp.Spec.Chunks.IHDR;
 
 namespace PngSharp.Decoder;
 

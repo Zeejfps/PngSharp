@@ -1,5 +1,5 @@
-﻿using PngSharp.Common;
-using PngSharp.Spec;
+﻿using PngSharp.Spec;
+using PngSharp.Spec.Chunks.sRGB;
 
 namespace PngSharp.Api;
 

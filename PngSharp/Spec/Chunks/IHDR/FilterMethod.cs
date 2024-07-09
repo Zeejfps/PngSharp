@@ -1,4 +1,4 @@
-﻿namespace PngSharp.Spec;
+﻿namespace PngSharp.Spec.Chunks.IHDR;
 
 public enum FilterMethod : byte
 {

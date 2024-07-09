@@ -1,6 +1,9 @@
 ﻿using System.Text;
-using PngSharp.Common;
 using PngSharp.Spec;
+using PngSharp.Spec.Chunks.IHDR;
+using PngSharp.Spec.Chunks.pHYS;
+using PngSharp.Spec.Chunks.sGAMA;
+using PngSharp.Spec.Chunks.sRGB;
 
 namespace PngSharp;
 
@@ -134,7 +137,7 @@ public sealed class PngReader
         {
             XAxisPPU = xAxisPPU,
             YAxisPPU = yAxisPPu,
-            UnitSpecifier = (PhysChunkUnitSpecifier)unitSpecifier
+            UnitSpecifier = (UnitSpecifier)unitSpecifier
         };
     }
 

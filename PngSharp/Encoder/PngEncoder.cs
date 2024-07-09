@@ -1,8 +1,8 @@
 ﻿using System.IO.Compression;
 using PngSharp.Api;
-using PngSharp.Common;
-using PngSharp.Common.AdaptiveFilter;
 using PngSharp.Spec;
+using PngSharp.Spec.AdaptiveFilter;
+using PngSharp.Spec.Chunks.IHDR;
 
 namespace PngSharp.Encoder;
 

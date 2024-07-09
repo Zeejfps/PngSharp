@@ -1,4 +1,4 @@
-﻿namespace PngSharp.Common;
+﻿namespace PngSharp.Spec;
 
 /// <summary>
 /// 32-bit Cyclic Redundancy Code used by the PNG for checking the data is intact.

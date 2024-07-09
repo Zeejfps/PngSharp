@@ -1,4 +1,4 @@
-﻿namespace PngSharp.Spec;
+﻿namespace PngSharp.Spec.Chunks.sRGB;
 
 public enum RenderingIntent : byte
 {

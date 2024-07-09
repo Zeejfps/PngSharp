@@ -1,6 +1,4 @@
-﻿using PngSharp.Spec;
-
-namespace PngSharp.Common.AdaptiveFilter.Types;
+﻿namespace PngSharp.Spec.AdaptiveFilter.Types;
 
 internal sealed class SubTypeFilter : FilterBase
 {
