@@ -36,9 +36,11 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         });
 
         if (png.Srgb.TryGetData(out var srgbChunkData))
-        {
             writer.WriteSRGBChunk(srgbChunkData);
-        }
+
+        if (png.Gama.TryGetData(out var gammaChunkData))
+            writer.WriteGAMAChunk(gammaChunkData);
+        
         
         Console.WriteLine($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);

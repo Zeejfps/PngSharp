@@ -12,4 +12,5 @@ internal sealed class DecodedPng : IDecodedPng
     public int BytesPerPixel { get; init; }
     
     public AncillaryChunk<PngSpec.SrgbChunkData> Srgb { get; }
+    public AncillaryChunk<PngSpec.GammaChunkData> Gama { get; }
 }

@@ -32,4 +32,5 @@ public interface IDecodedPng
     
 
     AncillaryChunk<PngSpec.SrgbChunkData> Srgb { get; }
+    AncillaryChunk<PngSpec.GammaChunkData> Gama { get; }
 }

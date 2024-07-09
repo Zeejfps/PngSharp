@@ -60,6 +60,17 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteCrc32();
     }
 
+    public void WriteGAMAChunk(PngSpec.GammaChunkData gammaChunkData)
+    {
+        WriteChunkHeader(new PngSpec.ChunkHeader
+        {
+            Name = PngSpec.HeaderNames.GAMA,
+            ChunkSizeInBytes = 1
+        });
+        WriteUInt32(gammaChunkData.Value);
+        WriteCrc32();
+    }
+
     public void WriteIENDChunk()
     {
         WriteChunkHeader(new PngSpec.ChunkHeader

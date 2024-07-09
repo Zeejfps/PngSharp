@@ -62,9 +62,7 @@ internal sealed class PngAdaptiveFilter
         {
             inputStream.ReadExactly(currRow);
             filterKind = (PngSpec.AdaptiveFilterTypeKind)currRow[0];
-            Console.WriteLine($"Filter Kind: {filterKind}");
             filter = GetFilterByKind(filterKind);
-            Console.WriteLine($"Reversing: {filter.Kind}");
             filter.Reverse(outputRow, currRow[1..], prevRow);
             outputStream.Write(outputRow);
             t = prevRow;
