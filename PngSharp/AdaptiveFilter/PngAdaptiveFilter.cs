@@ -1,6 +1,6 @@
-﻿using PngSharp.Encoder.AdaptiveFilter.Types;
+﻿using PngSharp.AdaptiveFilter.Types;
 
-namespace PngSharp.Encoder.AdaptiveFilter;
+namespace PngSharp.AdaptiveFilter;
 
 internal sealed class PngAdaptiveFilter
 {
@@ -53,10 +53,24 @@ internal sealed class PngAdaptiveFilter
         var filter = GetFilterByKind(filterKind);
         filter.Reverse(outputRow, currRow[1..], prevRow);
         outputStream.Write(outputRow);
+        
         var t = prevRow;
         prevRow = outputRow;
         outputRow = t;
 
+        for (var i = 1; i < height; i++)
+        {
+            inputStream.ReadExactly(currRow);
+            filterKind = (PngSpec.AdaptiveFilterTypeKind)currRow[0];
+            Console.WriteLine($"Filter Kind: {filterKind}");
+            filter = GetFilterByKind(filterKind);
+            Console.WriteLine($"Reversing: {filter.Kind}");
+            filter.Reverse(outputRow, currRow[1..], prevRow);
+            outputStream.Write(outputRow);
+            t = prevRow;
+            prevRow = outputRow;
+            outputRow = t;
+        }
     }
 
     private ITypeFilter GetFilterByKind(PngSpec.AdaptiveFilterTypeKind kind)

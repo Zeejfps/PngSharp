@@ -1,4 +1,4 @@
-﻿namespace PngSharp.Encoder.AdaptiveFilter.Types;
+﻿namespace PngSharp.AdaptiveFilter.Types;
 
 internal sealed class UpTypeFilter : FilterBase
 {
@@ -8,18 +8,18 @@ internal sealed class UpTypeFilter : FilterBase
 
     public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.Up;
 
-    protected override byte ComputeValue(ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
+    protected override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
     {
-        var above = GetAboveValue(previousRowBuffer, currentIndex);
-        var x = currentRowBuffer[currentIndex];
+        var above = GetAboveValue(prevRow, currByteIndex);
+        var x = currentRow[currByteIndex];
         return (byte)(x - above);
     }
 
     protected override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
     {
+        var above = GetAboveValue(prevRow, currByteIndex);
         var x = currentRow[currByteIndex];
-        var upValue = GetAboveValue(prevRow, currByteIndex);
-        return (byte)(x + upValue);
+        return (byte)(x + above);
     }
     
 }

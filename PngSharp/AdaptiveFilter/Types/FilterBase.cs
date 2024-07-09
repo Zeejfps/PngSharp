@@ -1,4 +1,4 @@
-﻿namespace PngSharp.Encoder.AdaptiveFilter.Types;
+﻿namespace PngSharp.AdaptiveFilter.Types;
 
 public abstract class FilterBase : ITypeFilter
 {
@@ -19,15 +19,18 @@ public abstract class FilterBase : ITypeFilter
             filteredRowBuffer[i + 1] = ComputeValue(currentRowBuffer, previousRowBuffer, i);
     }
 
-    public void Reverse(Span<byte> outputRow, ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow)
+    public void Reverse(Span<byte> outputRow, Span<byte> currentRow, ReadOnlySpan<byte> prevRow)
     {
         var length = outputRow.Length;
         for (var i = 0; i < length; i++)
-            outputRow[i] = ReverseValue(currentRow, prevRow, i);
-
+        {
+            var value = ReverseValue(currentRow, prevRow, i);
+            outputRow[i] = value;
+            currentRow[i] = value;
+        }
     }
 
-    protected abstract byte ComputeValue(ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer, int currByteIndex);
+    protected abstract byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currByteIndex);
     protected abstract byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex);
 
 
