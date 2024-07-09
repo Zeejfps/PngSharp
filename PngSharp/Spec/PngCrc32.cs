@@ -3,12 +3,12 @@
 /// <summary>
 /// 32-bit Cyclic Redundancy Code used by the PNG for checking the data is intact.
 /// </summary>
-public sealed class PngCrcBuilder
+public sealed class PngCrc32
 {
     private const uint Polynomial = 0xEDB88320;
     private static readonly uint[] s_Lookup;
 
-    static PngCrcBuilder()
+    static PngCrc32()
     {
         s_Lookup = new uint[256];
         for (uint i = 0; i < 256; i++)
@@ -26,35 +26,31 @@ public sealed class PngCrcBuilder
         }
     }
 
-    private uint m_Crc32;
+    public uint Value => m_Value ^ uint.MaxValue; 
+    
+    private uint m_Value;
 
-    public void Begin()
+    public void Reset()
     {
-        m_Crc32 = uint.MaxValue;
+        m_Value = uint.MaxValue;
     }
 
     public void Update(byte b)
     {
-        var crc32 = m_Crc32;
+        var crc32 = m_Value;
         var index = (crc32 ^ b) & 0xFF;
         crc32 = (crc32 >> 8) ^ s_Lookup[index];
-        m_Crc32 = crc32;
+        m_Value = crc32;
     }
     
     public void Update(ReadOnlySpan<byte> data)
     {
-        var crc32 = m_Crc32;
+        var crc32 = m_Value;
         foreach (var b in data)
         {
             var index = (crc32 ^ b) & 0xFF;
             crc32 = (crc32 >> 8) ^ s_Lookup[index];
         }
-        m_Crc32 = crc32;
-    }
-
-    public uint End()
-    {
-        var crc32 = m_Crc32 ^ uint.MaxValue;
-        return crc32;
+        m_Value = crc32;
     }
 }

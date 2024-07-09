@@ -10,12 +10,12 @@ namespace PngSharp.Encoder;
 internal sealed class PngWriter : IDisposable, IAsyncDisposable
 {
     private readonly Stream m_Stream;
-    private readonly PngCrcBuilder m_CrcBuilder;
+    private readonly PngCrc32 m_Crc32;
 
     public PngWriter(Stream stream)
     {
         m_Stream = stream;
-        m_CrcBuilder = new PngCrcBuilder();
+        m_Crc32 = new PngCrc32();
     }
 
     public void WriteSignature()
@@ -37,7 +37,6 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteByte((byte)data.CompressionMethod);
         WriteByte((byte)CompressionMethod.DeflateWithSlidingWindow);
         WriteByte((byte)InterlaceMethod.None);
-        
         WriteCrc32();
     }
 
@@ -99,16 +98,16 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         m_Stream.Flush();
     }
 
-    private void WriteCrc32()
+    public void WriteCrc32()
     {
-        var crc = m_CrcBuilder.End();
+        var crc = m_Crc32.Value;
         WriteUInt32(crc);
     }
 
-    private void WriteChunkHeader(ChunkHeader header)
+    public void WriteChunkHeader(ChunkHeader header)
     {
         WriteHeaderSize((uint)header.ChunkSizeInBytes);
-        m_CrcBuilder.Begin();
+        m_Crc32.Reset();
         WriteHeaderName(header.Name);
     }
 
@@ -135,13 +134,13 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     private void WriteByte(byte b)
     {
         m_Stream.WriteByte(b);
-        m_CrcBuilder.Update(b);
+        m_Crc32.Update(b);
     }
 
     private void WriteBytes(ReadOnlySpan<byte> data)
     {
         m_Stream.Write(data);
-        m_CrcBuilder.Update(data);
+        m_Crc32.Update(data);
     }
 
     public void Dispose()
