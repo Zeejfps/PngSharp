@@ -1,10 +1,11 @@
 ﻿using System.Text;
-using PngSharp;
+using PngSharp.Api;
 
-var decodedPng = Png.DecodeFromFile("Assets/sprite_atlas_128x64.png");
-Png.EncodeToFile(decodedPng, "test_64x64.png");
+var decodedPng = PngApi.DecodeFromFile("Assets/sprite_atlas_128x64.png");
 
-Console.WriteLine(decodedPng.PixelFormat);
+PngApi.EncodeToFile(decodedPng, "test_64x64.png");
+
+Console.WriteLine(decodedPng.ColorType);
 
 SaveToPAM("test.pam", decodedPng.PixelData, decodedPng.Width, decodedPng.Height);
 

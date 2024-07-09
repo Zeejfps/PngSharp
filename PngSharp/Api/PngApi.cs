@@ -1,46 +1,9 @@
 ﻿using PngSharp.Decoder;
 using PngSharp.Encoder;
 
-namespace PngSharp;
+namespace PngSharp.Api;
 
-public enum PixelFormat
-{
-    RGBA,
-    RGB,
-    Grayscale,
-    GrayscaleWithAlpha
-}
-
-public interface IDecodedPng
-{
-    /// <summary>
-    /// Width of the image in pixels
-    /// </summary>
-    int Width { get; }
-    
-    /// <summary>
-    /// Height of the image in pixels
-    /// </summary>
-    int Height { get; }
-    
-    /// <summary>
-    /// The ordering of bytes inside the <seealso cref="PixelData"/> array
-    /// </summary>
-    PixelFormat PixelFormat { get; }
-    
-    /// <summary>
-    /// How many bytes in the <seealso cref="PixelData"/> array reprsent a single pixel
-    /// </summary>
-    int BytesPerPixel { get; }
-    
-    /// <summary>
-    /// Order of bytes is determined by <seealso cref="PixelFormat"/>.
-    /// Ex: RGBA format stores the pixels in [R,G,B,A] where each byte represents a color channel
-    /// </summary>
-    byte[] PixelData { get; }
-}
-
-public static class Png
+public static class PngApi
 {
     /// <summary>
     /// Decodes a PNG image from a file
@@ -68,14 +31,13 @@ public static class Png
         decoder.PixelDataStream.Position = 0;
         var pixelsRead = decoder.PixelDataStream.Read(pixelData);
         // TODO: verify pixelsRead matches?
-        var pixelFormat = decoder.GetPixelFormat();
         
         return new DecodedPng
         {
             Width = imageWidth,
             Height = imageHeight,
             BytesPerPixel = decoder.BytesPerPixel,
-            PixelFormat = pixelFormat,
+            ColorType = decoder.IhdrChunkData.ColorType,
             PixelData = pixelData
         };
     }

@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using PngSharp.Api;
 using PngSharp.Common;
 using PngSharp.Common.AdaptiveFilter;
 
@@ -29,7 +30,7 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             Height = (uint)png.Height,
             CompressionMethod = PngSpec.CompressionMethod.DeflateWithSlidingWindow,
             FilterMethod = PngSpec.FilterMethod.AdaptiveFiltering,
-            ColorType = PixelFormatToColorType(png.PixelFormat),
+            ColorType = png.ColorType,
             InterlaceMethod = PngSpec.InterlaceMethod.None, // TODO: Make dynamic?
             BitDepth = 8, // TODO: Make dynamic
         });
