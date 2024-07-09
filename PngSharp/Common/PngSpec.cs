@@ -1,4 +1,4 @@
-﻿namespace PngSharp;
+﻿namespace PngSharp.Common;
 
 public static class PngSpec
 {

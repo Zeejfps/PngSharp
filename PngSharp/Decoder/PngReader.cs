@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using PngSharp.Common;
 
 namespace PngSharp;
 

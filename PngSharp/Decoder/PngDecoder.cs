@@ -1,4 +1,5 @@
-﻿using PngSharp.Decoder.States;
+﻿using PngSharp.Common;
+using PngSharp.Decoder.States;
 
 namespace PngSharp.Decoder;
 
