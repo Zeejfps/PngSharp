@@ -35,7 +35,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (PngSpec.IsSRGBChunkHeader(header))
         {
             var srgbData = reader.ReadSrgbChunkData();
-            decoder.Srgb = AncillaryChunk<PngSpec.SrgbChunkData>.Of(srgbData);
+            decoder.DecodedPng.Srgb = AncillaryChunk<PngSpec.SrgbChunkData>.Of(srgbData);
             reader.ReadCrc();
             return;
         }
@@ -43,7 +43,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (PngSpec.IsGAMAChunkHeader(header))
         {
             var gamaData = reader.ReadGamaChunkData();
-            decoder.Gama = AncillaryChunk<PngSpec.GammaChunkData>.Of(gamaData);
+            decoder.DecodedPng.Gama = AncillaryChunk<PngSpec.GammaChunkData>.Of(gamaData);
             reader.ReadCrc();
             return;
         }

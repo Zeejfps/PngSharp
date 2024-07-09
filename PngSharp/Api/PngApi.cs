@@ -31,15 +31,15 @@ public static class PngApi
         decoder.PixelDataStream.Position = 0;
         var pixelsRead = decoder.PixelDataStream.Read(pixelData);
         // TODO: verify pixelsRead matches?
-        
-        return new DecodedPng
-        {
-            Width = imageWidth,
-            Height = imageHeight,
-            BytesPerPixel = decoder.BytesPerPixel,
-            ColorType = decoder.IhdrChunkData.ColorType,
-            PixelData = pixelData
-        };
+
+        var decodedPng = decoder.DecodedPng;
+        decodedPng.Width = imageWidth;
+        decodedPng.Height = imageHeight;
+        decodedPng.BytesPerPixel = decoder.BytesPerPixel;
+        decodedPng.ColorType = decoder.IhdrChunkData.ColorType;
+        decodedPng.PixelData = pixelData;
+
+        return decodedPng;
     }
 
     public static void EncodeToFile(IDecodedPng decodedPng, string pathToFile)

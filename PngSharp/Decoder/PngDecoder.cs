@@ -18,9 +18,7 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public IDecoderState ReadChunkState { get; }
     public IDecoderState DoneState { get; }
     
-    // Ancillary Chunks
-    public AncillaryChunk<PngSpec.SrgbChunkData> Srgb { get; set; }
-    public AncillaryChunk<PngSpec.GammaChunkData> Gama { get; set; }
+    public DecodedPng DecodedPng { get; } = new();
 
     private bool IsDone => State == DoneState;
 

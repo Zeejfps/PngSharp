@@ -35,11 +35,18 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             BitDepth = 8, // TODO: Make dynamic
         });
 
+        
         if (png.Srgb.TryGetData(out var srgbChunkData))
+        {
+            Console.WriteLine("Has SRGB Data");
             writer.WriteSRGBChunk(srgbChunkData);
-
-        if (png.Gama.TryGetData(out var gammaChunkData))
-            writer.WriteGAMAChunk(gammaChunkData);
+        }
+        
+        // if (png.Gama.TryGetData(out var gammaChunkData))
+        // {
+        //     Console.WriteLine("Has Gama data");
+        //     writer.WriteGAMAChunk(gammaChunkData);
+        // }
         
         
         Console.WriteLine($"Uncompressed Size: {png.PixelData.Length} bytes");
