@@ -1,4 +1,4 @@
-﻿namespace PngSharp.Common.AdaptiveFilter.Types;
+﻿namespace PngSharp.Spec.AdaptiveFilter.Types;
 
 internal sealed class UpTypeFilter : FilterBase
 {
@@ -6,7 +6,7 @@ internal sealed class UpTypeFilter : FilterBase
     {
     }
 
-    public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.Up;
+    public override AdaptiveFilterTypeKind Kind => AdaptiveFilterTypeKind.Up;
 
     protected override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
     {

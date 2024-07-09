@@ -1,5 +1,9 @@
 ﻿using System.Text;
-using PngSharp.Common;
+using PngSharp.Spec;
+using PngSharp.Spec.Chunks.IHDR;
+using PngSharp.Spec.Chunks.pHYS;
+using PngSharp.Spec.Chunks.sGAMA;
+using PngSharp.Spec.Chunks.sRGB;
 
 namespace PngSharp.Encoder;
 
@@ -16,15 +20,14 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
 
     public void WriteSignature()
     {
-        m_Stream.Write(PngSpec.PNG_SIGNATURE);
+        m_Stream.Write(PngSpecUtils.PNG_SIGNATURE);
     }
     
-    public void WriteIHDRChunk(PngSpec.IhdrChunkData data)
+    public void WriteIHDRChunk(IhdrChunkData data)
     {
-        m_CrcBuilder.Begin();
-        WriteChunkHeader(new PngSpec.ChunkHeader
+        WriteChunkHeader(new ChunkHeader
         {
-            Name = PngSpec.HeaderNames.IHDR,
+            Name = PngSpecUtils.HeaderNames.IHDR,
             ChunkSizeInBytes = 13
         });
         WriteUInt32(data.Width);
@@ -32,31 +35,64 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteByte(data.BitDepth);
         WriteByte((byte)data.ColorType);
         WriteByte((byte)data.CompressionMethod);
-        WriteByte((byte)PngSpec.CompressionMethod.DeflateWithSlidingWindow);
-        WriteByte((byte)PngSpec.InterlaceMethod.None);
+        WriteByte((byte)CompressionMethod.DeflateWithSlidingWindow);
+        WriteByte((byte)InterlaceMethod.None);
         
         WriteCrc32();
     }
 
     public void WriteIDATChunk(ReadOnlySpan<byte> data)
     {
-        m_CrcBuilder.Begin();
         var sizeInBytes = data.Length;
-        WriteChunkHeader(new PngSpec.ChunkHeader
+        WriteChunkHeader(new ChunkHeader
         {
-            Name = PngSpec.HeaderNames.IDAT,
+            Name = PngSpecUtils.HeaderNames.IDAT,
             ChunkSizeInBytes = sizeInBytes
         });
         WriteBytes(data);
         WriteCrc32();
     }
 
+    public void WriteSRGBChunk(SrgbChunkData srgbChunkData)
+    {
+        WriteChunkHeader(new ChunkHeader
+        {
+            Name = PngSpecUtils.HeaderNames.SRGB,
+            ChunkSizeInBytes = 1
+        });
+        WriteByte((byte)srgbChunkData.RenderingIntent);
+        WriteCrc32();
+    }
+
+    public void WriteGAMAChunk(GammaChunkData gammaChunkData)
+    {
+        WriteChunkHeader(new ChunkHeader
+        {
+            Name = PngSpecUtils.HeaderNames.GAMA,
+            ChunkSizeInBytes = 4
+        });
+        WriteUInt32(gammaChunkData.Value);
+        WriteCrc32();
+    }
+
+    public void WritePHYSChunk(PhysChunkData physChunkData)
+    {
+        WriteChunkHeader(new ChunkHeader
+        {
+            Name = PngSpecUtils.HeaderNames.PHYS,
+            ChunkSizeInBytes = 9
+        });
+        WriteUInt32(physChunkData.XAxisPPU);
+        WriteUInt32(physChunkData.YAxisPPU);
+        WriteByte((byte)physChunkData.UnitSpecifier);
+        WriteCrc32();
+    }
+
     public void WriteIENDChunk()
     {
-        m_CrcBuilder.Begin();
-        WriteChunkHeader(new PngSpec.ChunkHeader
+        WriteChunkHeader(new ChunkHeader
         {
-            Name = PngSpec.HeaderNames.IEND,
+            Name = PngSpecUtils.HeaderNames.IEND,
             ChunkSizeInBytes = 0
         });
         WriteCrc32();
@@ -68,10 +104,11 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         var crc = m_CrcBuilder.End();
         WriteUInt32(crc);
     }
-    
-    private void WriteChunkHeader(PngSpec.ChunkHeader header)
+
+    private void WriteChunkHeader(ChunkHeader header)
     {
-        WriteUInt32((uint)header.ChunkSizeInBytes);
+        WriteHeaderSize((uint)header.ChunkSizeInBytes);
+        m_CrcBuilder.Begin();
         WriteHeaderName(header.Name);
     }
 
@@ -81,6 +118,11 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteBytes(valueBytes);
     }
 
+    private void WriteHeaderSize(uint size)
+    {
+        WriteUInt32(size);
+    }
+
     private void WriteUInt32(uint value)
     {
         var bytes = BitConverter.GetBytes(value).AsSpan();
@@ -88,13 +130,13 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         bytes.Reverse();
         WriteBytes(bytes);
     }
-    
+
     private void WriteByte(byte b)
     {
         m_Stream.WriteByte(b);
         m_CrcBuilder.Update(b);
     }
-    
+
     private void WriteBytes(ReadOnlySpan<byte> data)
     {
         m_Stream.Write(data);

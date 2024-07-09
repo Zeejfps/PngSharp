@@ -1,10 +1,10 @@
-﻿namespace PngSharp.Common.AdaptiveFilter.Types;
+﻿namespace PngSharp.Spec.AdaptiveFilter.Types;
 
 internal class PaethTypeFilter : FilterBase
 {
     public PaethTypeFilter(int bytesPerPixel) : base(bytesPerPixel) { }
 
-    public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.Paeth;
+    public override AdaptiveFilterTypeKind Kind => AdaptiveFilterTypeKind.Paeth;
     protected override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
     {
         var x = currentRow[currentIndex];

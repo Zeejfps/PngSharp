@@ -1,6 +1,8 @@
 ﻿using System.IO.Compression;
-using PngSharp.Common;
-using PngSharp.Common.AdaptiveFilter;
+using PngSharp.Api;
+using PngSharp.Spec;
+using PngSharp.Spec.AdaptiveFilter;
+using PngSharp.Spec.Chunks.IHDR;
 
 namespace PngSharp.Encoder;
 
@@ -23,16 +25,36 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         var writer = m_PngWriter;
         
         writer.WriteSignature();
-        writer.WriteIHDRChunk(new PngSpec.IhdrChunkData
+        writer.WriteIHDRChunk(new IhdrChunkData
         {
             Width = (uint)png.Width,
             Height = (uint)png.Height,
-            CompressionMethod = PngSpec.CompressionMethod.DeflateWithSlidingWindow,
-            FilterMethod = PngSpec.FilterMethod.AdaptiveFiltering,
-            ColorType = PixelFormatToColorType(png.PixelFormat),
-            InterlaceMethod = PngSpec.InterlaceMethod.None, // TODO: Make dynamic?
+            CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+            FilterMethod = FilterMethod.AdaptiveFiltering,
+            ColorType = png.ColorType,
+            InterlaceMethod = InterlaceMethod.None, // TODO: Make dynamic?
             BitDepth = 8, // TODO: Make dynamic
         });
+
+        
+        if (png.Srgb.TryGetData(out var srgbChunkData))
+        {
+            Console.WriteLine("Has SRGB Data");
+            writer.WriteSRGBChunk(srgbChunkData);
+        }
+        
+        if (png.Gama.TryGetData(out var gammaChunkData))
+        {
+            Console.WriteLine($"Has Gama data: {gammaChunkData}");
+            writer.WriteGAMAChunk(gammaChunkData);
+        }
+
+        if (png.Phys.TryGetData(out var physChunkData))
+        {
+            Console.WriteLine($"Has Phys Data: {physChunkData}");
+            writer.WritePHYSChunk(physChunkData);
+        }
+        
         Console.WriteLine($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);
         using var compressedDataStream = new MemoryStream();
@@ -48,18 +70,6 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
     private void EncodePixels(Stream outputStream, Stream inputStream)
     {
         m_AdaptiveFilter.Apply(outputStream, inputStream);
-    }
-
-    private PngSpec.ColorType PixelFormatToColorType(PixelFormat pixelFormat)
-    {
-        return pixelFormat switch
-        {
-            PixelFormat.RGBA => PngSpec.ColorType.TrueColorWithAlpha,
-            PixelFormat.RGB => PngSpec.ColorType.TrueColor,
-            PixelFormat.Grayscale => PngSpec.ColorType.Grayscale,
-            PixelFormat.GrayscaleWithAlpha => PngSpec.ColorType.GrayscaleWithAlpha,
-            _ => throw new ArgumentOutOfRangeException(nameof(pixelFormat), pixelFormat, null)
-        };
     }
 
     public void Dispose()

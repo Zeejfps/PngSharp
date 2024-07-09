@@ -1,4 +1,4 @@
-﻿namespace PngSharp.Common.AdaptiveFilter.Types;
+﻿namespace PngSharp.Spec.AdaptiveFilter.Types;
 
 public abstract class FilterBase : ITypeFilter
 {
@@ -9,7 +9,7 @@ public abstract class FilterBase : ITypeFilter
         m_BytesPerPixel = bytesPerPixel;
     }
 
-    public abstract PngSpec.AdaptiveFilterTypeKind Kind { get; }
+    public abstract AdaptiveFilterTypeKind Kind { get; }
 
     public void Apply(Span<byte> filteredRowBuffer, ReadOnlySpan<byte> currentRowBuffer, ReadOnlySpan<byte> previousRowBuffer)
     {

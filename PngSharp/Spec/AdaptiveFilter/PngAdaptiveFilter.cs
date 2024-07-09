@@ -1,6 +1,6 @@
-﻿using PngSharp.Common.AdaptiveFilter.Types;
+﻿using PngSharp.Spec.AdaptiveFilter.Types;
 
-namespace PngSharp.Common.AdaptiveFilter;
+namespace PngSharp.Spec.AdaptiveFilter;
 
 internal sealed class PngAdaptiveFilter
 {
@@ -49,7 +49,7 @@ internal sealed class PngAdaptiveFilter
 
         // TODO: Handle first row more gracefully?
         inputStream.ReadExactly(currRow);
-        var filterKind = (PngSpec.AdaptiveFilterTypeKind)currRow[0];
+        var filterKind = (AdaptiveFilterTypeKind)currRow[0];
         var filter = GetFilterByKind(filterKind);
         filter.Reverse(outputRow, currRow[1..], prevRow);
         outputStream.Write(outputRow);
@@ -61,10 +61,8 @@ internal sealed class PngAdaptiveFilter
         for (var i = 1; i < height; i++)
         {
             inputStream.ReadExactly(currRow);
-            filterKind = (PngSpec.AdaptiveFilterTypeKind)currRow[0];
-            Console.WriteLine($"Filter Kind: {filterKind}");
+            filterKind = (AdaptiveFilterTypeKind)currRow[0];
             filter = GetFilterByKind(filterKind);
-            Console.WriteLine($"Reversing: {filter.Kind}");
             filter.Reverse(outputRow, currRow[1..], prevRow);
             outputStream.Write(outputRow);
             t = prevRow;
@@ -73,15 +71,15 @@ internal sealed class PngAdaptiveFilter
         }
     }
 
-    private ITypeFilter GetFilterByKind(PngSpec.AdaptiveFilterTypeKind kind)
+    private ITypeFilter GetFilterByKind(AdaptiveFilterTypeKind kind)
     {
         return kind switch
         {
-            PngSpec.AdaptiveFilterTypeKind.None => new NoneTypeFilter(m_BytesPerPixel),
-            PngSpec.AdaptiveFilterTypeKind.Sub => new SubTypeFilter(m_BytesPerPixel),
-            PngSpec.AdaptiveFilterTypeKind.Up => new UpTypeFilter(m_BytesPerPixel),
-            PngSpec.AdaptiveFilterTypeKind.Average => new AverageTypeFilter(m_BytesPerPixel),
-            PngSpec.AdaptiveFilterTypeKind.Paeth => new PaethTypeFilter(m_BytesPerPixel),
+            AdaptiveFilterTypeKind.None => new NoneTypeFilter(m_BytesPerPixel),
+            AdaptiveFilterTypeKind.Sub => new SubTypeFilter(m_BytesPerPixel),
+            AdaptiveFilterTypeKind.Up => new UpTypeFilter(m_BytesPerPixel),
+            AdaptiveFilterTypeKind.Average => new AverageTypeFilter(m_BytesPerPixel),
+            AdaptiveFilterTypeKind.Paeth => new PaethTypeFilter(m_BytesPerPixel),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
         };
     }
@@ -143,8 +141,6 @@ internal sealed class PngAdaptiveFilter
                 bestFilter = filter;
             }
         }
-        
-        Console.WriteLine($"Best filter score: {score}, Filter: {bestFilter.Kind}");
         return bestFilter;
     }
 

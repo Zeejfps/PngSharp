@@ -1,4 +1,4 @@
-﻿using PngSharp.Common;
+﻿using PngSharp.Spec;
 
 namespace PngSharp.Decoder.States;
 
@@ -15,7 +15,7 @@ internal sealed class ReadSignatureState : IDecoderState
     {
         var decoder = m_Decoder;
         var sig = decoder.Reader.ReadSignature();
-        if (!PngSpec.IsValidPngFileSignature(sig))
+        if (!PngSpecUtils.IsValidPngFileSignature(sig))
             throw new Exception("Not a png file");
         decoder.State = decoder.ReadIhdrChunkState;
     } 
