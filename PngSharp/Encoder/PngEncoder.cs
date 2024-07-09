@@ -42,12 +42,17 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             writer.WriteSRGBChunk(srgbChunkData);
         }
         
-        // if (png.Gama.TryGetData(out var gammaChunkData))
-        // {
-        //     Console.WriteLine("Has Gama data");
-        //     writer.WriteGAMAChunk(gammaChunkData);
-        // }
-        
+        if (png.Gama.TryGetData(out var gammaChunkData))
+        {
+            Console.WriteLine($"Has Gama data: {gammaChunkData}");
+            writer.WriteGAMAChunk(gammaChunkData);
+        }
+
+        if (png.Phys.TryGetData(out var physChunkData))
+        {
+            Console.WriteLine($"Has Phys Data: {physChunkData}");
+            writer.WritePHYSChunk(physChunkData);
+        }
         
         Console.WriteLine($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);

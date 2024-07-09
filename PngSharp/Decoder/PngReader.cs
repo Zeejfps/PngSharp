@@ -126,10 +126,14 @@ public sealed class PngReader
 
     public PngSpec.PhysChunkData ReadPhysChunkData()
     {
-        ReadBytesBigEndian(9);
+        var xAxisPPU = ReadUInt32();
+        var yAxisPPu = ReadUInt32();
+        var unitSpecifier = ReadByte();
         return new PngSpec.PhysChunkData
         {
-            
+            XAxisPPU = xAxisPPU,
+            YAxisPPU = yAxisPPu,
+            UnitSpecifier = (PngSpec.PhysChunkUnitSpecifier)unitSpecifier
         };
     }
 

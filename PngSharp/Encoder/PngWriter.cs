@@ -65,9 +65,22 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteChunkHeader(new PngSpec.ChunkHeader
         {
             Name = PngSpec.HeaderNames.GAMA,
-            ChunkSizeInBytes = 1
+            ChunkSizeInBytes = 4
         });
         WriteUInt32(gammaChunkData.Value);
+        WriteCrc32();
+    }
+
+    public void WritePHYSChunk(PngSpec.PhysChunkData physChunkData)
+    {
+        WriteChunkHeader(new PngSpec.ChunkHeader
+        {
+            Name = PngSpec.HeaderNames.PHYS,
+            ChunkSizeInBytes = 9
+        });
+        WriteUInt32(physChunkData.XAxisPPU);
+        WriteUInt32(physChunkData.YAxisPPU);
+        WriteByte((byte)physChunkData.UnitSpecifier);
         WriteCrc32();
     }
 
@@ -105,7 +118,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     {
         WriteUInt32(size);
     }
-    
+
     private void WriteUInt32(uint value)
     {
         var bytes = BitConverter.GetBytes(value).AsSpan();

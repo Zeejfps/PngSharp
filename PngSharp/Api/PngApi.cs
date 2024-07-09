@@ -33,10 +33,7 @@ public static class PngApi
         // TODO: verify pixelsRead matches?
 
         var decodedPng = decoder.DecodedPng;
-        decodedPng.Width = imageWidth;
-        decodedPng.Height = imageHeight;
         decodedPng.BytesPerPixel = decoder.BytesPerPixel;
-        decodedPng.ColorType = decoder.IhdrChunkData.ColorType;
         decodedPng.PixelData = pixelData;
 
         return decodedPng;

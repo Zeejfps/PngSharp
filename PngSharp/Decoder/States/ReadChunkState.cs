@@ -50,7 +50,8 @@ internal sealed class ReadChunkState : IDecoderState
         
         if (PngSpec.IsPHYSChunkHeader(header))
         {
-            reader.ReadPhysChunkData();
+            var physChunkData = reader.ReadPhysChunkData();
+            decoder.DecodedPng.Phys = AncillaryChunk<PngSpec.PhysChunkData>.Of(physChunkData);
             reader.ReadCrc();
             return;
         }
