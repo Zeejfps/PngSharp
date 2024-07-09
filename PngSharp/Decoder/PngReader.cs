@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using PngSharp.Common;
+using PngSharp.Spec;
 
 namespace PngSharp;
 
@@ -19,7 +20,7 @@ public sealed class PngReader
         return ReadBytesLittleEndian(8);
     }
 
-    public PngSpec.IhdrChunkData ReadIhdrChunkData()
+    public IhdrChunkData ReadIhdrChunkData()
     {
         var width = ReadUInt32();
         var height = ReadUInt32();
@@ -29,15 +30,15 @@ public sealed class PngReader
         var filterMethod = ReadByte();
         var interlaceMethod = ReadByte();
         
-        return new PngSpec.IhdrChunkData
+        return new IhdrChunkData
         {
             Width = width,
             Height = height,
             BitDepth = bitDepth,
-            ColorType = (PngSpec.ColorType)colorType,
-            CompressionMethod = (PngSpec.CompressionMethod)compressionMethod,
-            FilterMethod = (PngSpec.FilterMethod)filterMethod,
-            InterlaceMethod = (PngSpec.InterlaceMethod)interlaceMethod
+            ColorType = (ColorType)colorType,
+            CompressionMethod = (CompressionMethod)compressionMethod,
+            FilterMethod = (FilterMethod)filterMethod,
+            InterlaceMethod = (InterlaceMethod)interlaceMethod
         };
     }
 
@@ -47,23 +48,23 @@ public sealed class PngReader
         return (byte)m_Stream.ReadByte();
     }
 
-    public void ReadChunkHeader(out PngSpec.ChunkHeader header)
+    public void ReadChunkHeader(out ChunkHeader header)
     {
         var chunkSize = ReadUInt32();
         var chunkName = ReadAsciiString(4);
-        header = new PngSpec.ChunkHeader
+        header = new ChunkHeader
         {
             ChunkSizeInBytes = (int)chunkSize,
             Name = chunkName
         };
     }
 
-    public PngSpec.SrgbChunkData ReadSrgbChunkData()
+    public SrgbChunkData ReadSrgbChunkData()
     {
         var renderingIntent = ReadByte();
-        return new PngSpec.SrgbChunkData
+        return new SrgbChunkData
         {
-            RenderingIntent = (PngSpec.RenderingIntent)renderingIntent
+            RenderingIntent = (RenderingIntent)renderingIntent
         };
     }
 
@@ -102,7 +103,7 @@ public sealed class PngReader
         return buffer;
     }
 
-    public void ReadIdatChunkDataIntoStream(PngSpec.ChunkHeader header, Stream stream)
+    public void ReadIdatChunkDataIntoStream(ChunkHeader header, Stream stream)
     {
         var chunkSize = (int)header.ChunkSizeInBytes;
         var remainingBytesToRead = chunkSize;
@@ -115,25 +116,25 @@ public sealed class PngReader
         }
     }
 
-    public PngSpec.GammaChunkData ReadGamaChunkData()
+    public GammaChunkData ReadGamaChunkData()
     {
         var value = ReadUInt32();
-        return new PngSpec.GammaChunkData
+        return new GammaChunkData
         {
             Value = value
         };
     }
 
-    public PngSpec.PhysChunkData ReadPhysChunkData()
+    public PhysChunkData ReadPhysChunkData()
     {
         var xAxisPPU = ReadUInt32();
         var yAxisPPu = ReadUInt32();
         var unitSpecifier = ReadByte();
-        return new PngSpec.PhysChunkData
+        return new PhysChunkData
         {
             XAxisPPU = xAxisPPU,
             YAxisPPU = yAxisPPu,
-            UnitSpecifier = (PngSpec.PhysChunkUnitSpecifier)unitSpecifier
+            UnitSpecifier = (PhysChunkUnitSpecifier)unitSpecifier
         };
     }
 

@@ -1,10 +1,12 @@
-﻿namespace PngSharp.Common.AdaptiveFilter.Types;
+﻿using PngSharp.Spec;
+
+namespace PngSharp.Common.AdaptiveFilter.Types;
 
 internal sealed class SubTypeFilter : FilterBase
 {
     public SubTypeFilter(int bytesPerPixel) : base(bytesPerPixel) { }
 
-    public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.Sub;
+    public override AdaptiveFilterTypeKind Kind => AdaptiveFilterTypeKind.Sub;
 
     protected override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currByteIndex)
     {

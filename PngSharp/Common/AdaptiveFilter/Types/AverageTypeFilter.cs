@@ -1,4 +1,6 @@
-﻿namespace PngSharp.Common.AdaptiveFilter.Types;
+﻿using PngSharp.Spec;
+
+namespace PngSharp.Common.AdaptiveFilter.Types;
 
 public class AverageTypeFilter : FilterBase
 {
@@ -6,7 +8,7 @@ public class AverageTypeFilter : FilterBase
     {
     }
 
-    public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.Average;
+    public override AdaptiveFilterTypeKind Kind => AdaptiveFilterTypeKind.Average;
     protected override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
     {
         var left = GetLeftValue(currentRow, currentIndex);

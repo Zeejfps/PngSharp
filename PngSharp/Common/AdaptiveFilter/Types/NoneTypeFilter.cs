@@ -1,4 +1,6 @@
-﻿namespace PngSharp.Common.AdaptiveFilter.Types;
+﻿using PngSharp.Spec;
+
+namespace PngSharp.Common.AdaptiveFilter.Types;
 
 internal sealed class NoneTypeFilter : FilterBase
 {
@@ -6,7 +8,7 @@ internal sealed class NoneTypeFilter : FilterBase
     {
     }
 
-    public override PngSpec.AdaptiveFilterTypeKind Kind => PngSpec.AdaptiveFilterTypeKind.None;
+    public override AdaptiveFilterTypeKind Kind => AdaptiveFilterTypeKind.None;
 
     protected override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
     {

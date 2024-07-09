@@ -1,8 +1,9 @@
 ﻿using PngSharp.Common;
+using PngSharp.Spec;
 
 namespace PngSharp.Api;
 
 public record Srgb
 {
-    public PngSpec.RenderingIntent RenderingIntent { get; set; }
+    public RenderingIntent RenderingIntent { get; set; }
 }

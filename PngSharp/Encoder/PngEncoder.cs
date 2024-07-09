@@ -2,6 +2,7 @@
 using PngSharp.Api;
 using PngSharp.Common;
 using PngSharp.Common.AdaptiveFilter;
+using PngSharp.Spec;
 
 namespace PngSharp.Encoder;
 
@@ -24,14 +25,14 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         var writer = m_PngWriter;
         
         writer.WriteSignature();
-        writer.WriteIHDRChunk(new PngSpec.IhdrChunkData
+        writer.WriteIHDRChunk(new IhdrChunkData
         {
             Width = (uint)png.Width,
             Height = (uint)png.Height,
-            CompressionMethod = PngSpec.CompressionMethod.DeflateWithSlidingWindow,
-            FilterMethod = PngSpec.FilterMethod.AdaptiveFiltering,
+            CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+            FilterMethod = FilterMethod.AdaptiveFiltering,
             ColorType = png.ColorType,
-            InterlaceMethod = PngSpec.InterlaceMethod.None, // TODO: Make dynamic?
+            InterlaceMethod = InterlaceMethod.None, // TODO: Make dynamic?
             BitDepth = 8, // TODO: Make dynamic
         });
 

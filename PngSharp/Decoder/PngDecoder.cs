@@ -1,6 +1,7 @@
 ﻿using PngSharp.Api;
 using PngSharp.Common;
 using PngSharp.Decoder.States;
+using PngSharp.Spec;
 
 namespace PngSharp.Decoder;
 
@@ -8,7 +9,7 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
 {
     public PngReader Reader { get; }
     public IDecoderState State { get; set; }
-    public PngSpec.IhdrChunkData IhdrChunkData { get; set; }
+    public IhdrChunkData IhdrChunkData { get; set; }
     public Stream CompressedPixelDataStream { get; }
     public Stream PixelDataStream { get; }
     public int BytesPerPixel => IhdrChunkData.GetBytesPerPixel();

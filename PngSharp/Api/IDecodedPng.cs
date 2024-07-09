@@ -1,4 +1,5 @@
 ﻿using PngSharp.Common;
+using PngSharp.Spec;
 
 namespace PngSharp.Api;
 
@@ -17,7 +18,7 @@ public interface IDecodedPng
     /// <summary>
     /// The ordering of bytes inside the <seealso cref="PixelData"/> array
     /// </summary>
-    PngSpec.ColorType ColorType { get; }
+    ColorType ColorType { get; }
     
     /// <summary>
     /// How many bytes in the <seealso cref="PixelData"/> array reprsent a single pixel
@@ -31,7 +32,7 @@ public interface IDecodedPng
     byte[] PixelData { get; }
     
 
-    AncillaryChunk<PngSpec.SrgbChunkData> Srgb { get; }
-    AncillaryChunk<PngSpec.GammaChunkData> Gama { get; }
-    AncillaryChunk<PngSpec.PhysChunkData> Phys { get; }
+    AncillaryChunk<SrgbChunkData> Srgb { get; }
+    AncillaryChunk<GammaChunkData> Gama { get; }
+    AncillaryChunk<PhysChunkData> Phys { get; }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using PngSharp.Common;
+using PngSharp.Spec;
 
 namespace PngSharp.Encoder;
 
@@ -16,14 +17,14 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
 
     public void WriteSignature()
     {
-        m_Stream.Write(PngSpec.PNG_SIGNATURE);
+        m_Stream.Write(PngSpecUtils.PNG_SIGNATURE);
     }
     
-    public void WriteIHDRChunk(PngSpec.IhdrChunkData data)
+    public void WriteIHDRChunk(IhdrChunkData data)
     {
-        WriteChunkHeader(new PngSpec.ChunkHeader
+        WriteChunkHeader(new ChunkHeader
         {
-            Name = PngSpec.HeaderNames.IHDR,
+            Name = PngSpecUtils.HeaderNames.IHDR,
             ChunkSizeInBytes = 13
         });
         WriteUInt32(data.Width);
@@ -31,8 +32,8 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteByte(data.BitDepth);
         WriteByte((byte)data.ColorType);
         WriteByte((byte)data.CompressionMethod);
-        WriteByte((byte)PngSpec.CompressionMethod.DeflateWithSlidingWindow);
-        WriteByte((byte)PngSpec.InterlaceMethod.None);
+        WriteByte((byte)CompressionMethod.DeflateWithSlidingWindow);
+        WriteByte((byte)InterlaceMethod.None);
         
         WriteCrc32();
     }
@@ -40,42 +41,42 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     public void WriteIDATChunk(ReadOnlySpan<byte> data)
     {
         var sizeInBytes = data.Length;
-        WriteChunkHeader(new PngSpec.ChunkHeader
+        WriteChunkHeader(new ChunkHeader
         {
-            Name = PngSpec.HeaderNames.IDAT,
+            Name = PngSpecUtils.HeaderNames.IDAT,
             ChunkSizeInBytes = sizeInBytes
         });
         WriteBytes(data);
         WriteCrc32();
     }
 
-    public void WriteSRGBChunk(PngSpec.SrgbChunkData srgbChunkData)
+    public void WriteSRGBChunk(SrgbChunkData srgbChunkData)
     {
-        WriteChunkHeader(new PngSpec.ChunkHeader
+        WriteChunkHeader(new ChunkHeader
         {
-            Name = PngSpec.HeaderNames.SRGB,
+            Name = PngSpecUtils.HeaderNames.SRGB,
             ChunkSizeInBytes = 1
         });
         WriteByte((byte)srgbChunkData.RenderingIntent);
         WriteCrc32();
     }
 
-    public void WriteGAMAChunk(PngSpec.GammaChunkData gammaChunkData)
+    public void WriteGAMAChunk(GammaChunkData gammaChunkData)
     {
-        WriteChunkHeader(new PngSpec.ChunkHeader
+        WriteChunkHeader(new ChunkHeader
         {
-            Name = PngSpec.HeaderNames.GAMA,
+            Name = PngSpecUtils.HeaderNames.GAMA,
             ChunkSizeInBytes = 4
         });
         WriteUInt32(gammaChunkData.Value);
         WriteCrc32();
     }
 
-    public void WritePHYSChunk(PngSpec.PhysChunkData physChunkData)
+    public void WritePHYSChunk(PhysChunkData physChunkData)
     {
-        WriteChunkHeader(new PngSpec.ChunkHeader
+        WriteChunkHeader(new ChunkHeader
         {
-            Name = PngSpec.HeaderNames.PHYS,
+            Name = PngSpecUtils.HeaderNames.PHYS,
             ChunkSizeInBytes = 9
         });
         WriteUInt32(physChunkData.XAxisPPU);
@@ -86,9 +87,9 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
 
     public void WriteIENDChunk()
     {
-        WriteChunkHeader(new PngSpec.ChunkHeader
+        WriteChunkHeader(new ChunkHeader
         {
-            Name = PngSpec.HeaderNames.IEND,
+            Name = PngSpecUtils.HeaderNames.IEND,
             ChunkSizeInBytes = 0
         });
         WriteCrc32();
@@ -101,7 +102,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteUInt32(crc);
     }
 
-    private void WriteChunkHeader(PngSpec.ChunkHeader header)
+    private void WriteChunkHeader(ChunkHeader header)
     {
         WriteHeaderSize((uint)header.ChunkSizeInBytes);
         m_CrcBuilder.Begin();
