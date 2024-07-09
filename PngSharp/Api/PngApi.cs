@@ -3,14 +3,14 @@ using PngSharp.Encoder;
 
 namespace PngSharp.Api;
 
-public static class PngApi
+public sealed class PngApi
 {
     /// <summary>
     /// Decodes a PNG image from a file
     /// </summary>
     /// <param name="pathToFile"></param>
     /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
-    public static IDecodedPng DecodeFromFile(string pathToFile)
+    public IDecodedPng DecodeFromFile(string pathToFile)
     {
         using var fileStream = new FileStream(pathToFile, FileMode.Open);
         return DecodeFromStream(fileStream);
@@ -21,7 +21,7 @@ public static class PngApi
     /// </summary>
     /// <param name="stream"></param>
     /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
-    public static IDecodedPng DecodeFromStream(Stream stream)
+    public IDecodedPng DecodeFromStream(Stream stream)
     {
         using var decoder = new PngDecoder(stream);
         decoder.Decode();
@@ -39,13 +39,13 @@ public static class PngApi
         return decodedPng;
     }
 
-    public static void EncodeToFile(IDecodedPng decodedPng, string pathToFile)
+    public void EncodeToFile(IDecodedPng decodedPng, string pathToFile)
     {
         using var fileStream = new FileStream(pathToFile, FileMode.Create);
         EncodeToStream(decodedPng, fileStream);
     }
 
-    public static void EncodeToStream(IDecodedPng decodedPng, Stream stream)
+    public void EncodeToStream(IDecodedPng decodedPng, Stream stream)
     {
         using var encoder = new PngEncoder(decodedPng, stream);
         encoder.Encode();
