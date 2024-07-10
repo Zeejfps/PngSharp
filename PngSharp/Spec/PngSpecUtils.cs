@@ -2,27 +2,11 @@
 
 public static class PngSpecUtils
 {
-    public static class HeaderNames
-    {
-        public const string IHDR = "IHDR";
-        public const string IEND = "IEND";
-        public const string IDAT = "IDAT";
-        public const string PLTE = "PLTE";
-        public const string SRGB = "sRGB";
-        public const string GAMA = "gAMA";
-        public const string PHYS = "pHYs";
-    }
-   
     public static byte[] PNG_SIGNATURE = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
 
     public static bool IsValidPngFileSignature(ReadOnlySpan<byte> sig)
     {
         return sig.SequenceEqual(PNG_SIGNATURE.AsSpan());
-    }
-
-    public static bool IsIHDRChunkHeader(ChunkHeader header)
-    {
-        return header.Name == HeaderNames.IHDR;
     }
 
     public static bool IsIENDChunkHeader(ChunkHeader chunkHeader)
@@ -48,10 +32,5 @@ public static class PngSpecUtils
     public static bool IsPHYSChunkHeader(ChunkHeader chunkHeader)
     {
         return chunkHeader.Name == HeaderNames.PHYS;
-    }
-    
-    public static bool IsPLTEChunkHeader(ChunkHeader chunkHeader)
-    {
-        return chunkHeader.Name == HeaderNames.PLTE;
     }
 }
