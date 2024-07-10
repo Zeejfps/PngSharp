@@ -37,7 +37,7 @@ public sealed class PngApi
     public IDecodedPng DecodeFromStream(Stream stream)
     {
         var reader = new PngReader(stream);
-        using var decoder = new PngDecoder(reader);
+        using var decoder = new PngDecoder(reader, m_Logger);
         decoder.Decode();
         var imageWidth = (int)decoder.IhdrChunkData.Width;
         var imageHeight = (int)decoder.IhdrChunkData.Height;

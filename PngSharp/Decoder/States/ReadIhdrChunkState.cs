@@ -1,14 +1,17 @@
-﻿using PngSharp.Spec;
+﻿using PngSharp.Api;
+using PngSharp.Spec;
 
 namespace PngSharp.Decoder.States;
 
 internal sealed class ReadIhdrChunkState : IDecoderState
 {
     private readonly PngDecoder m_Decoder;
+    private readonly ILogger m_Logger;
     
-    public ReadIhdrChunkState(PngDecoder decoder)
+    public ReadIhdrChunkState(PngDecoder decoder, ILogger logger)
     {
         m_Decoder = decoder;
+        m_Logger = logger;
     }
     
     public void Execute()
@@ -26,6 +29,6 @@ internal sealed class ReadIhdrChunkState : IDecoderState
         decoder.DecodedPng.Height = (int)data.Height;
         decoder.DecodedPng.ColorType = data.ColorType;
         decoder.IhdrChunkData = data;
-        decoder.State = new ReadChunkState(decoder);
+        decoder.State = decoder.ReadChunkState;
     }
 }

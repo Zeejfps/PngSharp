@@ -9,10 +9,12 @@ namespace PngSharp.Decoder.States;
 internal sealed class ReadChunkState : IDecoderState
 {
     private readonly PngDecoder m_Decoder;
+    private readonly ILogger m_Logger;
     
-    public ReadChunkState(PngDecoder decoder)
+    public ReadChunkState(PngDecoder decoder, ILogger logger)
     {
         m_Decoder = decoder;
+        m_Logger = logger;
     }
     
     public void Execute()
@@ -20,7 +22,7 @@ internal sealed class ReadChunkState : IDecoderState
         var decoder = m_Decoder;
         var reader = decoder.Reader;
         reader.ReadChunkHeader(out var header);
-        Console.WriteLine(header);
+        m_Logger.Debug(header.ToString());
         
         if (PngSpecUtils.IsIENDChunkHeader(header))
         {
@@ -41,7 +43,7 @@ internal sealed class ReadChunkState : IDecoderState
             decoder.DecodedPng.Srgb = AncillaryChunk<SrgbChunkData>.Of(srgbData);
             var crc = reader.CurrentCrcValue;
             var newCrc = reader.ReadCrc();
-            Console.WriteLine($"Our CRC: {crc}, Read CRC: {newCrc}");
+            m_Logger.Debug($"Our CRC: {crc}, Read CRC: {newCrc}");
             return;
         }
 
@@ -51,7 +53,7 @@ internal sealed class ReadChunkState : IDecoderState
             decoder.DecodedPng.Gama = AncillaryChunk<GammaChunkData>.Of(gamaData);
             var crc = reader.CurrentCrcValue;
             var newCrc = reader.ReadCrc();
-            Console.WriteLine($"Our CRC: {crc}, Read CRC: {newCrc}");
+            m_Logger.Debug($"Our CRC: {crc}, Read CRC: {newCrc}");
             return;
         }
         
@@ -61,7 +63,7 @@ internal sealed class ReadChunkState : IDecoderState
             decoder.DecodedPng.Phys = AncillaryChunk<PhysChunkData>.Of(physChunkData);
             var crc = reader.CurrentCrcValue;
             var newCrc = reader.ReadCrc();
-            Console.WriteLine($"Our CRC: {crc}, Read CRC: {newCrc}");
+            m_Logger.Debug($"Our CRC: {crc}, Read CRC: {newCrc}");
             return;
         }
 

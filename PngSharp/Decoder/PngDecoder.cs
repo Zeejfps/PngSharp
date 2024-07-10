@@ -23,13 +23,13 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
 
     private bool IsDone => State == DoneState;
 
-    public PngDecoder(PngReader pngReader)
+    public PngDecoder(PngReader pngReader, ILogger logger)
     {
         Reader = pngReader;
         State = new ReadSignatureState(this);
         
-        ReadIhdrChunkState = new ReadIhdrChunkState(this);
-        ReadChunkState = new ReadChunkState(this);
+        ReadIhdrChunkState = new ReadIhdrChunkState(this, logger);
+        ReadChunkState = new ReadChunkState(this, logger);
         DoneState = new DoneState();
         
         CompressedPixelDataStream = new MemoryStream();
