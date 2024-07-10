@@ -24,7 +24,7 @@ public interface IDecodedPng
     ColorType ColorType { get; }
     
     /// <summary>
-    /// How many bytes in the <seealso cref="PixelData"/> array reprsent a single pixel
+    /// How many bytes in the <seealso cref="PixelData"/> array represent a single pixel
     /// </summary>
     int BytesPerPixel { get; }
     
@@ -34,7 +34,6 @@ public interface IDecodedPng
     /// </summary>
     byte[] PixelData { get; }
     
-
     AncillaryChunk<SrgbChunkData> Srgb { get; }
     AncillaryChunk<GammaChunkData> Gama { get; }
     AncillaryChunk<PhysChunkData> Phys { get; }
