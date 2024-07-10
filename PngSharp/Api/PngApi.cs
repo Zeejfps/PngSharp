@@ -32,11 +32,11 @@ public sealed class PngApi
     /// <summary>
     /// Decodes a PNG image from a stream
     /// </summary>
-    /// <param name="stream"></param>
+    /// <param name="inputStream"></param>
     /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
-    public IDecodedPng DecodeFromStream(Stream stream)
+    public IDecodedPng DecodeFromStream(Stream inputStream)
     {
-        var reader = new PngReader(stream);
+        var reader = new PngReader(inputStream);
         using var decoder = new PngDecoder(reader, m_Logger);
         decoder.Decode();
         var imageWidth = (int)decoder.IhdrChunkData.Width;

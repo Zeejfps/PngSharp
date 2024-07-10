@@ -1,6 +1,5 @@
 ﻿using PngSharp.Api;
 using PngSharp.Decoder.States;
-using PngSharp.Spec;
 using PngSharp.Spec.Chunks.IHDR;
 
 namespace PngSharp.Decoder;

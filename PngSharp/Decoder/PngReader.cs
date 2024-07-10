@@ -24,7 +24,9 @@ public sealed class PngReader
 
     public ReadOnlySpan<byte> ReadSignature()
     {
-        return ReadBytes(8);
+        var buffer = m_Buffer.AsSpan(0, 8);
+        ReadBytes(buffer);
+        return buffer;
     }
 
     public IhdrChunkData ReadIhdrChunkData()
@@ -61,7 +63,7 @@ public sealed class PngReader
     {
         var chunkSize = ReadUInt32();
         m_Crc32.Reset();
-        var chunkName = ReadAsciiString(4);
+        var chunkName = ReadChunkHeaderId();
         header = new ChunkHeader
         {
             ChunkSizeInBytes = (int)chunkSize,
@@ -85,27 +87,24 @@ public sealed class PngReader
 
     private UInt32 ReadUInt32()
     {
-        var buffer = ReadBytes(4);
+        Span<byte> buffer = stackalloc byte[sizeof(uint)];
+        ReadBytes(buffer);
         if (BitConverter.IsLittleEndian)
             buffer.Reverse();
-        
         return BitConverter.ToUInt32(buffer);
     }
 
-    private string ReadAsciiString(int sizeInBytes)
+    private string ReadChunkHeaderId()
     {
-        var buffer = ReadBytes(sizeInBytes);
+        Span<byte> buffer = stackalloc byte[4];
+        ReadBytes(buffer);
         return Encoding.ASCII.GetString(buffer);
     }
 
-    private Span<byte> ReadBytes(int byteCount)
+    public void ReadBytes(Span<byte> buffer)
     {
-        var bytesRead = m_Stream.Read(m_Buffer, 0, byteCount);
-        if (bytesRead != byteCount)
-            throw new Exception($"Failed to read png. Read {bytesRead} bytes, expected {byteCount}");
-        var buffer = m_Buffer.AsSpan(0, byteCount);
+        m_Stream.ReadExactly(buffer);
         m_Crc32.Update(buffer);
-        return buffer;
     }
 
     public void ReadIdatChunkDataIntoStream(ChunkHeader header, Stream stream)
