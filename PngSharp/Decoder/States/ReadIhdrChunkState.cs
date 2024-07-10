@@ -18,9 +18,9 @@ internal sealed class ReadIhdrChunkState : IDecoderState
         reader.ReadChunkHeader(out var header);
         if (header.Id != HeaderIds.IHDR)
             throw new Exception("Expected IHDR chunk");
-        var data = reader.ReadIhdrChunkData(); 
+        var data = reader.ReadIhdrChunkData();
+        var outCrc = reader.CurrentCrcValue;
         var crc = reader.ReadCrc();
-        Console.WriteLine($"IHDR Chunk CRC: {crc}");
 
         decoder.DecodedPng.Width = (int)data.Width;
         decoder.DecodedPng.Height = (int)data.Height;

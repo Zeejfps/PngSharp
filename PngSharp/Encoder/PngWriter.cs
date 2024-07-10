@@ -113,8 +113,9 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
 
     private void WriteHeaderName(string name)
     {
-        var valueBytes = Encoding.ASCII.GetBytes(name).AsSpan();
-        WriteBytes(valueBytes);
+        Span<byte> buffer = stackalloc byte[4];
+        Encoding.ASCII.GetBytes(name, buffer);
+        WriteBytes(buffer);
     }
 
     private void WriteHeaderSize(uint size)

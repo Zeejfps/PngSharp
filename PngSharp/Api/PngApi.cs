@@ -6,6 +6,18 @@ namespace PngSharp.Api;
 
 public sealed class PngApi
 {
+    private readonly ILogger m_Logger;
+    
+    public PngApi() : this(new NullLogger())
+    {
+        
+    }
+
+    public PngApi(ILogger logger)
+    {
+        m_Logger = logger;
+    }
+    
     /// <summary>
     /// Decodes a PNG image from a file
     /// </summary>
@@ -51,7 +63,15 @@ public sealed class PngApi
     {
         var crc32 = new PngCrc32();
         using var writer = new PngWriter(stream, crc32);
-        using var encoder = new PngEncoder(decodedPng, writer);
+        using var encoder = new PngEncoder(decodedPng, writer, m_Logger);
         encoder.Encode();
+    }
+
+    private sealed class NullLogger : ILogger
+    {
+        public void Debug(string message) { }
+        public void Info(string message) { }
+        public void Warning(string message) { }
+        public void Error(string message) { }
     }
 }
