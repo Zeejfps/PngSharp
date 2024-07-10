@@ -1,6 +1,6 @@
 namespace PngSharp.Spec;
 
-public static class HeaderNames
+public static class HeaderIds
 {
     public const string IHDR = "IHDR";
     public const string IEND = "IEND";

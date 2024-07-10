@@ -27,7 +27,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     {
         WriteChunkHeader(new ChunkHeader
         {
-            Name = HeaderNames.IHDR,
+            Id = HeaderIds.IHDR,
             ChunkSizeInBytes = 13
         });
         WriteUInt32(data.Width);
@@ -45,7 +45,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         var sizeInBytes = data.Length;
         WriteChunkHeader(new ChunkHeader
         {
-            Name = HeaderNames.IDAT,
+            Id = HeaderIds.IDAT,
             ChunkSizeInBytes = sizeInBytes
         });
         WriteBytes(data);
@@ -56,7 +56,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     {
         WriteChunkHeader(new ChunkHeader
         {
-            Name = HeaderNames.SRGB,
+            Id = HeaderIds.SRGB,
             ChunkSizeInBytes = 1
         });
         WriteByte((byte)srgbChunkData.RenderingIntent);
@@ -67,7 +67,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     {
         WriteChunkHeader(new ChunkHeader
         {
-            Name = HeaderNames.GAMA,
+            Id = HeaderIds.GAMA,
             ChunkSizeInBytes = 4
         });
         WriteUInt32(gammaChunkData.Value);
@@ -78,7 +78,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     {
         WriteChunkHeader(new ChunkHeader
         {
-            Name = HeaderNames.PHYS,
+            Id = HeaderIds.PHYS,
             ChunkSizeInBytes = 9
         });
         WriteUInt32(physChunkData.XAxisPPU);
@@ -91,7 +91,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     {
         WriteChunkHeader(new ChunkHeader
         {
-            Name = HeaderNames.IEND,
+            Id = HeaderIds.IEND,
             ChunkSizeInBytes = 0
         });
         WriteCrc32();
@@ -108,7 +108,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     {
         WriteHeaderSize((uint)header.ChunkSizeInBytes);
         m_Crc32.Reset();
-        WriteHeaderName(header.Name);
+        WriteHeaderName(header.Id);
     }
 
     private void WriteHeaderName(string name)

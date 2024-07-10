@@ -35,17 +35,19 @@ internal class PaethTypeFilter : FilterBase
         return (byte)(x + PaethPredictor(a, b, c));
     }
 
-    private byte PaethPredictor(byte a, byte b, byte c)
+    private byte PaethPredictor(byte left, byte up, byte upLeft)
     {
-        var p = a + b - c;
-        var pa = Math.Abs(p - a);
-        var pb = Math.Abs(p - b);
-        var pc = Math.Abs(p - c);
+        var p = left + up - upLeft;
+        var pa = Math.Abs(p - left);
+        var pb = Math.Abs(p - up);
+        var pc = Math.Abs(p - upLeft);
 
         if (pa <= pb && pa <= pc)
-            return a;
+            return left;
+        
         if (pb <= pc)
-            return b;
-        return c;
+            return up;
+        
+        return upLeft;
     }
 }

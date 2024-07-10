@@ -11,26 +11,26 @@ public static class PngSpecUtils
 
     public static bool IsIENDChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderNames.IEND;
+        return chunkHeader.Id == HeaderIds.IEND;
     }
 
     public static bool IsIDATChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderNames.IDAT;
+        return chunkHeader.Id == HeaderIds.IDAT;
     }
 
     public static bool IsSRGBChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderNames.SRGB;
+        return chunkHeader.Id == HeaderIds.SRGB;
     }
 
     public static bool IsGAMAChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderNames.GAMA;
+        return chunkHeader.Id == HeaderIds.GAMA;
     }
 
     public static bool IsPHYSChunkHeader(ChunkHeader chunkHeader)
     {
-        return chunkHeader.Name == HeaderNames.PHYS;
+        return chunkHeader.Id == HeaderIds.PHYS;
     }
 }

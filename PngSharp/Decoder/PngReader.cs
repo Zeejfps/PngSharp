@@ -65,7 +65,7 @@ public sealed class PngReader
         header = new ChunkHeader
         {
             ChunkSizeInBytes = (int)chunkSize,
-            Name = chunkName
+            Id = chunkName
         };
     }
 
