@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
 using PngSharp.Spec;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.pHYS;
@@ -125,11 +127,11 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
 
     private void WriteUInt32(uint value)
     {
-        var bytes = BitConverter.GetBytes(value).AsSpan();
-        // TODO: verify endines
+        Span<byte> buffer = stackalloc byte[sizeof(uint)];
+        MemoryMarshal.Write(buffer, value);
         if (BitConverter.IsLittleEndian)
-            bytes.Reverse();
-        WriteBytes(bytes);
+            buffer.Reverse();
+        WriteBytes(buffer);
     }
 
     private void WriteByte(byte b)
