@@ -27,7 +27,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (PngSpecUtils.IsIENDChunkHeader(header))
         {
             reader.ReadCrc();
-            decoder.State = new DecodePixelDataState(decoder);
+            decoder.State = decoder.DecodePixelDataState;
             return;
         }
 

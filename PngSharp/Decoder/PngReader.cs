@@ -110,7 +110,7 @@ public sealed class PngReader
 
     public void ReadIdatChunkDataIntoStream(ChunkHeader header, Stream stream)
     {
-        var chunkSize = (int)header.ChunkSizeInBytes;
+        var chunkSize = header.ChunkSizeInBytes;
         var remainingBytesToRead = chunkSize;
         while (remainingBytesToRead > 0)
         {
