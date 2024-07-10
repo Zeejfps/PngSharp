@@ -12,10 +12,10 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     private readonly Stream m_Stream;
     private readonly PngCrc32 m_Crc32;
 
-    public PngWriter(Stream stream)
+    public PngWriter(Stream stream, PngCrc32 crc32)
     {
         m_Stream = stream;
-        m_Crc32 = new PngCrc32();
+        m_Crc32 = crc32;
     }
 
     public void WriteSignature()

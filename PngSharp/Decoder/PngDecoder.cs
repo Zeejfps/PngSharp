@@ -23,9 +23,9 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
 
     private bool IsDone => State == DoneState;
 
-    public PngDecoder(Stream stream)
+    public PngDecoder(PngReader pngReader)
     {
-        Reader = new PngReader(stream);
+        Reader = pngReader;
         State = new ReadSignatureState(this);
         
         ReadIhdrChunkState = new ReadIhdrChunkState(this);

@@ -1,6 +1,5 @@
 ﻿using System.IO.Compression;
 using PngSharp.Api;
-using PngSharp.Spec;
 using PngSharp.Spec.AdaptiveFilter;
 using PngSharp.Spec.Chunks.IHDR;
 
@@ -12,10 +11,10 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
     private readonly PngWriter m_PngWriter;
     private readonly PngAdaptiveFilter m_AdaptiveFilter;
 
-    public PngEncoder(IDecodedPng png, Stream stream)
+    public PngEncoder(IDecodedPng png, PngWriter writer)
     {
         m_Png = png;
-        m_PngWriter = new PngWriter(stream);
+        m_PngWriter = writer;
         m_AdaptiveFilter = new PngAdaptiveFilter(m_Png.Width, m_Png.Height, m_Png.BytesPerPixel);
     }
     

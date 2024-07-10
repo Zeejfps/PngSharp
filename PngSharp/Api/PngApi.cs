@@ -1,5 +1,6 @@
 ﻿using PngSharp.Decoder;
 using PngSharp.Encoder;
+using PngSharp.Spec;
 
 namespace PngSharp.Api;
 
@@ -23,7 +24,8 @@ public sealed class PngApi
     /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
     public IDecodedPng DecodeFromStream(Stream stream)
     {
-        using var decoder = new PngDecoder(stream);
+        var reader = new PngReader(stream);
+        using var decoder = new PngDecoder(reader);
         decoder.Decode();
         var imageWidth = (int)decoder.IhdrChunkData.Width;
         var imageHeight = (int)decoder.IhdrChunkData.Height;
@@ -47,7 +49,9 @@ public sealed class PngApi
 
     public void EncodeToStream(IDecodedPng decodedPng, Stream stream)
     {
-        using var encoder = new PngEncoder(decodedPng, stream);
+        var crc32 = new PngCrc32();
+        using var writer = new PngWriter(stream, crc32);
+        using var encoder = new PngEncoder(decodedPng, writer);
         encoder.Encode();
     }
 }
