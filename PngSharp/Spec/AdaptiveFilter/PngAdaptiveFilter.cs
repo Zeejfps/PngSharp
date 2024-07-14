@@ -7,22 +7,15 @@ internal sealed class PngAdaptiveFilter
     private readonly int m_Width;
     private readonly int m_Height;
     private readonly int m_BytesPerPixel;
-    private readonly ITypeFilter[] m_FirstRowFilterTypes;
-    private readonly ITypeFilter[] m_AllFilterTypes;
+    private readonly Dictionary<AdaptiveFilterTypeKind, ITypeFilter> m_AllFilterTypes = new();
     
     public PngAdaptiveFilter(int width, int height, int bytesPerPixel)
     {
         m_Width = width;
         m_Height = height;
         m_BytesPerPixel = bytesPerPixel;
-        
-        m_FirstRowFilterTypes = new ITypeFilter[]
-        {
-            new NoneTypeFilter(bytesPerPixel),
-            new SubTypeFilter(bytesPerPixel),
-        };
-        
-        m_AllFilterTypes = new ITypeFilter[]
+
+        var allFilterTypes = new ITypeFilter[]
         {
             new NoneTypeFilter(bytesPerPixel),
             new SubTypeFilter(bytesPerPixel),
@@ -30,6 +23,9 @@ internal sealed class PngAdaptiveFilter
             new AverageTypeFilter(bytesPerPixel),
             new PaethTypeFilter(bytesPerPixel)
         };
+
+        foreach (var filter in allFilterTypes)
+            m_AllFilterTypes.Add(filter.Kind, filter);
     }
 
     public void Reverse(Stream outputStream, Stream inputStream)
@@ -37,9 +33,7 @@ internal sealed class PngAdaptiveFilter
         var width = m_Width;
         var height = m_Height;
         var bytesPerPixel = m_BytesPerPixel;
-        var firstRowFilters = m_FirstRowFilterTypes;
-        var allFilters = m_AllFilterTypes;
-        
+
         var strideUnfiltered = width * bytesPerPixel;
         var strideFiltered = strideUnfiltered + 1;
         var buffer = new byte[strideUnfiltered + strideUnfiltered + strideFiltered];
@@ -73,15 +67,7 @@ internal sealed class PngAdaptiveFilter
 
     private ITypeFilter GetFilterByKind(AdaptiveFilterTypeKind kind)
     {
-        return kind switch
-        {
-            AdaptiveFilterTypeKind.None => new NoneTypeFilter(m_BytesPerPixel),
-            AdaptiveFilterTypeKind.Sub => new SubTypeFilter(m_BytesPerPixel),
-            AdaptiveFilterTypeKind.Up => new UpTypeFilter(m_BytesPerPixel),
-            AdaptiveFilterTypeKind.Average => new AverageTypeFilter(m_BytesPerPixel),
-            AdaptiveFilterTypeKind.Paeth => new PaethTypeFilter(m_BytesPerPixel),
-            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
-        };
+        return m_AllFilterTypes[kind];
     }
 
     public void Apply(Stream outputStream, Stream inputStream)
@@ -89,8 +75,7 @@ internal sealed class PngAdaptiveFilter
         var width = m_Width;
         var height = m_Height;
         var bytesPerPixel = m_BytesPerPixel;
-        var firstRowFilters = m_FirstRowFilterTypes;
-        var allFilters = m_AllFilterTypes;
+        var allFilters = m_AllFilterTypes.Values;
         
         var strideUnfiltered = width * bytesPerPixel;
         var strideFiltered = strideUnfiltered + 1;
@@ -101,7 +86,7 @@ internal sealed class PngAdaptiveFilter
 
         // TODO: Handle first row more gracefully?
         inputStream.ReadExactly(currRow);
-        var filter = ChooseFilter(outputRow, currRow, prevRow, firstRowFilters);
+        var filter = ChooseFilter(outputRow, currRow, prevRow, allFilters);
         filter.Apply(outputRow, currRow, prevRow);
         outputStream.Write(outputRow);
 

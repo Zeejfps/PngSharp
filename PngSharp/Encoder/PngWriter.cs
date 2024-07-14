@@ -128,7 +128,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     private void WriteUInt32(uint value)
     {
         Span<byte> buffer = stackalloc byte[sizeof(uint)];
-        MemoryMarshal.Write(buffer, value);
+        MemoryMarshal.Write(buffer, ref value);
         if (BitConverter.IsLittleEndian)
             buffer.Reverse();
         WriteBytes(buffer);
