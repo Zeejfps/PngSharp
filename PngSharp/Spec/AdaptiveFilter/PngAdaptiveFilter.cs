@@ -83,25 +83,15 @@ internal sealed class PngAdaptiveFilter
         var currRow = new Span<byte>(buffer, 0, strideUnfiltered);
         var prevRow = new Span<byte>(buffer, strideUnfiltered, strideUnfiltered);
         var outputRow = new Span<byte>(buffer, strideUnfiltered + strideUnfiltered, strideFiltered);
-
-        // TODO: Handle first row more gracefully?
-        inputStream.ReadExactly(currRow);
-        var filter = ChooseFilter(outputRow, currRow, prevRow, allFilters);
-        filter.Apply(outputRow, currRow, prevRow);
-        outputStream.Write(outputRow);
-
-        var t = prevRow;
-        prevRow = currRow;
-        currRow = t;
- 
-        for (var i = 1; i < height; i++)
+        
+        for (var i = 0; i < height; i++)
         {
             inputStream.ReadExactly(currRow);
-            filter =  ChooseFilter(outputRow, currRow, prevRow, allFilters);
+            var filter =  ChooseFilter(outputRow, currRow, prevRow, allFilters);
             filter.Apply(outputRow, currRow, prevRow);
             outputStream.Write(outputRow);
 
-            t = prevRow;
+            var t = prevRow;
             prevRow = currRow;
             currRow = t;
         }
