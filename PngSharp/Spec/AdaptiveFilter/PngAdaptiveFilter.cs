@@ -40,26 +40,15 @@ internal sealed class PngAdaptiveFilter
         var outputRow = new Span<byte>(buffer, 0, strideUnfiltered);
         var prevRow = new Span<byte>(buffer, strideUnfiltered, strideUnfiltered);
         var currRow = new Span<byte>(buffer, strideUnfiltered + strideUnfiltered, strideFiltered);
-
-        // TODO: Handle first row more gracefully?
-        inputStream.ReadExactly(currRow);
-        var filterKind = (AdaptiveFilterTypeKind)currRow[0];
-        var filter = GetFilterByKind(filterKind);
-        filter.Reverse(outputRow, currRow[1..], prevRow);
-        outputStream.Write(outputRow);
         
-        var t = prevRow;
-        prevRow = outputRow;
-        outputRow = t;
-
         for (var i = 1; i < height; i++)
         {
             inputStream.ReadExactly(currRow);
-            filterKind = (AdaptiveFilterTypeKind)currRow[0];
-            filter = GetFilterByKind(filterKind);
+            var filterKind = (AdaptiveFilterTypeKind)currRow[0];
+            var filter = GetFilterByKind(filterKind);
             filter.Reverse(outputRow, currRow[1..], prevRow);
             outputStream.Write(outputRow);
-            t = prevRow;
+            var t = prevRow;
             prevRow = outputRow;
             outputRow = t;
         }
@@ -87,7 +76,7 @@ internal sealed class PngAdaptiveFilter
         for (var i = 0; i < height; i++)
         {
             inputStream.ReadExactly(currRow);
-            var filter =  ChooseFilter(outputRow, currRow, prevRow, allFilters);
+            var filter = ChooseFilter(outputRow, currRow, prevRow, allFilters);
             filter.Apply(outputRow, currRow, prevRow);
             outputStream.Write(outputRow);
 
