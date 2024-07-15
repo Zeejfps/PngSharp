@@ -7,7 +7,7 @@ public class AverageTypeFilter : FilterBase
     }
 
     public override AdaptiveFilterTypeKind Kind => AdaptiveFilterTypeKind.Average;
-    protected override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
+    public override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
     {
         var left = GetLeftValue(currentRow, currentIndex);
         var above = GetAboveValue(previousRowBuffer, currentIndex);
@@ -16,7 +16,7 @@ public class AverageTypeFilter : FilterBase
         return (byte)(x - reconValue);
     }
 
-    protected override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
+    public override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
     {
         var x = currentRow[currByteIndex];
         var left = GetLeftValue(currentRow, currByteIndex);

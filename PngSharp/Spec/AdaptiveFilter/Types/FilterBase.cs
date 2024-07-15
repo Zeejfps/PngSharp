@@ -30,10 +30,9 @@ public abstract class FilterBase : ITypeFilter
         }
     }
 
-    protected abstract byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currByteIndex);
-    protected abstract byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex);
-
-
+    public abstract byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex);
+    public abstract byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex);
+    
     protected byte GetLeftValue(ReadOnlySpan<byte> currentRowBuffer, int currByteIndex)
     {
         if (currByteIndex < m_BytesPerPixel)

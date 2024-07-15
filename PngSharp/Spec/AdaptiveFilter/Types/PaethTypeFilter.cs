@@ -6,7 +6,7 @@ internal class PaethTypeFilter : FilterBase
 
     public override AdaptiveFilterTypeKind Kind => AdaptiveFilterTypeKind.Paeth;
     
-    protected override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
+    public override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
     {
         var x = currentRow[currentIndex];
         var left = GetLeftValue(currentRow, currentIndex);
@@ -15,7 +15,7 @@ internal class PaethTypeFilter : FilterBase
         return (byte)(x - PaethPredictor(left, above, aboveLeft));
     }
 
-    protected override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
+    public override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
     {
         var x = currentRow[currByteIndex];
         var left = GetLeftValue(currentRow, currByteIndex);

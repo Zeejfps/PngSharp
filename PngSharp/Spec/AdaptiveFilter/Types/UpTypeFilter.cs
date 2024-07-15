@@ -8,14 +8,14 @@ internal sealed class UpTypeFilter : FilterBase
 
     public override AdaptiveFilterTypeKind Kind => AdaptiveFilterTypeKind.Up;
 
-    protected override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
+    public override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
     {
         var above = GetAboveValue(prevRow, currByteIndex);
         var x = currentRow[currByteIndex];
         return (byte)(x - above);
     }
 
-    protected override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
+    public override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currByteIndex)
     {
         var above = GetAboveValue(prevRow, currByteIndex);
         var x = currentRow[currByteIndex];

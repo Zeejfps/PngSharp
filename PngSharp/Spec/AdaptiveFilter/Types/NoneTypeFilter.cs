@@ -8,12 +8,12 @@ internal sealed class NoneTypeFilter : FilterBase
 
     public override AdaptiveFilterTypeKind Kind => AdaptiveFilterTypeKind.None;
 
-    protected override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
+    public override byte ComputeValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> previousRowBuffer, int currentIndex)
     {
         return currentRow[currentIndex];
     }
 
-    protected override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currentByteIndex)
+    public override byte ReverseValue(ReadOnlySpan<byte> currentRow, ReadOnlySpan<byte> prevRow, int currentByteIndex)
     {
         return currentRow[currentByteIndex];
     }
