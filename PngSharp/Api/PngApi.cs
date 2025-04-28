@@ -6,12 +6,9 @@ namespace PngSharp.Api;
 
 public sealed class PngApi
 {
-    private readonly ILogger m_Logger;
+    public static PngApi Default { get; } = new(new NullLogger());
     
-    public PngApi() : this(new NullLogger())
-    {
-        
-    }
+    private readonly ILogger m_Logger;
 
     public PngApi(ILogger logger)
     {
