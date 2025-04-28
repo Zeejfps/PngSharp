@@ -1,8 +1,9 @@
 ﻿using PngSharp.Api;
 
-var pngApi = new PngApi(new ConsoleLogger());
-var decodedPng = pngApi.DecodeFromFile("Assets/sprite_atlas_128x64.png");
-pngApi.EncodeToFile(decodedPng, "test_64x64.png");
+Png.Logger = new ConsoleLogger();
+var decodedPng = Png.DecodeFromFile("Assets/sprite_atlas_128x64.png");
+
+Png.EncodeToFile(decodedPng, "test_64x64.png");
 
 
 class ConsoleLogger : ILogger
