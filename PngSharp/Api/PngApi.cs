@@ -6,8 +6,6 @@ namespace PngSharp.Api;
 
 public sealed class PngApi
 {
-    public static PngApi Default { get; } = new(new NullLogger());
-    
     private readonly ILogger m_Logger;
 
     public PngApi(ILogger logger)
@@ -62,13 +60,5 @@ public sealed class PngApi
         using var writer = new PngWriter(stream, crc32);
         using var encoder = new PngEncoder(decodedPng, writer, m_Logger);
         encoder.Encode();
-    }
-
-    private sealed class NullLogger : ILogger
-    {
-        public void Debug(string message) { }
-        public void Info(string message) { }
-        public void Warning(string message) { }
-        public void Error(string message) { }
     }
 }
