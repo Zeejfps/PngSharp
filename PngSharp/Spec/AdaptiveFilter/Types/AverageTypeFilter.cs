@@ -21,7 +21,7 @@ public class AverageTypeFilter : FilterBase
         var x = currentRow[currByteIndex];
         var left = GetLeftValue(currentRow, currByteIndex);
         var above = GetAboveValue(prevRow, currByteIndex);
-        var reconValue = (byte)(left + above * 0.5);
+        var reconValue = (left + above) / 2;
         return (byte)(x + reconValue);
     }
 }
