@@ -41,7 +41,7 @@ internal sealed class PngAdaptiveFilter
         var prevRow = new Span<byte>(buffer, strideUnfiltered, strideUnfiltered);
         var currRow = new Span<byte>(buffer, strideUnfiltered + strideUnfiltered, strideFiltered);
         
-        for (var i = 1; i < height; i++)
+        for (var i = 0; i < height; i++)
         {
             inputStream.ReadExactly(currRow);
             var filterKind = (AdaptiveFilterTypeKind)currRow[0];
