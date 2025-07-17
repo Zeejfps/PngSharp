@@ -14,15 +14,16 @@ public readonly struct IhdrChunkData
 
     public int GetBytesPerPixel()
     {
-        return ColorType switch
+        var bitsPerPixel = ColorType switch
         {
-            ColorType.Grayscale => 1,
-            ColorType.TrueColor => 3,
-            ColorType.IndexedColor => 1,
-            ColorType.GrayscaleWithAlpha => 2,
-            ColorType.TrueColorWithAlpha => 4,
+            ColorType.Grayscale => BitDepth,
+            ColorType.TrueColor => BitDepth * 3,
+            ColorType.IndexedColor => BitDepth,
+            ColorType.GrayscaleWithAlpha => BitDepth * 2,
+            ColorType.TrueColorWithAlpha => BitDepth * 4,
             _ => throw new ArgumentOutOfRangeException()
         };
+        return (bitsPerPixel + 7) / 8;
     }
         
     public override string ToString()
