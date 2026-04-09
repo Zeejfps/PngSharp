@@ -142,6 +142,30 @@ public class PngRoundTripTests
         Assert.Equal(expectedLength, png.PixelData.Length);
     }
 
+    [Theory]
+    [InlineData("test_2x2.png")]
+    [InlineData("test_4x4.png")]
+    [InlineData("test_64x64.png")]
+    [InlineData("diamond_helm.png")]
+    [InlineData("diamond_helm_extra_small.png")]
+    [InlineData("diamond_helm_grayscale.png")]
+    [InlineData("sprite_atlas.png")]
+    [InlineData("sprite_atlas_128x64.png")]
+    public void RoundTrip_Asset_PixelDataPreserved(string fileName)
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "Assets", fileName);
+        var bytes = File.ReadAllBytes(path);
+        var decoded = Png.DecodeFromByteArray(bytes);
+
+        var reEncoded = RoundTrip(decoded);
+
+        Assert.Equal(decoded.Ihdr.Width, reEncoded.Ihdr.Width);
+        Assert.Equal(decoded.Ihdr.Height, reEncoded.Ihdr.Height);
+        Assert.Equal(decoded.Ihdr.ColorType, reEncoded.Ihdr.ColorType);
+        Assert.Equal(decoded.Ihdr.BitDepth, reEncoded.Ihdr.BitDepth);
+        Assert.Equal(decoded.PixelData, reEncoded.PixelData);
+    }
+
     // --- 16-bit round-trip tests ---
 
     [Fact]
