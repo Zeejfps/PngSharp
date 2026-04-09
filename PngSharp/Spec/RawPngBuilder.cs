@@ -4,6 +4,7 @@ using PngSharp.Spec.Chunks.pHYS;
 using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
+using PngSharp.Spec.Chunks.Text;
 using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Spec;
@@ -17,6 +18,7 @@ internal sealed class RawPngBuilder : IRawPngBuilder
     private SrgbChunkData? m_Srgb;
     private GammaChunkData? m_Gama;
     private PhysChunkData? m_Phys;
+    private readonly List<TextChunkData> m_TextChunks = [];
 
     public IRawPngBuilder WithIhdr(IhdrChunkData ihdr)
     {
@@ -60,6 +62,12 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         return this;
     }
 
+    public IRawPngBuilder WithTextChunk(TextChunkData textChunk)
+    {
+        m_TextChunks.Add(textChunk);
+        return this;
+    }
+
     public IRawPng Build()
     {
         if (m_Ihdr is null)
@@ -77,6 +85,7 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         ValidateBitDepth(ihdr.BitDepth, ihdr.ColorType);
         ValidatePlte(ihdr, m_Plte);
         ValidateTrns(ihdr, m_Trns, m_Plte);
+        ValidateTextChunks(m_TextChunks);
 
         var expectedLength = (int)ihdr.Width * (int)ihdr.Height * ihdr.GetBytesPerPixel();
         if (m_PixelData.Length != expectedLength)
@@ -93,6 +102,7 @@ internal sealed class RawPngBuilder : IRawPngBuilder
             Srgb = m_Srgb,
             Gama = m_Gama,
             Phys = m_Phys,
+            TextChunks = m_TextChunks,
         };
     }
 
@@ -145,6 +155,18 @@ internal sealed class RawPngBuilder : IRawPngBuilder
                     throw new InvalidOperationException(
                         $"tRNS has {data.Length} entries but palette has only {maxEntries}.");
                 break;
+        }
+    }
+
+    private static void ValidateTextChunks(List<TextChunkData> textChunks)
+    {
+        foreach (var chunk in textChunks)
+        {
+            if (string.IsNullOrEmpty(chunk.Keyword))
+                throw new InvalidOperationException("Text chunk keyword must not be empty.");
+            if (chunk.Keyword.Length > 79)
+                throw new InvalidOperationException(
+                    $"Text chunk keyword '{chunk.Keyword}' exceeds maximum length of 79 bytes.");
         }
     }
 

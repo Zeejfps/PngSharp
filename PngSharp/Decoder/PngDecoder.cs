@@ -5,6 +5,7 @@ using PngSharp.Spec.Chunks.pHYS;
 using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
+using PngSharp.Spec.Chunks.Text;
 using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Decoder;
@@ -21,6 +22,7 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public SrgbChunkData? Srgb { get; set; }
     public GammaChunkData? Gama { get; set; }
     public PhysChunkData? Phys { get; set; }
+    public List<TextChunkData> TextChunks { get; } = [];
 
     
     // States

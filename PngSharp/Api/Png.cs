@@ -64,6 +64,7 @@ public static class Png
             Srgb = decoder.Srgb,
             Gama = decoder.Gama,
             Phys = decoder.Phys,
+            TextChunks = decoder.TextChunks,
         };
     }
 

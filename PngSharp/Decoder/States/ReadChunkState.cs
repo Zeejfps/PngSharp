@@ -75,6 +75,30 @@ internal sealed class ReadChunkState : IDecoderState
             return;
         }
 
+        if (header.Id == HeaderIds.TEXT)
+        {
+            var textData = reader.ReadTextChunkData(header.ChunkSizeInBytes);
+            decoder.TextChunks.Add(textData);
+            reader.ReadAndValidateCrc(HeaderIds.TEXT);
+            return;
+        }
+
+        if (header.Id == HeaderIds.ZTXT)
+        {
+            var textData = reader.ReadZtxtChunkData(header.ChunkSizeInBytes);
+            decoder.TextChunks.Add(textData);
+            reader.ReadAndValidateCrc(HeaderIds.ZTXT);
+            return;
+        }
+
+        if (header.Id == HeaderIds.ITXT)
+        {
+            var textData = reader.ReadItxtChunkData(header.ChunkSizeInBytes);
+            decoder.TextChunks.Add(textData);
+            reader.ReadAndValidateCrc(HeaderIds.ITXT);
+            return;
+        }
+
         if (PngSpecUtils.IsCriticalChunk(header))
             throw new PngFormatException($"Unrecognized critical chunk: '{header.Id}'");
 

@@ -10,4 +10,7 @@ internal static class HeaderIds
     public const string GAMA = "gAMA";
     public const string PHYS = "pHYs";
     public const string TRNS = "tRNS";
+    public const string TEXT = "tEXt";
+    public const string ZTXT = "zTXt";
+    public const string ITXT = "iTXt";
 }
