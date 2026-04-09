@@ -94,7 +94,7 @@ internal sealed class PngAdaptiveFilter
     {
         var score = double.MaxValue;
         
-        ITypeFilter bestFilter = null;
+        ITypeFilter? bestFilter = null;
         foreach (var filter in filters)
         {
             filter.Apply(outputRow, currentRow, prevRow);
@@ -105,7 +105,9 @@ internal sealed class PngAdaptiveFilter
                 bestFilter = filter;
             }
         }
-        return bestFilter;
+        
+        // NOTE(Zee): This should not ever be null
+        return bestFilter!;
     }
 
     private double ComputeScore(ReadOnlySpan<byte> row)
