@@ -50,11 +50,17 @@ public static class Png
         var pixelsRead = decoder.PixelDataStream.Read(pixelData);
         // TODO: verify pixelsRead matches?
 
-        var decodedPng = decoder.RawPng;
-        decodedPng.BytesPerPixel = decoder.BytesPerPixel;
-        decodedPng.PixelData = pixelData;
-
-        return decodedPng;
+        return new RawPng
+        {
+            Width = imageWidth,
+            Height = imageHeight,
+            ColorType = decoder.IhdrChunkData.ColorType,
+            BytesPerPixel = decoder.BytesPerPixel,
+            PixelData = pixelData,
+            Srgb = decoder.Srgb,
+            Gama = decoder.Gama,
+            Phys = decoder.Phys,
+        };
     }
 
     public static void EncodeToFile(IDecodedPng decodedPng, string pathToFile)
