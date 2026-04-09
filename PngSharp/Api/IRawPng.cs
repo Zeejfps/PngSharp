@@ -6,7 +6,7 @@ using PngSharp.Spec.Chunks.sRGB;
 
 namespace PngSharp.Api;
 
-public interface IDecodedPng
+public interface IRawPng
 {
     /// <summary>
     /// Width of the image in pixels

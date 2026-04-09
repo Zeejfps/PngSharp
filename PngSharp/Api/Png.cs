@@ -16,7 +16,7 @@ public static class Png
     /// </summary>
     /// <param name="bytes"></param>
     /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
-    public static IDecodedPng DecodeFromByteArray(byte[] bytes)
+    public static IRawPng DecodeFromByteArray(byte[] bytes)
     {
         using var memoryStream = new MemoryStream(bytes);
         return DecodeFromStream(memoryStream);
@@ -27,7 +27,7 @@ public static class Png
     /// </summary>
     /// <param name="pathToFile"></param>
     /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
-    public static IDecodedPng DecodeFromFile(string pathToFile)
+    public static IRawPng DecodeFromFile(string pathToFile)
     {
         using var fileStream = FileSystem.OpenFile(pathToFile);
         return DecodeFromStream(fileStream);
@@ -38,7 +38,7 @@ public static class Png
     /// </summary>
     /// <param name="inputStream"></param>
     /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
-    public static IDecodedPng DecodeFromStream(Stream inputStream)
+    public static IRawPng DecodeFromStream(Stream inputStream)
     {
         var reader = new PngReader(inputStream);
         using var decoder = new PngDecoder(reader, Logger);
@@ -63,13 +63,13 @@ public static class Png
         };
     }
 
-    public static void EncodeToFile(IDecodedPng decodedPng, string pathToFile)
+    public static void EncodeToFile(IRawPng decodedPng, string pathToFile)
     {
         using var fileStream = FileSystem.CreateFile(pathToFile);
         EncodeToStream(decodedPng, fileStream);
     }
 
-    public static void EncodeToStream(IDecodedPng decodedPng, Stream stream)
+    public static void EncodeToStream(IRawPng decodedPng, Stream stream)
     {
         var crc32 = new PngCrc32();
         using var writer = new PngWriter(stream, crc32);
@@ -98,7 +98,7 @@ public static class Png
         }
     }
 
-    public static IDecodedPng CreateGrayscale(int width, int height, byte[] pixels)
+    public static IRawPng CreateGrayscale(int width, int height, byte[] pixels)
     {
         return new RawPng
         {
@@ -110,7 +110,7 @@ public static class Png
         };
     }
 
-    public static IDecodedPng CreateGrayscaleWithAlpha(int width, int height, byte[] pixels)
+    public static IRawPng CreateGrayscaleWithAlpha(int width, int height, byte[] pixels)
     {
         return new RawPng
         {
@@ -122,7 +122,7 @@ public static class Png
         };
     }
 
-    public static IDecodedPng CreateRgb(int width, int height, byte[] pixels)
+    public static IRawPng CreateRgb(int width, int height, byte[] pixels)
     {
         return new RawPng
         {
@@ -134,7 +134,7 @@ public static class Png
         };
     }
 
-    public static IDecodedPng CreateRgba(int width, int height, byte[] pixels)
+    public static IRawPng CreateRgba(int width, int height, byte[] pixels)
     {
         return new RawPng
         {

@@ -8,11 +8,11 @@ namespace PngSharp.Encoder;
 internal sealed class PngEncoder : IDisposable, IAsyncDisposable
 {
     private readonly ILogger m_Logger;
-    private readonly IDecodedPng m_Png;
+    private readonly IRawPng m_Png;
     private readonly PngWriter m_PngWriter;
     private readonly PngAdaptiveFilter m_AdaptiveFilter;
 
-    public PngEncoder(IDecodedPng png, PngWriter writer, ILogger logger)
+    public PngEncoder(IRawPng png, PngWriter writer, ILogger logger)
     {
         m_Png = png;
         m_PngWriter = writer;

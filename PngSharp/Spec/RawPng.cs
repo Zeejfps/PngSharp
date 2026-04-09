@@ -6,7 +6,7 @@ using PngSharp.Spec.Chunks.sRGB;
 
 namespace PngSharp.Spec;
 
-internal sealed class RawPng : IDecodedPng
+internal sealed class RawPng : IRawPng
 {
     public int Width { get; init; }
     public int Height { get; init; }
