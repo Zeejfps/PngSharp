@@ -15,7 +15,7 @@ public readonly record struct ITextChunk
     public bool IsCompressed { get; init; }
     public byte[] Data { get; init; }
 
-    public ITextContent GetContent()
+    public ITextContent DecodeContent()
     {
         string text;
         if (!IsCompressed)

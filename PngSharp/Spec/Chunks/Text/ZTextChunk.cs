@@ -12,7 +12,7 @@ public readonly record struct ZTextChunk
     public string Keyword { get; init; }
     public byte[] CompressedData { get; init; }
 
-    public ZTextContent GetContent()
+    public ZTextContent DecodeContent()
     {
         using var compressedStream = new MemoryStream(CompressedData);
         using var deflateStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
