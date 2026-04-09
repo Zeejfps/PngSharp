@@ -45,7 +45,7 @@ public static class Png
         decoder.Decode();
         var imageWidth = (int)decoder.IhdrChunkData.Width;
         var imageHeight = (int)decoder.IhdrChunkData.Height;
-        var pixelData = new byte[imageWidth * imageHeight * decoder.BytesPerPixel];
+        var pixelData = new byte[imageWidth * imageHeight * decoder.IhdrChunkData.GetBytesPerPixel()];
         decoder.PixelDataStream.Position = 0;
         var pixelsRead = decoder.PixelDataStream.Read(pixelData);
         // TODO: verify pixelsRead matches?
@@ -55,7 +55,7 @@ public static class Png
             Width = imageWidth,
             Height = imageHeight,
             ColorType = decoder.IhdrChunkData.ColorType,
-            BytesPerPixel = decoder.BytesPerPixel,
+            BytesPerPixel = decoder.IhdrChunkData.GetBytesPerPixel(),
             PixelData = pixelData,
             Srgb = decoder.Srgb,
             Gama = decoder.Gama,
