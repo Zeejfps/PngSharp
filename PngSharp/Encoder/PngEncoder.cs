@@ -17,7 +17,8 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         m_Png = png;
         m_PngWriter = writer;
         m_Logger = logger;
-        m_AdaptiveFilter = new PngAdaptiveFilter(m_Png.Width, m_Png.Height, m_Png.BytesPerPixel);
+        var ihdr = m_Png.Ihdr;
+        m_AdaptiveFilter = new PngAdaptiveFilter((int)ihdr.Width, (int)ihdr.Height, ihdr.GetBytesPerPixel());
     }
     
     public void Encode()
@@ -26,16 +27,7 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         var writer = m_PngWriter;
         
         writer.WriteSignature();
-        writer.WriteIHDRChunk(new IhdrChunkData
-        {
-            Width = (uint)png.Width,
-            Height = (uint)png.Height,
-            CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
-            FilterMethod = FilterMethod.AdaptiveFiltering,
-            ColorType = png.ColorType,
-            InterlaceMethod = InterlaceMethod.None, // TODO: Make dynamic?
-            BitDepth = 8, // TODO: Make dynamic
-        });
+        writer.WriteIHDRChunk(png.Ihdr);
         
         if (png.Srgb.HasValue)
         {

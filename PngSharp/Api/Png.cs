@@ -49,19 +49,15 @@ public static class Png
         var reader = new PngReader(inputStream);
         using var decoder = new PngDecoder(reader, Logger);
         decoder.Decode();
-        var imageWidth = (int)decoder.IhdrChunkData.Width;
-        var imageHeight = (int)decoder.IhdrChunkData.Height;
-        var pixelData = new byte[imageWidth * imageHeight * decoder.IhdrChunkData.GetBytesPerPixel()];
+        var ihdr = decoder.IhdrChunkData;
+        var pixelData = new byte[(int)ihdr.Width * (int)ihdr.Height * ihdr.GetBytesPerPixel()];
         decoder.PixelDataStream.Position = 0;
         var pixelsRead = decoder.PixelDataStream.Read(pixelData);
         // TODO: verify pixelsRead matches?
 
         return new RawPng
         {
-            Width = imageWidth,
-            Height = imageHeight,
-            ColorType = decoder.IhdrChunkData.ColorType,
-            BytesPerPixel = decoder.IhdrChunkData.GetBytesPerPixel(),
+            Ihdr = ihdr,
             PixelData = pixelData,
             Srgb = decoder.Srgb,
             Gama = decoder.Gama,
@@ -104,10 +100,16 @@ public static class Png
     {
         return new RawPng
         {
-            Width = width,
-            Height = height,
-            BytesPerPixel = 1,
-            ColorType = ColorType.Grayscale,
+            Ihdr = new IhdrChunkData
+            {
+                Width = (uint)width,
+                Height = (uint)height,
+                BitDepth = 8,
+                ColorType = ColorType.Grayscale,
+                CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+                FilterMethod = FilterMethod.AdaptiveFiltering,
+                InterlaceMethod = InterlaceMethod.None,
+            },
             PixelData = pixels
         };
     }
@@ -123,10 +125,16 @@ public static class Png
     {
         return new RawPng
         {
-            Width = width,
-            Height = height,
-            BytesPerPixel = 2,
-            ColorType = ColorType.GrayscaleWithAlpha,
+            Ihdr = new IhdrChunkData
+            {
+                Width = (uint)width,
+                Height = (uint)height,
+                BitDepth = 8,
+                ColorType = ColorType.GrayscaleWithAlpha,
+                CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+                FilterMethod = FilterMethod.AdaptiveFiltering,
+                InterlaceMethod = InterlaceMethod.None,
+            },
             PixelData = pixels
         };
     }
@@ -142,10 +150,16 @@ public static class Png
     {
         return new RawPng
         {
-            Width = width,
-            Height = height,
-            BytesPerPixel = 3,
-            ColorType = ColorType.TrueColor,
+            Ihdr = new IhdrChunkData
+            {
+                Width = (uint)width,
+                Height = (uint)height,
+                BitDepth = 8,
+                ColorType = ColorType.TrueColor,
+                CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+                FilterMethod = FilterMethod.AdaptiveFiltering,
+                InterlaceMethod = InterlaceMethod.None,
+            },
             PixelData = pixels
         };
     }
@@ -161,10 +175,16 @@ public static class Png
     {
         return new RawPng
         {
-            Width = width,
-            Height = height,
-            BytesPerPixel = 4,
-            ColorType = ColorType.TrueColorWithAlpha,
+            Ihdr = new IhdrChunkData
+            {
+                Width = (uint)width,
+                Height = (uint)height,
+                BitDepth = 8,
+                ColorType = ColorType.TrueColorWithAlpha,
+                CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+                FilterMethod = FilterMethod.AdaptiveFiltering,
+                InterlaceMethod = InterlaceMethod.None,
+            },
             PixelData = pixels
         };
     }
