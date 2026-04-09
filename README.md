@@ -48,6 +48,31 @@ var grayAlpha = Png.CreateGrayscaleWithAlpha(width, height, pixelData);
 Png.EncodeToFile(rgba, "output.png");
 ```
 
+## Builder
+
+For full control over the PNG structure, use the builder:
+
+```C#
+var png = Png.Builder()
+    .WithIhdr(new IhdrChunkData
+    {
+        Width = 256,
+        Height = 256,
+        BitDepth = 8,
+        ColorType = ColorType.TrueColorWithAlpha,
+        CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+        FilterMethod = FilterMethod.AdaptiveFiltering,
+        InterlaceMethod = InterlaceMethod.None,
+    })
+    .WithPixelData(pixelData)
+    .WithSrgb(new SrgbChunkData { RenderingIntent = RenderingIntent.Perceptual })
+    .WithGama(new GammaChunkData { Value = 45455 })
+    .WithPhys(new PhysChunkData { XAxisPPU = 3780, YAxisPPU = 3780, UnitSpecifier = UnitSpecifier.Meter })
+    .Build();
+
+Png.EncodeToFile(png, "output.png");
+```
+
 ## Configuration
 
 ```C#
