@@ -8,7 +8,18 @@ public static class Png
 {
     public static ILogger Logger { get; set; } = new NullLogger();
     public static IFileSystem FileSystem { get; set; } = new OsFileSystem();
-    
+
+
+    /// <summary>
+    /// Decodes a PNG image from a byte array
+    /// </summary>
+    /// <param name="bytes"></param>
+    /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
+    public static IDecodedPng DecodeFromByteArray(byte[] bytes)
+    {
+        using var memoryStream = new MemoryStream(bytes);
+        return DecodeFromStream(memoryStream);
+    }
     
     /// <summary>
     /// Decodes a PNG image from a file
