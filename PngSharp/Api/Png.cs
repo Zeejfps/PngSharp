@@ -4,12 +4,6 @@ using PngSharp.Spec;
 
 namespace PngSharp.Api;
 
-public interface IFileSystem
-{
-    Stream CreateFile(string pathToFile);
-    Stream OpenFile(string pathToFile);
-}
-
 public static class Png
 {
     public static ILogger Logger { get; set; } = new NullLogger();
