@@ -1,6 +1,14 @@
 # PngSharp
 
-A pure C# PNG encoder/decoder library with support for all color types, bit depths (1, 2, 4, 8, 16), and critical PNG chunks.
+A fast, low-allocation, pure C# PNG encoder/decoder with zero native dependencies.
+
+## Features
+
+- All color types and bit depths (1, 2, 4, 8, 16) per the PNG spec
+- All 5 adaptive filter types with per-scanline selection
+- Chunks: IHDR, PLTE, IDAT, IEND, tRNS, sRGB, gAMA, pHYs
+- CRC-32 validation on all chunks
+- Stackalloc and span-based paths to minimize heap allocations
 
 ## Decoding
 
@@ -93,16 +101,6 @@ var png = Png.Builder()
     .WithPixelData(pixelIndices)
     .Build();
 ```
-
-## Supported Features
-
-- All 5 color types: Grayscale, TrueColor, IndexedColor, GrayscaleWithAlpha, TrueColorWithAlpha
-- All bit depths: 1, 2, 4, 8, 16 (per PNG spec valid combinations)
-- All 5 adaptive filter types: None, Sub, Up, Average, Paeth
-- Critical chunks: IHDR, PLTE, IDAT (multiple), IEND
-- Ancillary chunks: sRGB, gAMA, pHYs, tRNS
-- CRC-32 validation on all chunks
-- zlib deflate compression/decompression
 
 ## Configuration
 
