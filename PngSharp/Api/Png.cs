@@ -63,18 +63,104 @@ public static class Png
         };
     }
 
-    public static void EncodeToFile(IRawPng decodedPng, string pathToFile)
+    /// <summary>
+    /// Encodes a PNG image to a file
+    /// </summary>
+    /// <param name="rawPng">The PNG image data to encode</param>
+    /// <param name="pathToFile">The path to write the PNG file to</param>
+    public static void EncodeToFile(IRawPng rawPng, string pathToFile)
     {
         using var fileStream = FileSystem.CreateFile(pathToFile);
-        EncodeToStream(decodedPng, fileStream);
+        EncodeToStream(rawPng, fileStream);
     }
 
-    public static void EncodeToStream(IRawPng decodedPng, Stream stream)
+    /// <summary>
+    /// Encodes a PNG image to a stream
+    /// </summary>
+    /// <param name="rawPng">The PNG image data to encode</param>
+    /// <param name="stream">The stream to write the encoded PNG data to</param>
+    public static void EncodeToStream(IRawPng rawPng, Stream stream)
     {
         var crc32 = new PngCrc32();
         using var writer = new PngWriter(stream, crc32);
-        using var encoder = new PngEncoder(decodedPng, writer, Logger);
+        using var encoder = new PngEncoder(rawPng, writer, Logger);
         encoder.Encode();
+    }
+
+    /// <summary>
+    /// Creates a grayscale PNG image (1 byte per pixel)
+    /// </summary>
+    /// <param name="width">Width of the image in pixels</param>
+    /// <param name="height">Height of the image in pixels</param>
+    /// <param name="pixels">Raw pixel data in grayscale format</param>
+    /// <returns>A new PNG image with grayscale color type</returns>
+    public static IRawPng CreateGrayscale(int width, int height, byte[] pixels)
+    {
+        return new RawPng
+        {
+            Width = width,
+            Height = height,
+            BytesPerPixel = 1,
+            ColorType = ColorType.Grayscale,
+            PixelData = pixels
+        };
+    }
+
+    /// <summary>
+    /// Creates a grayscale PNG image with an alpha channel (2 bytes per pixel)
+    /// </summary>
+    /// <param name="width">Width of the image in pixels</param>
+    /// <param name="height">Height of the image in pixels</param>
+    /// <param name="pixels">Raw pixel data in grayscale+alpha format [G,A]</param>
+    /// <returns>A new PNG image with grayscale+alpha color type</returns>
+    public static IRawPng CreateGrayscaleWithAlpha(int width, int height, byte[] pixels)
+    {
+        return new RawPng
+        {
+            Width = width,
+            Height = height,
+            BytesPerPixel = 2,
+            ColorType = ColorType.GrayscaleWithAlpha,
+            PixelData = pixels
+        };
+    }
+
+    /// <summary>
+    /// Creates an RGB PNG image (3 bytes per pixel)
+    /// </summary>
+    /// <param name="width">Width of the image in pixels</param>
+    /// <param name="height">Height of the image in pixels</param>
+    /// <param name="pixels">Raw pixel data in RGB format [R,G,B]</param>
+    /// <returns>A new PNG image with true color type</returns>
+    public static IRawPng CreateRgb(int width, int height, byte[] pixels)
+    {
+        return new RawPng
+        {
+            Width = width,
+            Height = height,
+            BytesPerPixel = 3,
+            ColorType = ColorType.TrueColor,
+            PixelData = pixels
+        };
+    }
+
+    /// <summary>
+    /// Creates an RGBA PNG image (4 bytes per pixel)
+    /// </summary>
+    /// <param name="width">Width of the image in pixels</param>
+    /// <param name="height">Height of the image in pixels</param>
+    /// <param name="pixels">Raw pixel data in RGBA format [R,G,B,A]</param>
+    /// <returns>A new PNG image with true color+alpha type</returns>
+    public static IRawPng CreateRgba(int width, int height, byte[] pixels)
+    {
+        return new RawPng
+        {
+            Width = width,
+            Height = height,
+            BytesPerPixel = 4,
+            ColorType = ColorType.TrueColorWithAlpha,
+            PixelData = pixels
+        };
     }
     
     private sealed class NullLogger : ILogger
@@ -96,53 +182,5 @@ public static class Png
         {
             return new FileStream(pathToFile, FileMode.Open);
         }
-    }
-
-    public static IRawPng CreateGrayscale(int width, int height, byte[] pixels)
-    {
-        return new RawPng
-        {
-            Width = width,
-            Height = height,
-            BytesPerPixel = 1,
-            ColorType = ColorType.Grayscale,
-            PixelData = pixels
-        };
-    }
-
-    public static IRawPng CreateGrayscaleWithAlpha(int width, int height, byte[] pixels)
-    {
-        return new RawPng
-        {
-            Width = width,
-            Height = height,
-            BytesPerPixel = 2,
-            ColorType = ColorType.GrayscaleWithAlpha,
-            PixelData = pixels
-        };
-    }
-
-    public static IRawPng CreateRgb(int width, int height, byte[] pixels)
-    {
-        return new RawPng
-        {
-            Width = width,
-            Height = height,
-            BytesPerPixel = 3,
-            ColorType = ColorType.TrueColor,
-            PixelData = pixels
-        };
-    }
-
-    public static IRawPng CreateRgba(int width, int height, byte[] pixels)
-    {
-        return new RawPng
-        {
-            Width = width,
-            Height = height,
-            BytesPerPixel = 4,
-            ColorType = ColorType.TrueColorWithAlpha,
-            PixelData = pixels
-        };
     }
 }
