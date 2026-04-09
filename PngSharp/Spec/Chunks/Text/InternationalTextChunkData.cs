@@ -1,9 +1,11 @@
+using System.IO.Compression;
+using System.Text;
+
 namespace PngSharp.Spec.Chunks.Text;
 
 /// <summary>
 /// iTXt chunk: international UTF-8 text metadata with language tag.
 /// Data contains raw bytes — UTF-8 text if uncompressed, deflate bytes if compressed.
-/// Use TextChunkUtils to get the text.
 /// </summary>
 public readonly record struct InternationalTextChunkData
 {
@@ -12,4 +14,45 @@ public readonly record struct InternationalTextChunkData
     public string TranslatedKeyword { get; init; }
     public bool IsCompressed { get; init; }
     public byte[] Data { get; init; }
+
+    public string GetText()
+    {
+        if (!IsCompressed)
+            return Encoding.UTF8.GetString(Data);
+
+        using var compressedStream = new MemoryStream(Data);
+        using var deflateStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
+        using var resultStream = new MemoryStream();
+        deflateStream.CopyTo(resultStream);
+        return Encoding.UTF8.GetString(resultStream.ToArray());
+    }
+
+    public static InternationalTextChunkData Create(
+        string keyword, string text, string languageTag, string translatedKeyword, bool compress = false)
+    {
+        byte[] data;
+        if (compress)
+        {
+            var raw = Encoding.UTF8.GetBytes(text);
+            using var compressedStream = new MemoryStream();
+            using (var zlibStream = new ZLibStream(compressedStream, CompressionLevel.Optimal, true))
+            {
+                zlibStream.Write(raw);
+            }
+            data = compressedStream.ToArray();
+        }
+        else
+        {
+            data = Encoding.UTF8.GetBytes(text);
+        }
+
+        return new InternationalTextChunkData
+        {
+            Keyword = keyword,
+            LanguageTag = languageTag,
+            TranslatedKeyword = translatedKeyword,
+            IsCompressed = compress,
+            Data = data,
+        };
+    }
 }

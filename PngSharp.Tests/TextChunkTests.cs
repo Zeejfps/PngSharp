@@ -1,4 +1,3 @@
-using System.Text;
 using PngSharp.Api;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.Text;
@@ -36,8 +35,7 @@ public class TextChunkTests
     public void RoundTrip_zTXt_CompressedDataPreserved()
     {
         var originalText = "This is a longer description that benefits from compression.";
-        var compressed = TextChunkUtils.Compress(originalText);
-        var chunk = new CompressedTextChunkData { Keyword = "Description", CompressedData = compressed };
+        var chunk = CompressedTextChunkData.Create("Description", originalText);
 
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())
@@ -49,22 +47,14 @@ public class TextChunkTests
         Assert.Single(decoded.CompressedTextChunks);
         Assert.Equal("Description", decoded.CompressedTextChunks[0].Keyword);
 
-        var decompressed = TextChunkUtils.Decompress(decoded.CompressedTextChunks[0]);
+        var decompressed = decoded.CompressedTextChunks[0].Decompress();
         Assert.Equal(originalText, decompressed);
     }
 
     [Fact]
     public void RoundTrip_iTXt_Uncompressed_Preserved()
     {
-        var textBytes = Encoding.UTF8.GetBytes("PNG test image");
-        var chunk = new InternationalTextChunkData
-        {
-            Keyword = "Title",
-            LanguageTag = "en",
-            TranslatedKeyword = "Title",
-            IsCompressed = false,
-            Data = textBytes,
-        };
+        var chunk = InternationalTextChunkData.Create("Title", "PNG test image", "en", "Title");
 
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())
@@ -79,22 +69,14 @@ public class TextChunkTests
         Assert.Equal("en", result.LanguageTag);
         Assert.Equal("Title", result.TranslatedKeyword);
         Assert.False(result.IsCompressed);
-        Assert.Equal("PNG test image", TextChunkUtils.GetText(result));
+        Assert.Equal("PNG test image", result.GetText());
     }
 
     [Fact]
     public void RoundTrip_iTXt_Compressed_Preserved()
     {
         var originalText = "A compressed international text chunk with UTF-8 support.";
-        var compressedData = TextChunkUtils.Compress(originalText, Encoding.UTF8);
-        var chunk = new InternationalTextChunkData
-        {
-            Keyword = "Description",
-            LanguageTag = "en",
-            TranslatedKeyword = "Description",
-            IsCompressed = true,
-            Data = compressedData,
-        };
+        var chunk = InternationalTextChunkData.Create("Description", originalText, "en", "Description", compress: true);
 
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())
@@ -106,7 +88,7 @@ public class TextChunkTests
         Assert.Single(decoded.InternationalTextChunks);
         var result = decoded.InternationalTextChunks[0];
         Assert.True(result.IsCompressed);
-        Assert.Equal(originalText, TextChunkUtils.GetText(result));
+        Assert.Equal(originalText, result.GetText());
     }
 
     [Fact]
@@ -120,15 +102,10 @@ public class TextChunkTests
             .WithCompressedTextChunk(new CompressedTextChunkData
             {
                 Keyword = "Description",
-                CompressedData = TextChunkUtils.Compress("Compressed text"),
+                CompressedData = CompressedTextChunkData.Create("Description", "Compressed text").CompressedData,
             })
-            .WithInternationalTextChunk(new InternationalTextChunkData
-            {
-                Keyword = "Comment",
-                LanguageTag = "ja",
-                TranslatedKeyword = "コメント",
-                Data = Encoding.UTF8.GetBytes("テスト"),
-            })
+            .WithInternationalTextChunk(
+                InternationalTextChunkData.Create("Comment", "テスト", "ja", "コメント"))
             .Build();
         var decoded = RoundTrip(png);
 
