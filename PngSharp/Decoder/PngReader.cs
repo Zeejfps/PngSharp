@@ -8,7 +8,7 @@ using PngSharp.Spec.Chunks.sRGB;
 
 namespace PngSharp.Decoder;
 
-public sealed class PngReader
+internal sealed class PngReader
 {
     private readonly Stream m_Stream;
     private readonly byte[] m_Buffer;
