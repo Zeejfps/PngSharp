@@ -90,6 +90,12 @@ public static class Png
     }
 
     /// <summary>
+    /// Creates a new builder for constructing an IRawPng instance
+    /// </summary>
+    /// <returns>A new builder instance</returns>
+    public static IRawPngBuilder Builder() => new RawPngBuilder();
+
+    /// <summary>
     /// Creates a grayscale PNG image (1 byte per pixel)
     /// </summary>
     /// <param name="width">Width of the image in pixels</param>
@@ -98,20 +104,10 @@ public static class Png
     /// <returns>A new PNG image with grayscale color type</returns>
     public static IRawPng CreateGrayscale(int width, int height, byte[] pixels)
     {
-        return new RawPng
-        {
-            Ihdr = new IhdrChunkData
-            {
-                Width = (uint)width,
-                Height = (uint)height,
-                BitDepth = 8,
-                ColorType = ColorType.Grayscale,
-                CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
-                FilterMethod = FilterMethod.AdaptiveFiltering,
-                InterlaceMethod = InterlaceMethod.None,
-            },
-            PixelData = pixels
-        };
+        return Builder()
+            .WithIhdr(CreateIhdr(width, height, ColorType.Grayscale))
+            .WithPixelData(pixels)
+            .Build();
     }
 
     /// <summary>
@@ -123,20 +119,10 @@ public static class Png
     /// <returns>A new PNG image with grayscale+alpha color type</returns>
     public static IRawPng CreateGrayscaleWithAlpha(int width, int height, byte[] pixels)
     {
-        return new RawPng
-        {
-            Ihdr = new IhdrChunkData
-            {
-                Width = (uint)width,
-                Height = (uint)height,
-                BitDepth = 8,
-                ColorType = ColorType.GrayscaleWithAlpha,
-                CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
-                FilterMethod = FilterMethod.AdaptiveFiltering,
-                InterlaceMethod = InterlaceMethod.None,
-            },
-            PixelData = pixels
-        };
+        return Builder()
+            .WithIhdr(CreateIhdr(width, height, ColorType.GrayscaleWithAlpha))
+            .WithPixelData(pixels)
+            .Build();
     }
 
     /// <summary>
@@ -148,20 +134,10 @@ public static class Png
     /// <returns>A new PNG image with true color type</returns>
     public static IRawPng CreateRgb(int width, int height, byte[] pixels)
     {
-        return new RawPng
-        {
-            Ihdr = new IhdrChunkData
-            {
-                Width = (uint)width,
-                Height = (uint)height,
-                BitDepth = 8,
-                ColorType = ColorType.TrueColor,
-                CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
-                FilterMethod = FilterMethod.AdaptiveFiltering,
-                InterlaceMethod = InterlaceMethod.None,
-            },
-            PixelData = pixels
-        };
+        return Builder()
+            .WithIhdr(CreateIhdr(width, height, ColorType.TrueColor))
+            .WithPixelData(pixels)
+            .Build();
     }
 
     /// <summary>
@@ -173,19 +149,23 @@ public static class Png
     /// <returns>A new PNG image with true color+alpha type</returns>
     public static IRawPng CreateRgba(int width, int height, byte[] pixels)
     {
-        return new RawPng
+        return Builder()
+            .WithIhdr(CreateIhdr(width, height, ColorType.TrueColorWithAlpha))
+            .WithPixelData(pixels)
+            .Build();
+    }
+
+    private static IhdrChunkData CreateIhdr(int width, int height, ColorType colorType)
+    {
+        return new IhdrChunkData
         {
-            Ihdr = new IhdrChunkData
-            {
-                Width = (uint)width,
-                Height = (uint)height,
-                BitDepth = 8,
-                ColorType = ColorType.TrueColorWithAlpha,
-                CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
-                FilterMethod = FilterMethod.AdaptiveFiltering,
-                InterlaceMethod = InterlaceMethod.None,
-            },
-            PixelData = pixels
+            Width = (uint)width,
+            Height = (uint)height,
+            BitDepth = 8,
+            ColorType = colorType,
+            CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+            FilterMethod = FilterMethod.AdaptiveFiltering,
+            InterlaceMethod = InterlaceMethod.None,
         };
     }
     
