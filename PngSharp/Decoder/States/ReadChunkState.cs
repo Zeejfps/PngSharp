@@ -1,9 +1,6 @@
 ﻿using PngSharp.Api;
 using PngSharp.Api.Exceptions;
 using PngSharp.Spec;
-using PngSharp.Spec.Chunks.pHYS;
-using PngSharp.Spec.Chunks.sGAMA;
-using PngSharp.Spec.Chunks.sRGB;
 
 namespace PngSharp.Decoder.States;
 
@@ -41,7 +38,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (PngSpecUtils.IsSRGBChunkHeader(header))
         {
             var srgbData = reader.ReadSrgbChunkData();
-            decoder.Srgb = AncillaryChunk<SrgbChunkData>.Of(srgbData);
+            decoder.Srgb = srgbData;
             reader.ReadAndValidateCrc(HeaderIds.SRGB);
             return;
         }
@@ -49,7 +46,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (PngSpecUtils.IsGAMAChunkHeader(header))
         {
             var gamaData = reader.ReadGamaChunkData();
-            decoder.Gama = AncillaryChunk<GammaChunkData>.Of(gamaData);
+            decoder.Gama = gamaData;
             reader.ReadAndValidateCrc(HeaderIds.GAMA);
             return;
         }
@@ -57,7 +54,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (PngSpecUtils.IsPHYSChunkHeader(header))
         {
             var physChunkData = reader.ReadPhysChunkData();
-            decoder.Phys = AncillaryChunk<PhysChunkData>.Of(physChunkData);
+            decoder.Phys = physChunkData;
             reader.ReadAndValidateCrc(HeaderIds.PHYS);
             return;
         }

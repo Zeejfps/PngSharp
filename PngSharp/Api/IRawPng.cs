@@ -33,7 +33,7 @@ public interface IRawPng
     /// </summary>
     byte[] PixelData { get; }
     
-    AncillaryChunk<SrgbChunkData> Srgb { get; }
-    AncillaryChunk<GammaChunkData> Gama { get; }
-    AncillaryChunk<PhysChunkData> Phys { get; }
+    SrgbChunkData? Srgb { get; }
+    GammaChunkData? Gama { get; }
+    PhysChunkData? Phys { get; }
 }

@@ -14,9 +14,9 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public IhdrChunkData IhdrChunkData { get; set; }
     public Stream CompressedPixelDataStream { get; }
     public Stream PixelDataStream { get; }
-    public AncillaryChunk<SrgbChunkData> Srgb { get; set; }
-    public AncillaryChunk<GammaChunkData> Gama { get; set; }
-    public AncillaryChunk<PhysChunkData> Phys { get; set; }
+    public SrgbChunkData? Srgb { get; set; }
+    public GammaChunkData? Gama { get; set; }
+    public PhysChunkData? Phys { get; set; }
 
     
     // States

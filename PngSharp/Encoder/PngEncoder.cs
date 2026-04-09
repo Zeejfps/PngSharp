@@ -37,22 +37,22 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             BitDepth = 8, // TODO: Make dynamic
         });
         
-        if (png.Srgb.TryGetData(out var srgbChunkData))
+        if (png.Srgb.HasValue)
         {
             m_Logger.Debug("Has SRGB Data");
-            writer.WriteSRGBChunk(srgbChunkData);
-        }
-        
-        if (png.Gama.TryGetData(out var gammaChunkData))
-        {
-            m_Logger.Debug($"Has Gama data: {gammaChunkData}");
-            writer.WriteGAMAChunk(gammaChunkData);
+            writer.WriteSRGBChunk(png.Srgb.Value);
         }
 
-        if (png.Phys.TryGetData(out var physChunkData))
+        if (png.Gama.HasValue)
         {
-            m_Logger.Debug($"Has Phys Data: {physChunkData}");
-            writer.WritePHYSChunk(physChunkData);
+            m_Logger.Debug($"Has Gama data: {png.Gama.Value}");
+            writer.WriteGAMAChunk(png.Gama.Value);
+        }
+
+        if (png.Phys.HasValue)
+        {
+            m_Logger.Debug($"Has Phys Data: {png.Phys.Value}");
+            writer.WritePHYSChunk(png.Phys.Value);
         }
         
         m_Logger.Debug($"Uncompressed Size: {png.PixelData.Length} bytes");

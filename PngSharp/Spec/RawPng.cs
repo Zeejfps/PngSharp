@@ -13,7 +13,7 @@ internal sealed class RawPng : IRawPng
     public ColorType ColorType { get; init; }
     public int BytesPerPixel { get; init; }
     public required byte[] PixelData { get; init; }
-    public AncillaryChunk<SrgbChunkData> Srgb { get; init; }
-    public AncillaryChunk<GammaChunkData> Gama { get; init; }
-    public AncillaryChunk<PhysChunkData> Phys { get; init; }
+    public SrgbChunkData? Srgb { get; init; }
+    public GammaChunkData? Gama { get; init; }
+    public PhysChunkData? Phys { get; init; }
 }
