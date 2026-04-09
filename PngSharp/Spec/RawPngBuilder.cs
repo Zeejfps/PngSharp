@@ -51,13 +51,45 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         if (m_PixelData is null)
             throw new InvalidOperationException("PixelData is required.");
 
+        var ihdr = m_Ihdr.Value;
+
+        if (ihdr.Width == 0)
+            throw new InvalidOperationException("Width must be greater than zero.");
+        if (ihdr.Height == 0)
+            throw new InvalidOperationException("Height must be greater than zero.");
+
+        ValidateBitDepth(ihdr.BitDepth, ihdr.ColorType);
+
+        var expectedLength = (int)ihdr.Width * (int)ihdr.Height * ihdr.GetBytesPerPixel();
+        if (m_PixelData.Length != expectedLength)
+            throw new InvalidOperationException(
+                $"PixelData length {m_PixelData.Length} does not match expected length {expectedLength} " +
+                $"for a {ihdr.Width}x{ihdr.Height} image with {ihdr.ColorType} color type and {ihdr.BitDepth}-bit depth.");
+
         return new RawPng
         {
-            Ihdr = m_Ihdr.Value,
+            Ihdr = ihdr,
             PixelData = m_PixelData,
             Srgb = m_Srgb,
             Gama = m_Gama,
             Phys = m_Phys,
         };
+    }
+
+    private static void ValidateBitDepth(byte bitDepth, ColorType colorType)
+    {
+        byte[] allowed = colorType switch
+        {
+            ColorType.Grayscale => [1, 2, 4, 8, 16],
+            ColorType.TrueColor => [8, 16],
+            ColorType.IndexedColor => [1, 2, 4, 8],
+            ColorType.GrayscaleWithAlpha => [8, 16],
+            ColorType.TrueColorWithAlpha => [8, 16],
+            _ => throw new InvalidOperationException($"Unknown ColorType: {colorType}."),
+        };
+
+        if (Array.IndexOf(allowed, bitDepth) < 0)
+            throw new InvalidOperationException(
+                $"BitDepth {bitDepth} is not valid for {colorType}. Allowed values: {string.Join(", ", allowed)}.");
     }
 }
