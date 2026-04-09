@@ -1,6 +1,6 @@
 # PngSharp
 
-A pure C# PNG encoder/decoder library.
+A pure C# PNG encoder/decoder library with support for all color types, bit depths (1, 2, 4, 8, 16), and critical PNG chunks.
 
 ## Decoding
 
@@ -15,7 +15,8 @@ var png = Png.DecodeFromByteArray(bytes);
 var png = Png.DecodeFromStream(stream);
 
 // Access image data
-Console.WriteLine($"{png.Width}x{png.Height}, {png.BytesPerPixel} bytes per pixel");
+var ihdr = png.Ihdr;
+Console.WriteLine($"{ihdr.Width}x{ihdr.Height}, {ihdr.GetBytesPerPixel()} bytes per pixel");
 byte[] pixels = png.PixelData;
 ```
 
@@ -72,6 +73,36 @@ var png = Png.Builder()
 
 Png.EncodeToFile(png, "output.png");
 ```
+
+### Indexed color with palette and transparency
+
+```C#
+var png = Png.Builder()
+    .WithIhdr(new IhdrChunkData
+    {
+        Width = 16,
+        Height = 16,
+        BitDepth = 8,
+        ColorType = ColorType.IndexedColor,
+        CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+        FilterMethod = FilterMethod.AdaptiveFiltering,
+        InterlaceMethod = InterlaceMethod.None,
+    })
+    .WithPlte(new PlteChunkData { Entries = [255, 0, 0, 0, 255, 0, 0, 0, 255] }) // red, green, blue
+    .WithTrns(new TrnsChunkData { Data = [255, 128, 0] }) // fully opaque, semi-transparent, fully transparent
+    .WithPixelData(pixelIndices)
+    .Build();
+```
+
+## Supported Features
+
+- All 5 color types: Grayscale, TrueColor, IndexedColor, GrayscaleWithAlpha, TrueColorWithAlpha
+- All bit depths: 1, 2, 4, 8, 16 (per PNG spec valid combinations)
+- All 5 adaptive filter types: None, Sub, Up, Average, Paeth
+- Critical chunks: IHDR, PLTE, IDAT (multiple), IEND
+- Ancillary chunks: sRGB, gAMA, pHYs, tRNS
+- CRC-32 validation on all chunks
+- zlib deflate compression/decompression
 
 ## Configuration
 
