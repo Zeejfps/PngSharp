@@ -23,7 +23,7 @@ public interface IRawPng
     SrgbChunkData? Srgb { get; }
     GammaChunkData? Gama { get; }
     PhysChunkData? Phys { get; }
-    IReadOnlyList<TxtChunk> TxtChunks { get; }
-    IReadOnlyList<ZTxtChunk> ZTxtChunks { get; }
-    IReadOnlyList<ITxtChunk> ITxtChunks { get; }
+    IReadOnlyList<TextChunk> TxtChunks { get; }
+    IReadOnlyList<ZTextChunk> ZTxtChunks { get; }
+    IReadOnlyList<ITextChunk> ITxtChunks { get; }
 }

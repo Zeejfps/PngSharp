@@ -1,6 +1,6 @@
 namespace PngSharp.Spec.Chunks.Text;
 
-public readonly record struct ITxtContent
+public readonly record struct ITextContent
 {
     public required string Keyword { get; init; }
     public required string Text { get; init; }

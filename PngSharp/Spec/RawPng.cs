@@ -18,7 +18,7 @@ internal sealed class RawPng : IRawPng
     public SrgbChunkData? Srgb { get; init; }
     public GammaChunkData? Gama { get; init; }
     public PhysChunkData? Phys { get; init; }
-    public required IReadOnlyList<TxtChunk> TxtChunks { get; init; }
-    public required IReadOnlyList<ZTxtChunk> ZTxtChunks { get; init; }
-    public required IReadOnlyList<ITxtChunk> ITxtChunks { get; init; }
+    public required IReadOnlyList<TextChunk> TxtChunks { get; init; }
+    public required IReadOnlyList<ZTextChunk> ZTxtChunks { get; init; }
+    public required IReadOnlyList<ITextChunk> ITxtChunks { get; init; }
 }
