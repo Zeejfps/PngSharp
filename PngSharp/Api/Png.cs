@@ -17,7 +17,7 @@ public static class Png
     /// <param name="bytes"></param>
     /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
     /// <exception cref="Exceptions.PngFormatException">Thrown when the PNG has an invalid format</exception>
-    /// <exception cref="Exceptions.PngCrcException">Thrown when the PNG data is corrupted</exception>
+    /// <exception cref="Exceptions.PngCorruptException">Thrown when the PNG data is corrupted</exception>
     public static IRawPng DecodeFromByteArray(byte[] bytes)
     {
         using var memoryStream = new MemoryStream(bytes);
@@ -30,7 +30,7 @@ public static class Png
     /// <param name="pathToFile"></param>
     /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
     /// <exception cref="Exceptions.PngFormatException">Thrown when the PNG has an invalid format</exception>
-    /// <exception cref="Exceptions.PngCrcException">Thrown when the PNG data is corrupted</exception>
+    /// <exception cref="Exceptions.PngCorruptException">Thrown when the PNG data is corrupted</exception>
     public static IRawPng DecodeFromFile(string pathToFile)
     {
         using var fileStream = FileSystem.OpenFile(pathToFile);
@@ -43,7 +43,7 @@ public static class Png
     /// <param name="inputStream"></param>
     /// <returns>Decoded PNG image containing information about the image and its pixel data</returns>
     /// <exception cref="Exceptions.PngFormatException">Thrown when the PNG has an invalid format</exception>
-    /// <exception cref="Exceptions.PngCrcException">Thrown when the PNG data is corrupted</exception>
+    /// <exception cref="Exceptions.PngCorruptException">Thrown when the PNG data is corrupted</exception>
     public static IRawPng DecodeFromStream(Stream inputStream)
     {
         var reader = new PngReader(inputStream);

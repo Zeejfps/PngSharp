@@ -91,7 +91,7 @@ public sealed class PngReader
         var computed = CurrentCrcValue;
         var expected = ReadCrc();
         if (computed != expected)
-            throw new PngCrcException(chunkId, computed, expected);
+            throw new PngCorruptException(chunkId, computed, expected);
     }
 
     private UInt32 ReadUInt32()
