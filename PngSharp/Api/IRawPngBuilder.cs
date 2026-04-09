@@ -17,8 +17,8 @@ public interface IRawPngBuilder
     IRawPngBuilder WithSrgb(SrgbChunkData srgb);
     IRawPngBuilder WithGama(GammaChunkData gama);
     IRawPngBuilder WithPhys(PhysChunkData phys);
-    IRawPngBuilder WithTxtChunk(TxtChunkData textChunk);
-    IRawPngBuilder WithZTxtChunk(ZTxtChunkData textChunk);
-    IRawPngBuilder WithITxtChunk(ITxtChunkData textChunk);
+    IRawPngBuilder WithTxtChunk(TxtChunk textChunk);
+    IRawPngBuilder WithZTxtChunk(ZTxtChunk textChunk);
+    IRawPngBuilder WithITxtChunk(ITxtChunk textChunk);
     IRawPng Build();
 }

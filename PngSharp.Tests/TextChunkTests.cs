@@ -10,7 +10,7 @@ public class TextChunkTests
     [Fact]
     public void RoundTrip_tEXt_Preserved()
     {
-        var text = new TxtChunkData { Keyword = "Comment", Text = "Hello, PNG!" };
+        var text = new TxtChunk { Keyword = "Comment", Text = "Hello, PNG!" };
         var png = CreatePngWithText(text);
         var decoded = RoundTrip(png);
 
@@ -22,7 +22,7 @@ public class TextChunkTests
     [Fact]
     public void RoundTrip_tEXt_EmptyText_Preserved()
     {
-        var text = new TxtChunkData { Keyword = "Comment", Text = "" };
+        var text = new TxtChunk { Keyword = "Comment", Text = "" };
         var png = CreatePngWithText(text);
         var decoded = RoundTrip(png);
 
@@ -35,7 +35,7 @@ public class TextChunkTests
     public void RoundTrip_zTXt_CompressedDataPreserved()
     {
         var originalText = "This is a longer description that benefits from compression.";
-        var chunk = ZTxtChunkData.Create("Description", originalText);
+        var chunk = ZTxtChunk.Create("Description", originalText);
 
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())
@@ -54,7 +54,7 @@ public class TextChunkTests
     [Fact]
     public void RoundTrip_iTXt_Uncompressed_Preserved()
     {
-        var chunk = ITxtChunkData.Create(new ITxtContent
+        var chunk = ITxtChunk.Create(new ITxtContent
         {
             Keyword = "Title",
             Text = "PNG test image",
@@ -82,7 +82,7 @@ public class TextChunkTests
     public void RoundTrip_iTXt_Compressed_Preserved()
     {
         var originalText = "A compressed international text chunk with UTF-8 support.";
-        var chunk = ITxtChunkData.Create(new ITxtCompressedContent
+        var chunk = ITxtChunk.CreateCompressed(new ITxtContent
         {
             Keyword = "Description",
             Text = originalText,
@@ -109,15 +109,15 @@ public class TextChunkTests
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())
             .WithPixelData([0, 0, 0, 255])
-            .WithTxtChunk(new TxtChunkData { Keyword = "Title", Text = "Test" })
-            .WithTxtChunk(new TxtChunkData { Keyword = "Author", Text = "PngSharp" })
-            .WithZTxtChunk(new ZTxtChunkData
+            .WithTxtChunk(new TxtChunk { Keyword = "Title", Text = "Test" })
+            .WithTxtChunk(new TxtChunk { Keyword = "Author", Text = "PngSharp" })
+            .WithZTxtChunk(new ZTxtChunk
             {
                 Keyword = "Description",
-                CompressedData = ZTxtChunkData.Create("Description", "Compressed text").CompressedData,
+                CompressedData = ZTxtChunk.Create("Description", "Compressed text").CompressedData,
             })
             .WithITxtChunk(
-                ITxtChunkData.Create(new ITxtContent
+                ITxtChunk.Create(new ITxtContent
                 {
                     Keyword = "Comment",
                     Text = "テスト",
@@ -139,7 +139,7 @@ public class TextChunkTests
     [Fact]
     public void Build_EmptyKeyword_Throws()
     {
-        var text = new TxtChunkData { Keyword = "", Text = "test" };
+        var text = new TxtChunk { Keyword = "", Text = "test" };
         Assert.Throws<InvalidOperationException>(() =>
             Png.Builder().WithIhdr(MakeIhdr()).WithPixelData([0, 0, 0, 255])
                 .WithTxtChunk(text).Build());
@@ -148,7 +148,7 @@ public class TextChunkTests
     [Fact]
     public void Build_KeywordTooLong_Throws()
     {
-        var text = new TxtChunkData { Keyword = new string('x', 80), Text = "test" };
+        var text = new TxtChunk { Keyword = new string('x', 80), Text = "test" };
         Assert.Throws<InvalidOperationException>(() =>
             Png.Builder().WithIhdr(MakeIhdr()).WithPixelData([0, 0, 0, 255])
                 .WithTxtChunk(text).Build());
@@ -173,7 +173,7 @@ public class TextChunkTests
         };
     }
 
-    private static IRawPng CreatePngWithText(TxtChunkData text)
+    private static IRawPng CreatePngWithText(TxtChunk text)
     {
         return Png.Builder()
             .WithIhdr(MakeIhdr())

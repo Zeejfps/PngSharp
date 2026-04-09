@@ -18,9 +18,9 @@ internal sealed class RawPngBuilder : IRawPngBuilder
     private SrgbChunkData? m_Srgb;
     private GammaChunkData? m_Gama;
     private PhysChunkData? m_Phys;
-    private readonly List<TxtChunkData> m_TxtChunks = [];
-    private readonly List<ZTxtChunkData> m_ZTxtChunks = [];
-    private readonly List<ITxtChunkData> m_ITxtChunks = [];
+    private readonly List<TxtChunk> m_TxtChunks = [];
+    private readonly List<ZTxtChunk> m_ZTxtChunks = [];
+    private readonly List<ITxtChunk> m_ITxtChunks = [];
 
     public IRawPngBuilder WithIhdr(IhdrChunkData ihdr)
     {
@@ -64,19 +64,19 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         return this;
     }
 
-    public IRawPngBuilder WithTxtChunk(TxtChunkData textChunk)
+    public IRawPngBuilder WithTxtChunk(TxtChunk textChunk)
     {
         m_TxtChunks.Add(textChunk);
         return this;
     }
 
-    public IRawPngBuilder WithZTxtChunk(ZTxtChunkData textChunk)
+    public IRawPngBuilder WithZTxtChunk(ZTxtChunk textChunk)
     {
         m_ZTxtChunks.Add(textChunk);
         return this;
     }
 
-    public IRawPngBuilder WithITxtChunk(ITxtChunkData textChunk)
+    public IRawPngBuilder WithITxtChunk(ITxtChunk textChunk)
     {
         m_ITxtChunks.Add(textChunk);
         return this;
@@ -175,9 +175,9 @@ internal sealed class RawPngBuilder : IRawPngBuilder
     }
 
     private static void ValidateTextKeywords(
-        List<TxtChunkData> text,
-        List<ZTxtChunkData> compressed,
-        List<ITxtChunkData> international)
+        List<TxtChunk> text,
+        List<ZTxtChunk> compressed,
+        List<ITxtChunk> international)
     {
         foreach (var chunk in text)
             ValidateKeyword(chunk.Keyword);
