@@ -1,5 +1,6 @@
 ﻿using System.IO.Compression;
 using PngSharp.Api;
+using PngSharp.Spec;
 using PngSharp.Spec.AdaptiveFilter;
 using PngSharp.Spec.Chunks.IHDR;
 
@@ -18,7 +19,7 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         m_PngWriter = writer;
         m_Logger = logger;
         var ihdr = m_Png.Ihdr;
-        m_AdaptiveFilter = new PngAdaptiveFilter((int)ihdr.Width, (int)ihdr.Height, ihdr.GetBytesPerPixel());
+        m_AdaptiveFilter = new PngAdaptiveFilter((int)ihdr.Height, ihdr.GetScanlineByteWidth(), ihdr.GetBytesPerPixel());
     }
     
     public void Encode()
@@ -62,7 +63,34 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
     
     private void EncodePixels(Stream outputStream, Stream inputStream)
     {
-        m_AdaptiveFilter.Apply(outputStream, inputStream);
+        var ihdr = m_Png.Ihdr;
+        if (ihdr.BitDepth < 8)
+        {
+            using var packedStream = new MemoryStream();
+            var scanlineByteWidth = ihdr.GetScanlineByteWidth();
+            var widthInPixels = (int)ihdr.Width;
+            var heightInPixels = (int)ihdr.Height;
+            const int stackAllocThreshold = 1024;
+            Span<byte> unpackedRow = widthInPixels <= stackAllocThreshold
+                ? stackalloc byte[widthInPixels]
+                : new byte[widthInPixels];
+            Span<byte> packedRow = scanlineByteWidth <= stackAllocThreshold
+                ? stackalloc byte[scanlineByteWidth]
+                : new byte[scanlineByteWidth];
+
+            for (var y = 0; y < heightInPixels; y++)
+            {
+                inputStream.ReadExactly(unpackedRow);
+                BitDepthConverter.PackScanline(unpackedRow, packedRow, ihdr.BitDepth, widthInPixels);
+                packedStream.Write(packedRow);
+            }
+            packedStream.Position = 0;
+            m_AdaptiveFilter.Apply(outputStream, packedStream);
+        }
+        else
+        {
+            m_AdaptiveFilter.Apply(outputStream, inputStream);
+        }
     }
 
     public void Dispose()

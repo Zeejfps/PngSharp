@@ -141,4 +141,157 @@ public class PngRoundTripTests
         var expectedLength = 2 * 2 * png.Ihdr.GetBytesPerPixel();
         Assert.Equal(expectedLength, png.PixelData.Length);
     }
+
+    [Theory]
+    [InlineData("test_2x2.png")]
+    [InlineData("test_4x4.png")]
+    [InlineData("test_64x64.png")]
+    [InlineData("diamond_helm.png")]
+    [InlineData("diamond_helm_extra_small.png")]
+    [InlineData("diamond_helm_grayscale.png")]
+    [InlineData("sprite_atlas.png")]
+    [InlineData("sprite_atlas_128x64.png")]
+    public void RoundTrip_Asset_PixelDataPreserved(string fileName)
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "Assets", fileName);
+        var bytes = File.ReadAllBytes(path);
+        var decoded = Png.DecodeFromByteArray(bytes);
+
+        var reEncoded = RoundTrip(decoded);
+
+        Assert.Equal(decoded.Ihdr.Width, reEncoded.Ihdr.Width);
+        Assert.Equal(decoded.Ihdr.Height, reEncoded.Ihdr.Height);
+        Assert.Equal(decoded.Ihdr.ColorType, reEncoded.Ihdr.ColorType);
+        Assert.Equal(decoded.Ihdr.BitDepth, reEncoded.Ihdr.BitDepth);
+        Assert.Equal(decoded.PixelData, reEncoded.PixelData);
+    }
+
+    // --- 16-bit round-trip tests ---
+
+    [Fact]
+    public void RoundTrip_Grayscale_16Bit_PixelDataPreserved()
+    {
+        // 2x2, 2 bytes per pixel (big-endian 16-bit samples)
+        byte[] pixels = [0x00, 0xFF, 0x80, 0x00, 0xFF, 0xFF, 0x00, 0x00];
+        var png = CreatePng(2, 2, ColorType.Grayscale, 16, pixels);
+        var decoded = RoundTrip(png);
+
+        Assert.Equal(pixels, decoded.PixelData);
+        Assert.Equal(ColorType.Grayscale, decoded.Ihdr.ColorType);
+        Assert.Equal(16, decoded.Ihdr.BitDepth);
+    }
+
+    [Fact]
+    public void RoundTrip_TrueColor_16Bit_PixelDataPreserved()
+    {
+        // 2x1, 6 bytes per pixel (R16 G16 B16)
+        byte[] pixels = [0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0x80, 0x00, 0xFF, 0x00];
+        var png = CreatePng(2, 1, ColorType.TrueColor, 16, pixels);
+        var decoded = RoundTrip(png);
+
+        Assert.Equal(pixels, decoded.PixelData);
+        Assert.Equal(ColorType.TrueColor, decoded.Ihdr.ColorType);
+        Assert.Equal(16, decoded.Ihdr.BitDepth);
+    }
+
+    [Fact]
+    public void RoundTrip_TrueColorWithAlpha_16Bit_PixelDataPreserved()
+    {
+        // 2x1, 8 bytes per pixel (R16 G16 B16 A16)
+        byte[] pixels =
+        [
+            0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0xFF, 0xFF,
+            0x00, 0xFF, 0x80, 0x00, 0xFF, 0x00, 0x80, 0x80,
+        ];
+        var png = CreatePng(2, 1, ColorType.TrueColorWithAlpha, 16, pixels);
+        var decoded = RoundTrip(png);
+
+        Assert.Equal(pixels, decoded.PixelData);
+        Assert.Equal(ColorType.TrueColorWithAlpha, decoded.Ihdr.ColorType);
+        Assert.Equal(16, decoded.Ihdr.BitDepth);
+    }
+
+    [Fact]
+    public void RoundTrip_GrayscaleWithAlpha_16Bit_PixelDataPreserved()
+    {
+        // 2x2, 4 bytes per pixel (G16 A16)
+        byte[] pixels =
+        [
+            0x00, 0x00, 0xFF, 0xFF,
+            0x80, 0x00, 0x80, 0x00,
+            0xFF, 0xFF, 0x00, 0x00,
+            0x40, 0x40, 0xC0, 0xC0,
+        ];
+        var png = CreatePng(2, 2, ColorType.GrayscaleWithAlpha, 16, pixels);
+        var decoded = RoundTrip(png);
+
+        Assert.Equal(pixels, decoded.PixelData);
+        Assert.Equal(ColorType.GrayscaleWithAlpha, decoded.Ihdr.ColorType);
+        Assert.Equal(16, decoded.Ihdr.BitDepth);
+    }
+
+    // --- Sub-byte round-trip tests ---
+
+    [Theory]
+    [InlineData(1, new byte[] { 0, 1, 1, 0 })]
+    [InlineData(2, new byte[] { 0, 1, 2, 3 })]
+    [InlineData(4, new byte[] { 0, 5, 10, 15 })]
+    public void RoundTrip_Grayscale_SubByteBitDepth_PixelDataPreserved(byte bitDepth, byte[] pixels)
+    {
+        var png = CreatePng(2, 2, ColorType.Grayscale, bitDepth, pixels);
+        var decoded = RoundTrip(png);
+
+        Assert.Equal(pixels, decoded.PixelData);
+        Assert.Equal(ColorType.Grayscale, decoded.Ihdr.ColorType);
+        Assert.Equal(bitDepth, decoded.Ihdr.BitDepth);
+    }
+
+    [Fact]
+    public void RoundTrip_Grayscale_1Bit_NonAlignedWidth_PixelDataPreserved()
+    {
+        // 7 pixels wide: 7 bits -> 1 byte per scanline, with 1 padding bit
+        byte[] pixels = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0];
+        var png = CreatePng(7, 2, ColorType.Grayscale, 1, pixels);
+        var decoded = RoundTrip(png);
+
+        Assert.Equal(pixels, decoded.PixelData);
+    }
+
+    [Fact]
+    public void RoundTrip_IndexedColor_4Bit_PixelDataPreserved()
+    {
+        byte[] pixels = [0, 3, 7, 15, 1, 8, 12, 14];
+        var png = CreatePng(4, 2, ColorType.IndexedColor, 4, pixels);
+        var decoded = RoundTrip(png);
+
+        Assert.Equal(pixels, decoded.PixelData);
+        Assert.Equal(ColorType.IndexedColor, decoded.Ihdr.ColorType);
+    }
+
+    [Fact]
+    public void RoundTrip_IndexedColor_1Bit_PixelDataPreserved()
+    {
+        // 8 pixels exactly fills one byte per scanline
+        byte[] pixels = [1, 0, 1, 0, 1, 0, 1, 0];
+        var png = CreatePng(8, 1, ColorType.IndexedColor, 1, pixels);
+        var decoded = RoundTrip(png);
+
+        Assert.Equal(pixels, decoded.PixelData);
+        Assert.Equal(ColorType.IndexedColor, decoded.Ihdr.ColorType);
+    }
+
+    private static IRawPng CreatePng(int width, int height, ColorType colorType, byte bitDepth, byte[] pixels)
+    {
+        var ihdr = new IhdrChunkData
+        {
+            Width = (uint)width,
+            Height = (uint)height,
+            BitDepth = bitDepth,
+            ColorType = colorType,
+            CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+            FilterMethod = FilterMethod.AdaptiveFiltering,
+            InterlaceMethod = InterlaceMethod.None,
+        };
+        return Png.Builder().WithIhdr(ihdr).WithPixelData(pixels).Build();
+    }
 }
