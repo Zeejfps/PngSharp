@@ -22,20 +22,20 @@ internal sealed class ReadChunkState : IDecoderState
         reader.ReadChunkHeader(out var header);
         m_Logger.Debug(header.ToString());
         
-        if (PngSpecUtils.IsIENDChunkHeader(header))
+        if (header.Id == HeaderIds.IEND)
         {
             reader.ReadAndValidateCrc(HeaderIds.IEND);
             decoder.State = decoder.DecodePixelDataState;
             return;
         }
 
-        if (PngSpecUtils.IsIDATChunkHeader(header))
+        if (header.Id == HeaderIds.IDAT)
         {
             decoder.State = new ReadIdataChunkState(header, decoder);
             return;
         }
 
-        if (PngSpecUtils.IsSRGBChunkHeader(header))
+        if (header.Id == HeaderIds.SRGB)
         {
             var srgbData = reader.ReadSrgbChunkData();
             decoder.Srgb = srgbData;
@@ -43,15 +43,15 @@ internal sealed class ReadChunkState : IDecoderState
             return;
         }
 
-        if (PngSpecUtils.IsGAMAChunkHeader(header))
+        if (header.Id == HeaderIds.GAMA)
         {
             var gamaData = reader.ReadGamaChunkData();
             decoder.Gama = gamaData;
             reader.ReadAndValidateCrc(HeaderIds.GAMA);
             return;
         }
-        
-        if (PngSpecUtils.IsPHYSChunkHeader(header))
+
+        if (header.Id == HeaderIds.PHYS)
         {
             var physChunkData = reader.ReadPhysChunkData();
             decoder.Phys = physChunkData;
