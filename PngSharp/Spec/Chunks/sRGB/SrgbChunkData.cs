@@ -1,11 +1,6 @@
-﻿namespace PngSharp.Spec.Chunks.sRGB;
+namespace PngSharp.Spec.Chunks.sRGB;
 
-public readonly struct SrgbChunkData
+public readonly record struct SrgbChunkData
 {
     public RenderingIntent RenderingIntent { get; init; }
-
-    public override string ToString()
-    {
-        return $"{nameof(RenderingIntent)}: {RenderingIntent}";
-    }
 }
