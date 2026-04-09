@@ -1,6 +1,6 @@
 ﻿namespace PngSharp.Spec;
 
-public sealed class PngCrc32
+internal sealed class PngCrc32
 {
     private const uint Polynomial = 0xEDB88320;
     private static readonly uint[] s_Lookup;
