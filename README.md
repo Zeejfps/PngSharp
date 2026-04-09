@@ -7,7 +7,9 @@ A fast, low-allocation, pure C# PNG encoder/decoder with zero native dependencie
 - All color types and bit depths (1, 2, 4, 8, 16) per the PNG spec
 - Adam7 interlacing (encode and decode)
 - All 5 adaptive filter types with per-scanline selection
-- Chunks: IHDR, PLTE, IDAT, IEND, tRNS, sRGB, gAMA, pHYs, tEXt, zTXt, iTXt
+- Chunks: IHDR, PLTE, IDAT, IEND, tRNS, sRGB, gAMA, pHYs, cHRM, tIME, bKGD, tEXt, zTXt, iTXt
+- Chunk ordering validation per the PNG spec
+- Multi-IDAT chunk encoding for large images
 - CRC-32 validation on all chunks
 - Stackalloc and span-based paths to minimize heap allocations
 
@@ -143,6 +145,24 @@ var png = Png.Builder()
         LanguageTag = "ja",
         TranslatedKeyword = "タイトル",
     }))
+    .Build();
+```
+
+### Chromaticities, background color, and modification time
+
+```C#
+var png = Png.Builder()
+    .WithIhdr(ihdr)
+    .WithPixelData(pixelData)
+    .WithChrm(new ChrmChunkData
+    {
+        WhitePointX = 31270, WhitePointY = 32900,
+        RedX = 64000, RedY = 33000,
+        GreenX = 30000, GreenY = 60000,
+        BlueX = 15000, BlueY = 6000,
+    })
+    .WithBkgd(new BkgdChunkData { Data = [0, 0, 0, 0, 0, 0] }) // black background (RGB, 2 bytes each)
+    .WithTime(new TimeChunkData { Year = 2026, Month = 4, Day = 9, Hour = 12, Minute = 0, Second = 0 })
     .Build();
 ```
 
