@@ -5,6 +5,7 @@ A fast, low-allocation, pure C# PNG encoder/decoder with zero native dependencie
 ## Features
 
 - All color types and bit depths (1, 2, 4, 8, 16) per the PNG spec
+- Adam7 interlacing (encode and decode)
 - All 5 adaptive filter types with per-scanline selection
 - Chunks: IHDR, PLTE, IDAT, IEND, tRNS, sRGB, gAMA, pHYs, tEXt, zTXt, iTXt
 - CRC-32 validation on all chunks
@@ -81,6 +82,28 @@ var png = Png.Builder()
 
 Png.EncodeToFile(png, "output.png");
 ```
+
+### Adam7 interlaced encoding
+
+```C#
+var png = Png.Builder()
+    .WithIhdr(new IhdrChunkData
+    {
+        Width = 256,
+        Height = 256,
+        BitDepth = 8,
+        ColorType = ColorType.TrueColorWithAlpha,
+        CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+        FilterMethod = FilterMethod.AdaptiveFiltering,
+        InterlaceMethod = InterlaceMethod.Adam7,
+    })
+    .WithPixelData(pixelData)
+    .Build();
+
+Png.EncodeToFile(png, "interlaced.png");
+```
+
+Interlaced images are automatically deinterlaced when decoded — `png.PixelData` always contains the final, non-interlaced pixel data.
 
 ### Indexed color with palette and transparency
 
