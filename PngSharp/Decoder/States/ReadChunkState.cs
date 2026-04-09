@@ -40,7 +40,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (PngSpecUtils.IsSRGBChunkHeader(header))
         {
             var srgbData = reader.ReadSrgbChunkData();
-            decoder.RawPng.Srgb = AncillaryChunk<SrgbChunkData>.Of(srgbData);
+            decoder.Srgb = AncillaryChunk<SrgbChunkData>.Of(srgbData);
             var crc = reader.CurrentCrcValue;
             var newCrc = reader.ReadCrc();
             m_Logger.Debug($"Our CRC: {crc}, Read CRC: {newCrc}");
@@ -50,7 +50,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (PngSpecUtils.IsGAMAChunkHeader(header))
         {
             var gamaData = reader.ReadGamaChunkData();
-            decoder.RawPng.Gama = AncillaryChunk<GammaChunkData>.Of(gamaData);
+            decoder.Gama = AncillaryChunk<GammaChunkData>.Of(gamaData);
             var crc = reader.CurrentCrcValue;
             var newCrc = reader.ReadCrc();
             m_Logger.Debug($"Our CRC: {crc}, Read CRC: {newCrc}");
@@ -60,7 +60,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (PngSpecUtils.IsPHYSChunkHeader(header))
         {
             var physChunkData = reader.ReadPhysChunkData();
-            decoder.RawPng.Phys = AncillaryChunk<PhysChunkData>.Of(physChunkData);
+            decoder.Phys = AncillaryChunk<PhysChunkData>.Of(physChunkData);
             var crc = reader.CurrentCrcValue;
             var newCrc = reader.ReadCrc();
             m_Logger.Debug($"Our CRC: {crc}, Read CRC: {newCrc}");
