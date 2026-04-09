@@ -1,6 +1,7 @@
 ﻿using PngSharp.Api;
 using PngSharp.Api.Exceptions;
 using PngSharp.Spec;
+using PngSharp.Spec.Chunks.IHDR;
 
 namespace PngSharp.Decoder.States;
 
@@ -25,7 +26,9 @@ internal sealed class ReadChunkState : IDecoderState
         if (header.Id == HeaderIds.IEND)
         {
             reader.ReadAndValidateCrc(HeaderIds.IEND);
-            decoder.State = decoder.DecodePixelDataState;
+            decoder.State = decoder.IhdrChunkData.InterlaceMethod == InterlaceMethod.Adam7
+                ? decoder.DecodeAdam7State
+                : decoder.DecodePixelDataState;
             return;
         }
 

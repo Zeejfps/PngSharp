@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using PngSharp.Spec;
 using PngSharp.Spec.AdaptiveFilter;
 
@@ -7,12 +7,12 @@ namespace PngSharp.Decoder.States;
 internal sealed class DecodePixelDataState : IDecoderState
 {
     private readonly PngDecoder m_Decoder;
-    
+
     public DecodePixelDataState(PngDecoder decoder)
     {
         m_Decoder = decoder;
     }
-    
+
     public void Execute()
     {
         var decoder = m_Decoder;
