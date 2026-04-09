@@ -6,7 +6,7 @@ A fast, low-allocation, pure C# PNG encoder/decoder with zero native dependencie
 
 - All color types and bit depths (1, 2, 4, 8, 16) per the PNG spec
 - All 5 adaptive filter types with per-scanline selection
-- Chunks: IHDR, PLTE, IDAT, IEND, tRNS, sRGB, gAMA, pHYs
+- Chunks: IHDR, PLTE, IDAT, IEND, tRNS, sRGB, gAMA, pHYs, tEXt, zTXt, iTXt
 - CRC-32 validation on all chunks
 - Stackalloc and span-based paths to minimize heap allocations
 
@@ -100,6 +100,48 @@ var png = Png.Builder()
     .WithTrns(new TrnsChunkData { Data = [255, 128, 0] }) // fully opaque, semi-transparent, fully transparent
     .WithPixelData(pixelIndices)
     .Build();
+```
+
+### Text metadata
+
+```C#
+var png = Png.Builder()
+    .WithIhdr(ihdr)
+    .WithPixelData(pixelData)
+    // Uncompressed Latin-1 text (tEXt)
+    .WithTxtChunk(new TextChunk { Keyword = "Author", Text = "Jane Doe" })
+    // Compressed Latin-1 text (zTXt)
+    .WithZTxtChunk(ZTextChunk.Create(new ZTextContent { Keyword = "Comment", Text = "A long description..." }))
+    // International UTF-8 text (iTXt)
+    .WithITxtChunk(ITextChunk.Create(new ITextContent
+    {
+        Keyword = "Title",
+        Text = "タイトル",
+        LanguageTag = "ja",
+        TranslatedKeyword = "タイトル",
+    }))
+    .Build();
+```
+
+### Reading text chunks
+
+```C#
+var png = Png.DecodeFromFile("image.png");
+
+foreach (var txt in png.TxtChunks)
+    Console.WriteLine($"{txt.Keyword}: {txt.Text}");
+
+foreach (var ztxt in png.ZTxtChunks)
+{
+    var content = ztxt.DecodeContent();
+    Console.WriteLine($"{content.Keyword}: {content.Text}");
+}
+
+foreach (var itxt in png.ITxtChunks)
+{
+    var content = itxt.DecodeContent();
+    Console.WriteLine($"{content.Keyword} [{content.LanguageTag}]: {content.Text}");
+}
 ```
 
 ## Configuration
