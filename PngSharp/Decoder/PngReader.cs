@@ -6,6 +6,7 @@ using PngSharp.Spec.Chunks.pHYS;
 using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
+using PngSharp.Spec.Chunks.Text;
 using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Decoder;
@@ -89,6 +90,65 @@ internal sealed class PngReader
         var data = new byte[chunkSize];
         ReadBytes(data);
         return new TrnsChunkData { Data = data };
+    }
+
+    public TextChunk ReadTxtChunkData(int chunkSize)
+    {
+        var data = new byte[chunkSize];
+        ReadBytes(data);
+
+        var nullIndex = Array.IndexOf(data, (byte)0);
+        var keyword = Encoding.Latin1.GetString(data, 0, nullIndex);
+        var text = nullIndex + 1 < data.Length
+            ? Encoding.Latin1.GetString(data, nullIndex + 1, data.Length - nullIndex - 1)
+            : "";
+
+        return new TextChunk { Keyword = keyword, Text = text };
+    }
+
+    public ZTextChunk ReadZtxtChunkData(int chunkSize)
+    {
+        var data = new byte[chunkSize];
+        ReadBytes(data);
+
+        var nullIndex = Array.IndexOf(data, (byte)0);
+        var keyword = Encoding.Latin1.GetString(data, 0, nullIndex);
+        // byte after null is compression method (must be 0 = deflate), then compressed data
+        var compressedStart = nullIndex + 2;
+        var compressedData = data[compressedStart..];
+
+        return new ZTextChunk { Keyword = keyword, CompressedData = compressedData };
+    }
+
+    public ITextChunk ReadItxtChunkData(int chunkSize)
+    {
+        var data = new byte[chunkSize];
+        ReadBytes(data);
+
+        // keyword \0 compressionFlag compressionMethod languageTag \0 translatedKeyword \0 text/compressedText
+        var nullIndex = Array.IndexOf(data, (byte)0);
+        var keyword = Encoding.Latin1.GetString(data, 0, nullIndex);
+        var compressionFlag = data[nullIndex + 1];
+        var pos = nullIndex + 3;
+
+        var langEnd = Array.IndexOf(data, (byte)0, pos);
+        var languageTag = Encoding.ASCII.GetString(data, pos, langEnd - pos);
+        pos = langEnd + 1;
+
+        var transEnd = Array.IndexOf(data, (byte)0, pos);
+        var translatedKeyword = Encoding.UTF8.GetString(data, pos, transEnd - pos);
+        pos = transEnd + 1;
+
+        var textData = pos < data.Length ? data[pos..] : [];
+
+        return new ITextChunk
+        {
+            Keyword = keyword,
+            LanguageTag = languageTag,
+            TranslatedKeyword = translatedKeyword,
+            IsCompressed = compressionFlag == 1,
+            Data = textData,
+        };
     }
 
     public SrgbChunkData ReadSrgbChunkData()

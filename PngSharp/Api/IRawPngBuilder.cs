@@ -3,6 +3,7 @@ using PngSharp.Spec.Chunks.pHYS;
 using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
+using PngSharp.Spec.Chunks.Text;
 using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Api;
@@ -16,5 +17,8 @@ public interface IRawPngBuilder
     IRawPngBuilder WithSrgb(SrgbChunkData srgb);
     IRawPngBuilder WithGama(GammaChunkData gama);
     IRawPngBuilder WithPhys(PhysChunkData phys);
+    IRawPngBuilder WithTxtChunk(TextChunk textChunk);
+    IRawPngBuilder WithZTxtChunk(ZTextChunk textChunk);
+    IRawPngBuilder WithITxtChunk(ITextChunk textChunk);
     IRawPng Build();
 }

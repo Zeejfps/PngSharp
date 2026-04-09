@@ -4,6 +4,7 @@ using PngSharp.Spec.Chunks.pHYS;
 using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
+using PngSharp.Spec.Chunks.Text;
 using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Spec;
@@ -17,6 +18,9 @@ internal sealed class RawPngBuilder : IRawPngBuilder
     private SrgbChunkData? m_Srgb;
     private GammaChunkData? m_Gama;
     private PhysChunkData? m_Phys;
+    private readonly List<TextChunk> m_TxtChunks = [];
+    private readonly List<ZTextChunk> m_ZTxtChunks = [];
+    private readonly List<ITextChunk> m_ITxtChunks = [];
 
     public IRawPngBuilder WithIhdr(IhdrChunkData ihdr)
     {
@@ -60,6 +64,24 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         return this;
     }
 
+    public IRawPngBuilder WithTxtChunk(TextChunk textChunk)
+    {
+        m_TxtChunks.Add(textChunk);
+        return this;
+    }
+
+    public IRawPngBuilder WithZTxtChunk(ZTextChunk textChunk)
+    {
+        m_ZTxtChunks.Add(textChunk);
+        return this;
+    }
+
+    public IRawPngBuilder WithITxtChunk(ITextChunk textChunk)
+    {
+        m_ITxtChunks.Add(textChunk);
+        return this;
+    }
+
     public IRawPng Build()
     {
         if (m_Ihdr is null)
@@ -77,6 +99,7 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         ValidateBitDepth(ihdr.BitDepth, ihdr.ColorType);
         ValidatePlte(ihdr, m_Plte);
         ValidateTrns(ihdr, m_Trns, m_Plte);
+        ValidateTextKeywords(m_TxtChunks, m_ZTxtChunks, m_ITxtChunks);
 
         var expectedLength = (int)ihdr.Width * (int)ihdr.Height * ihdr.GetBytesPerPixel();
         if (m_PixelData.Length != expectedLength)
@@ -93,6 +116,9 @@ internal sealed class RawPngBuilder : IRawPngBuilder
             Srgb = m_Srgb,
             Gama = m_Gama,
             Phys = m_Phys,
+            TxtChunks = m_TxtChunks,
+            ZTxtChunks = m_ZTxtChunks,
+            ITxtChunks = m_ITxtChunks,
         };
     }
 
@@ -146,6 +172,28 @@ internal sealed class RawPngBuilder : IRawPngBuilder
                         $"tRNS has {data.Length} entries but palette has only {maxEntries}.");
                 break;
         }
+    }
+
+    private static void ValidateTextKeywords(
+        List<TextChunk> text,
+        List<ZTextChunk> compressed,
+        List<ITextChunk> international)
+    {
+        foreach (var chunk in text)
+            ValidateKeyword(chunk.Keyword);
+        foreach (var chunk in compressed)
+            ValidateKeyword(chunk.Keyword);
+        foreach (var chunk in international)
+            ValidateKeyword(chunk.Keyword);
+    }
+
+    private static void ValidateKeyword(string keyword)
+    {
+        if (string.IsNullOrEmpty(keyword))
+            throw new InvalidOperationException("Text chunk keyword must not be empty.");
+        if (keyword.Length > 79)
+            throw new InvalidOperationException(
+                $"Text chunk keyword '{keyword}' exceeds maximum length of 79 bytes.");
     }
 
     private static void ValidateBitDepth(byte bitDepth, ColorType colorType)
