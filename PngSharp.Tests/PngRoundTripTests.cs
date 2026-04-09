@@ -1,4 +1,5 @@
 using PngSharp.Api;
+using PngSharp.Spec.Chunks.IHDR;
 using Xunit;
 
 namespace PngSharp.Tests;
@@ -94,6 +95,37 @@ public class PngRoundTripTests
         // Bit depth=8, color type=6 (RGBA)
         Assert.Equal(8, bytes[24]);
         Assert.Equal(6, bytes[25]);
+
+        // Compression method=0, filter method=0, interlace method=0
+        Assert.Equal((byte)CompressionMethod.DeflateWithSlidingWindow, bytes[26]);
+        Assert.Equal((byte)FilterMethod.AdaptiveFiltering, bytes[27]);
+        Assert.Equal((byte)InterlaceMethod.None, bytes[28]);
+    }
+
+    [Fact]
+    public void Encode_IHDRChunk_WritesInterlaceMethod()
+    {
+        var ihdr = new IhdrChunkData
+        {
+            Width = 2,
+            Height = 2,
+            BitDepth = 8,
+            ColorType = ColorType.TrueColorWithAlpha,
+            CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+            FilterMethod = FilterMethod.AdaptiveFiltering,
+            InterlaceMethod = InterlaceMethod.Adam7,
+        };
+        var png = Png.Builder()
+            .WithIhdr(ihdr)
+            .WithPixelData(new byte[16])
+            .Build();
+
+        var ms = new MemoryStream();
+        Png.EncodeToStream(png, ms);
+        var bytes = ms.ToArray();
+
+        // Byte 28 is the interlace method in the IHDR chunk
+        Assert.Equal((byte)InterlaceMethod.Adam7, bytes[28]);
     }
 
     [Fact]

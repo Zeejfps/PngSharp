@@ -36,8 +36,8 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteByte(data.BitDepth);
         WriteByte((byte)data.ColorType);
         WriteByte((byte)data.CompressionMethod);
-        WriteByte((byte)CompressionMethod.DeflateWithSlidingWindow);
-        WriteByte((byte)InterlaceMethod.None);
+        WriteByte((byte)data.FilterMethod);
+        WriteByte((byte)data.InterlaceMethod);
         WriteCrc32();
     }
 
