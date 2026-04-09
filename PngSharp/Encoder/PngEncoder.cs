@@ -4,6 +4,7 @@ using PngSharp.Spec;
 using PngSharp.Spec.AdaptiveFilter;
 using PngSharp.Spec.Chunks.IHDR;
 
+
 namespace PngSharp.Encoder;
 
 internal sealed class PngEncoder : IDisposable, IAsyncDisposable
@@ -127,21 +128,11 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         var allPixels = new byte[width * height * finalBpp];
         inputStream.ReadExactly(allPixels);
 
-        // Pass 7 is always the largest — pre-allocate row buffers once
         var maxPassWidth = Adam7.GetPassWidth(width, Adam7.PassCount - 1);
         var maxPassScanlineByteWidth = Adam7.GetPassScanlineByteWidth(maxPassWidth, bitsPerPixel);
-        var maxRowByteWidth = maxPassWidth * bytesPerPixel;
-        const int stackAllocThreshold = 1024;
-
-        var unpackedRowBuf = isSubByte
-            ? (maxPassWidth <= stackAllocThreshold ? stackalloc byte[maxPassWidth] : new byte[maxPassWidth])
-            : Span<byte>.Empty;
-        var packedRowBuf = isSubByte
-            ? (maxPassScanlineByteWidth <= stackAllocThreshold ? stackalloc byte[maxPassScanlineByteWidth] : new byte[maxPassScanlineByteWidth])
-            : Span<byte>.Empty;
-        var rowBytesBuf = !isSubByte
-            ? (maxRowByteWidth <= stackAllocThreshold ? stackalloc byte[maxRowByteWidth] : new byte[maxRowByteWidth])
-            : Span<byte>.Empty;
+        var unpackedRowBuf = isSubByte ? new byte[maxPassWidth] : [];
+        var packedRowBuf = isSubByte ? new byte[maxPassScanlineByteWidth] : [];
+        var rowBytesBuf = !isSubByte ? new byte[maxPassWidth * bytesPerPixel] : [];
 
         for (var pass = 0; pass < Adam7.PassCount; pass++)
         {
@@ -160,8 +151,8 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
 
             if (isSubByte)
             {
-                var unpackedRow = unpackedRowBuf[..passWidth];
-                var packedRow = packedRowBuf[..passScanlineByteWidth];
+                var unpackedRow = unpackedRowBuf.AsSpan(0, passWidth);
+                var packedRow = packedRowBuf.AsSpan(0, passScanlineByteWidth);
 
                 for (var r = 0; r < passHeight; r++)
                 {
@@ -177,7 +168,7 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             }
             else
             {
-                var rowBytes = rowBytesBuf[..(passWidth * bytesPerPixel)];
+                var rowBytes = rowBytesBuf.AsSpan(0, passWidth * bytesPerPixel);
 
                 for (var r = 0; r < passHeight; r++)
                 {

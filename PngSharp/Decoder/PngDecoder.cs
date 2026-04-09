@@ -32,6 +32,7 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public IDecoderState ReadChunkState { get; }
     public IDecoderState DoneState { get; }
     public IDecoderState DecodePixelDataState { get; }
+    public IDecoderState DecodeAdam7State { get; }
     
     private bool IsDone => State == DoneState;
 
@@ -43,6 +44,7 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
         ReadIhdrChunkState = new ReadIhdrChunkState(this, logger);
         ReadChunkState = new ReadChunkState(this, logger);
         DecodePixelDataState = new DecodePixelDataState(this);
+        DecodeAdam7State = new DecodeAdam7PixelDataState(this);
         DoneState = new DoneState();
         
         CompressedPixelDataStream = new MemoryStream();
