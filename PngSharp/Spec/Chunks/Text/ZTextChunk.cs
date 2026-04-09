@@ -12,13 +12,17 @@ public readonly record struct ZTextChunk
     public string Keyword { get; init; }
     public byte[] CompressedData { get; init; }
 
-    public string Decompress()
+    public ZTextContent GetContent()
     {
         using var compressedStream = new MemoryStream(CompressedData);
         using var deflateStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
         using var resultStream = new MemoryStream();
         deflateStream.CopyTo(resultStream);
-        return Encoding.Latin1.GetString(resultStream.ToArray());
+        return new ZTextContent
+        {
+            Keyword = Keyword,
+            Text = Encoding.Latin1.GetString(resultStream.ToArray()),
+        };
     }
 
     public static ZTextChunk Create(ZTextContent content)

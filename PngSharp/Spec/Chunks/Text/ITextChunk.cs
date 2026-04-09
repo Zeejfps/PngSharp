@@ -15,16 +15,29 @@ public readonly record struct ITextChunk
     public bool IsCompressed { get; init; }
     public byte[] Data { get; init; }
 
-    public string GetText()
+    public ITextContent GetContent()
     {
+        string text;
         if (!IsCompressed)
-            return Encoding.UTF8.GetString(Data);
+        {
+            text = Encoding.UTF8.GetString(Data);
+        }
+        else
+        {
+            using var compressedStream = new MemoryStream(Data);
+            using var deflateStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
+            using var resultStream = new MemoryStream();
+            deflateStream.CopyTo(resultStream);
+            text = Encoding.UTF8.GetString(resultStream.ToArray());
+        }
 
-        using var compressedStream = new MemoryStream(Data);
-        using var deflateStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
-        using var resultStream = new MemoryStream();
-        deflateStream.CopyTo(resultStream);
-        return Encoding.UTF8.GetString(resultStream.ToArray());
+        return new ITextContent
+        {
+            Keyword = Keyword,
+            Text = text,
+            LanguageTag = LanguageTag,
+            TranslatedKeyword = TranslatedKeyword,
+        };
     }
 
     public static ITextChunk Create(ITextContent content)

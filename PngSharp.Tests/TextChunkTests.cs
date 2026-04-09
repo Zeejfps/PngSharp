@@ -51,8 +51,8 @@ public class TextChunkTests
         Assert.Single(decoded.ZTxtChunks);
         Assert.Equal("Description", decoded.ZTxtChunks[0].Keyword);
 
-        var decompressed = decoded.ZTxtChunks[0].Decompress();
-        Assert.Equal(originalText, decompressed);
+        var content = decoded.ZTxtChunks[0].GetContent();
+        Assert.Equal(originalText, content.Text);
     }
 
     [Fact]
@@ -75,11 +75,12 @@ public class TextChunkTests
 
         Assert.Single(decoded.ITxtChunks);
         var result = decoded.ITxtChunks[0];
-        Assert.Equal("Title", result.Keyword);
-        Assert.Equal("en", result.LanguageTag);
-        Assert.Equal("Title", result.TranslatedKeyword);
+        var content = result.GetContent();
+        Assert.Equal("Title", content.Keyword);
+        Assert.Equal("en", content.LanguageTag);
+        Assert.Equal("Title", content.TranslatedKeyword);
         Assert.False(result.IsCompressed);
-        Assert.Equal("PNG test image", result.GetText());
+        Assert.Equal("PNG test image", content.Text);
     }
 
     [Fact]
@@ -104,7 +105,7 @@ public class TextChunkTests
         Assert.Single(decoded.ITxtChunks);
         var result = decoded.ITxtChunks[0];
         Assert.True(result.IsCompressed);
-        Assert.Equal(originalText, result.GetText());
+        Assert.Equal(originalText, result.GetContent().Text);
     }
 
     [Fact]
