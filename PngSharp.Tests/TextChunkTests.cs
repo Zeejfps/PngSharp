@@ -76,7 +76,7 @@ public class TextChunkTests
     public void RoundTrip_iTXt_Compressed_Preserved()
     {
         var originalText = "A compressed international text chunk with UTF-8 support.";
-        var chunk = InternationalTextChunkData.Create("Description", originalText, "en", "Description", compress: true);
+        var chunk = InternationalTextChunkData.CreateCompressed("Description", originalText, "en", "Description");
 
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())

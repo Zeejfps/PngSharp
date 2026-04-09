@@ -28,22 +28,26 @@ public readonly record struct InternationalTextChunkData
     }
 
     public static InternationalTextChunkData Create(
-        string keyword, string text, string languageTag, string translatedKeyword, bool compress = false)
+        string keyword, string text, string languageTag, string translatedKeyword)
     {
-        byte[] data;
-        if (compress)
+        return new InternationalTextChunkData
         {
-            var raw = Encoding.UTF8.GetBytes(text);
-            using var compressedStream = new MemoryStream();
-            using (var zlibStream = new ZLibStream(compressedStream, CompressionLevel.Optimal, true))
-            {
-                zlibStream.Write(raw);
-            }
-            data = compressedStream.ToArray();
-        }
-        else
+            Keyword = keyword,
+            LanguageTag = languageTag,
+            TranslatedKeyword = translatedKeyword,
+            IsCompressed = false,
+            Data = Encoding.UTF8.GetBytes(text),
+        };
+    }
+
+    public static InternationalTextChunkData CreateCompressed(
+        string keyword, string text, string languageTag, string translatedKeyword)
+    {
+        var raw = Encoding.UTF8.GetBytes(text);
+        using var compressedStream = new MemoryStream();
+        using (var zlibStream = new ZLibStream(compressedStream, CompressionLevel.Optimal, true))
         {
-            data = Encoding.UTF8.GetBytes(text);
+            zlibStream.Write(raw);
         }
 
         return new InternationalTextChunkData
@@ -51,8 +55,8 @@ public readonly record struct InternationalTextChunkData
             Keyword = keyword,
             LanguageTag = languageTag,
             TranslatedKeyword = translatedKeyword,
-            IsCompressed = compress,
-            Data = data,
+            IsCompressed = true,
+            Data = compressedStream.ToArray(),
         };
     }
 }
