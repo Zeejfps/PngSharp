@@ -9,4 +9,5 @@ internal static class HeaderIds
     public const string SRGB = "sRGB";
     public const string GAMA = "gAMA";
     public const string PHYS = "pHYs";
+    public const string TRNS = "tRNS";
 }

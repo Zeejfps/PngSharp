@@ -1,5 +1,6 @@
 using PngSharp.Api;
 using PngSharp.Spec.Chunks.IHDR;
+using PngSharp.Spec.Chunks.PLTE;
 using Xunit;
 
 namespace PngSharp.Tests;
@@ -260,8 +261,10 @@ public class PngRoundTripTests
     [Fact]
     public void RoundTrip_IndexedColor_4Bit_PixelDataPreserved()
     {
+        // 16-entry palette for 4-bit
+        var plte = new PlteChunkData { Entries = new byte[16 * 3] };
         byte[] pixels = [0, 3, 7, 15, 1, 8, 12, 14];
-        var png = CreatePng(4, 2, ColorType.IndexedColor, 4, pixels);
+        var png = CreateIndexedPng(4, 2, 4, plte, pixels);
         var decoded = RoundTrip(png);
 
         Assert.Equal(pixels, decoded.PixelData);
@@ -271,13 +274,29 @@ public class PngRoundTripTests
     [Fact]
     public void RoundTrip_IndexedColor_1Bit_PixelDataPreserved()
     {
-        // 8 pixels exactly fills one byte per scanline
+        // 2-entry palette for 1-bit
+        var plte = new PlteChunkData { Entries = [0, 0, 0, 255, 255, 255] };
         byte[] pixels = [1, 0, 1, 0, 1, 0, 1, 0];
-        var png = CreatePng(8, 1, ColorType.IndexedColor, 1, pixels);
+        var png = CreateIndexedPng(8, 1, 1, plte, pixels);
         var decoded = RoundTrip(png);
 
         Assert.Equal(pixels, decoded.PixelData);
         Assert.Equal(ColorType.IndexedColor, decoded.Ihdr.ColorType);
+    }
+
+    private static IRawPng CreateIndexedPng(int width, int height, byte bitDepth, PlteChunkData plte, byte[] pixels)
+    {
+        var ihdr = new IhdrChunkData
+        {
+            Width = (uint)width,
+            Height = (uint)height,
+            BitDepth = bitDepth,
+            ColorType = ColorType.IndexedColor,
+            CompressionMethod = CompressionMethod.DeflateWithSlidingWindow,
+            FilterMethod = FilterMethod.AdaptiveFiltering,
+            InterlaceMethod = InterlaceMethod.None,
+        };
+        return Png.Builder().WithIhdr(ihdr).WithPlte(plte).WithPixelData(pixels).Build();
     }
 
     private static IRawPng CreatePng(int width, int height, ColorType colorType, byte bitDepth, byte[] pixels)

@@ -1,7 +1,9 @@
 ﻿using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.pHYS;
+using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
+using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Api;
 
@@ -15,6 +17,8 @@ public interface IRawPng
     /// </summary>
     byte[] PixelData { get; }
 
+    PlteChunkData? Plte { get; }
+    TrnsChunkData? Trns { get; }
     SrgbChunkData? Srgb { get; }
     GammaChunkData? Gama { get; }
     PhysChunkData? Phys { get; }

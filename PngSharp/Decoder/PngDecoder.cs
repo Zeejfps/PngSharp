@@ -2,8 +2,10 @@
 using PngSharp.Decoder.States;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.pHYS;
+using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
+using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Decoder;
 
@@ -14,6 +16,8 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public IhdrChunkData IhdrChunkData { get; set; }
     public Stream CompressedPixelDataStream { get; }
     public Stream PixelDataStream { get; }
+    public PlteChunkData? Plte { get; set; }
+    public TrnsChunkData? Trns { get; set; }
     public SrgbChunkData? Srgb { get; set; }
     public GammaChunkData? Gama { get; set; }
     public PhysChunkData? Phys { get; set; }

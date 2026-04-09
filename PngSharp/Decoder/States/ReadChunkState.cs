@@ -35,6 +35,22 @@ internal sealed class ReadChunkState : IDecoderState
             return;
         }
 
+        if (header.Id == HeaderIds.PLTE)
+        {
+            var plteData = reader.ReadPlteChunkData(header.ChunkSizeInBytes);
+            decoder.Plte = plteData;
+            reader.ReadAndValidateCrc(HeaderIds.PLTE);
+            return;
+        }
+
+        if (header.Id == HeaderIds.TRNS)
+        {
+            var trnsData = reader.ReadTrnsChunkData(header.ChunkSizeInBytes);
+            decoder.Trns = trnsData;
+            reader.ReadAndValidateCrc(HeaderIds.TRNS);
+            return;
+        }
+
         if (header.Id == HeaderIds.SRGB)
         {
             var srgbData = reader.ReadSrgbChunkData();

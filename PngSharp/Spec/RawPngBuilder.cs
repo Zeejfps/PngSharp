@@ -1,8 +1,10 @@
 using PngSharp.Api;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.pHYS;
+using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
+using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Spec;
 
@@ -10,6 +12,8 @@ internal sealed class RawPngBuilder : IRawPngBuilder
 {
     private IhdrChunkData? m_Ihdr;
     private byte[]? m_PixelData;
+    private PlteChunkData? m_Plte;
+    private TrnsChunkData? m_Trns;
     private SrgbChunkData? m_Srgb;
     private GammaChunkData? m_Gama;
     private PhysChunkData? m_Phys;
@@ -23,6 +27,18 @@ internal sealed class RawPngBuilder : IRawPngBuilder
     public IRawPngBuilder WithPixelData(byte[] pixels)
     {
         m_PixelData = pixels;
+        return this;
+    }
+
+    public IRawPngBuilder WithPlte(PlteChunkData plte)
+    {
+        m_Plte = plte;
+        return this;
+    }
+
+    public IRawPngBuilder WithTrns(TrnsChunkData trns)
+    {
+        m_Trns = trns;
         return this;
     }
 
@@ -59,6 +75,8 @@ internal sealed class RawPngBuilder : IRawPngBuilder
             throw new InvalidOperationException("Height must be greater than zero.");
 
         ValidateBitDepth(ihdr.BitDepth, ihdr.ColorType);
+        ValidatePlte(ihdr, m_Plte);
+        ValidateTrns(ihdr, m_Trns, m_Plte);
 
         var expectedLength = (int)ihdr.Width * (int)ihdr.Height * ihdr.GetBytesPerPixel();
         if (m_PixelData.Length != expectedLength)
@@ -70,10 +88,64 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         {
             Ihdr = ihdr,
             PixelData = m_PixelData,
+            Plte = m_Plte,
+            Trns = m_Trns,
             Srgb = m_Srgb,
             Gama = m_Gama,
             Phys = m_Phys,
         };
+    }
+
+    private static void ValidatePlte(IhdrChunkData ihdr, PlteChunkData? plte)
+    {
+        if (ihdr.ColorType is ColorType.Grayscale or ColorType.GrayscaleWithAlpha && plte.HasValue)
+            throw new InvalidOperationException($"PLTE chunk is forbidden for {ihdr.ColorType}.");
+
+        if (ihdr.ColorType == ColorType.IndexedColor && !plte.HasValue)
+            throw new InvalidOperationException("PLTE chunk is required for IndexedColor.");
+
+        if (plte.HasValue)
+        {
+            var entries = plte.Value.Entries;
+            if (entries.Length == 0 || entries.Length % 3 != 0)
+                throw new InvalidOperationException(
+                    $"PLTE data length {entries.Length} must be a positive multiple of 3.");
+
+            var maxEntries = 1 << ihdr.BitDepth;
+            if (plte.Value.EntryCount > maxEntries)
+                throw new InvalidOperationException(
+                    $"PLTE has {plte.Value.EntryCount} entries but bit depth {ihdr.BitDepth} allows at most {maxEntries}.");
+        }
+    }
+
+    private static void ValidateTrns(IhdrChunkData ihdr, TrnsChunkData? trns, PlteChunkData? plte)
+    {
+        if (!trns.HasValue)
+            return;
+
+        if (ihdr.ColorType is ColorType.GrayscaleWithAlpha or ColorType.TrueColorWithAlpha)
+            throw new InvalidOperationException($"tRNS chunk is forbidden for {ihdr.ColorType}.");
+
+        var data = trns.Value.Data;
+        switch (ihdr.ColorType)
+        {
+            case ColorType.Grayscale:
+                if (data.Length != 2)
+                    throw new InvalidOperationException(
+                        $"tRNS data length for Grayscale must be 2, got {data.Length}.");
+                break;
+            case ColorType.TrueColor:
+                if (data.Length != 6)
+                    throw new InvalidOperationException(
+                        $"tRNS data length for TrueColor must be 6, got {data.Length}.");
+                break;
+            case ColorType.IndexedColor:
+                var maxEntries = plte?.EntryCount ?? 0;
+                if (data.Length > maxEntries)
+                    throw new InvalidOperationException(
+                        $"tRNS has {data.Length} entries but palette has only {maxEntries}.");
+                break;
+        }
     }
 
     private static void ValidateBitDepth(byte bitDepth, ColorType colorType)
