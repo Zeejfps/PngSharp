@@ -21,14 +21,14 @@ public readonly record struct ZTxtChunk
         return Encoding.Latin1.GetString(resultStream.ToArray());
     }
 
-    public static ZTxtChunk Create(string keyword, string text)
+    public static ZTxtChunk Create(ZTxtContent content)
     {
-        var raw = Encoding.Latin1.GetBytes(text);
+        var raw = Encoding.Latin1.GetBytes(content.Text);
         using var compressedStream = new MemoryStream();
         using (var zlibStream = new ZLibStream(compressedStream, CompressionLevel.Optimal, true))
         {
             zlibStream.Write(raw);
         }
-        return new ZTxtChunk { Keyword = keyword, CompressedData = compressedStream.ToArray() };
+        return new ZTxtChunk { Keyword = content.Keyword, CompressedData = compressedStream.ToArray() };
     }
 }

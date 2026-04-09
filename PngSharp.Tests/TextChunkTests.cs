@@ -35,7 +35,11 @@ public class TextChunkTests
     public void RoundTrip_zTXt_CompressedDataPreserved()
     {
         var originalText = "This is a longer description that benefits from compression.";
-        var chunk = ZTxtChunk.Create("Description", originalText);
+        var chunk = ZTxtChunk.Create(new ZTxtContent
+        {
+            Keyword = "Description",
+            Text = originalText,
+        });
 
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())
@@ -111,11 +115,11 @@ public class TextChunkTests
             .WithPixelData([0, 0, 0, 255])
             .WithTxtChunk(new TxtChunk { Keyword = "Title", Text = "Test" })
             .WithTxtChunk(new TxtChunk { Keyword = "Author", Text = "PngSharp" })
-            .WithZTxtChunk(new ZTxtChunk
+            .WithZTxtChunk(ZTxtChunk.Create(new ZTxtContent
             {
                 Keyword = "Description",
-                CompressedData = ZTxtChunk.Create("Description", "Compressed text").CompressedData,
-            })
+                Text = "Compressed text",
+            }))
             .WithITxtChunk(
                 ITxtChunk.Create(new ITxtContent
                 {
