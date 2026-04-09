@@ -1,5 +1,4 @@
-﻿using System.IO.Compression;
-using System.Text;
+﻿using System.Text;
 using PngSharp.Api.Exceptions;
 using PngSharp.Spec;
 using PngSharp.Spec.Chunks.IHDR;
@@ -107,36 +106,29 @@ internal sealed class PngReader
         return new TextChunkData { Keyword = keyword, Text = text };
     }
 
-    public TextChunkData ReadZtxtChunkData(int chunkSize)
+    public CompressedTextChunkData ReadZtxtChunkData(int chunkSize)
     {
         var data = new byte[chunkSize];
         ReadBytes(data);
 
         var nullIndex = Array.IndexOf(data, (byte)0);
         var keyword = Encoding.Latin1.GetString(data, 0, nullIndex);
-        // byte after null is compression method (must be 0 = deflate)
+        // byte after null is compression method (must be 0 = deflate), then compressed data
         var compressedStart = nullIndex + 2;
-        var compressedData = data.AsSpan(compressedStart);
+        var compressedData = data[compressedStart..];
 
-        using var compressedStream = new MemoryStream(compressedData.ToArray());
-        using var deflateStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
-        using var resultStream = new MemoryStream();
-        deflateStream.CopyTo(resultStream);
-        var text = Encoding.Latin1.GetString(resultStream.ToArray());
-
-        return new TextChunkData { Keyword = keyword, Text = text, IsCompressed = true };
+        return new CompressedTextChunkData { Keyword = keyword, CompressedData = compressedData };
     }
 
-    public TextChunkData ReadItxtChunkData(int chunkSize)
+    public InternationalTextChunkData ReadItxtChunkData(int chunkSize)
     {
         var data = new byte[chunkSize];
         ReadBytes(data);
 
-        // keyword \0 compressionFlag compressionMethod languageTag \0 translatedKeyword \0 text
+        // keyword \0 compressionFlag compressionMethod languageTag \0 translatedKeyword \0 text/compressedText
         var nullIndex = Array.IndexOf(data, (byte)0);
         var keyword = Encoding.Latin1.GetString(data, 0, nullIndex);
         var compressionFlag = data[nullIndex + 1];
-        // compressionMethod = data[nullIndex + 2] (always 0 = deflate)
         var pos = nullIndex + 3;
 
         var langEnd = Array.IndexOf(data, (byte)0, pos);
@@ -147,29 +139,15 @@ internal sealed class PngReader
         var translatedKeyword = Encoding.UTF8.GetString(data, pos, transEnd - pos);
         pos = transEnd + 1;
 
-        string text;
-        if (compressionFlag == 1 && pos < data.Length)
-        {
-            using var compressedStream = new MemoryStream(data, pos, data.Length - pos);
-            using var deflateStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
-            using var resultStream = new MemoryStream();
-            deflateStream.CopyTo(resultStream);
-            text = Encoding.UTF8.GetString(resultStream.ToArray());
-        }
-        else
-        {
-            text = pos < data.Length
-                ? Encoding.UTF8.GetString(data, pos, data.Length - pos)
-                : "";
-        }
+        var textData = pos < data.Length ? data[pos..] : [];
 
-        return new TextChunkData
+        return new InternationalTextChunkData
         {
             Keyword = keyword,
-            Text = text,
-            IsCompressed = compressionFlag == 1,
             LanguageTag = languageTag,
             TranslatedKeyword = translatedKeyword,
+            IsCompressed = compressionFlag == 1,
+            Data = textData,
         };
     }
 

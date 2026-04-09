@@ -74,18 +74,6 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(textChunkData.Keyword.Length, MaxKeywordLength, nameof(textChunkData.Keyword));
 
-        if (textChunkData.IsInternational)
-        {
-            WriteItxtChunk(textChunkData);
-            return;
-        }
-        if (textChunkData.IsCompressed)
-        {
-            WriteZtxtChunk(textChunkData);
-            return;
-        }
-
-        // NOTE(Zee): Keyword should be capped at 79 characters
         Span<byte> keyword = stackalloc byte[textChunkData.Keyword.Length];
         Encoding.Latin1.GetBytes(textChunkData.Keyword, keyword);
         var text = Encoding.Latin1.GetBytes(textChunkData.Text);
@@ -98,68 +86,46 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteCrc32();
     }
 
-    private void WriteZtxtChunk(TextChunkData textChunkData)
+    public void WriteCompressedTextChunk(CompressedTextChunkData chunk)
     {
-        Span<byte> keyword = stackalloc byte[textChunkData.Keyword.Length];
-        Encoding.Latin1.GetBytes(textChunkData.Keyword, keyword);
-        var textBytes = Encoding.Latin1.GetBytes(textChunkData.Text);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(chunk.Keyword.Length, MaxKeywordLength, nameof(chunk.Keyword));
 
-        using var compressedStream = new MemoryStream();
-        using (var zlibStream = new ZLibStream(compressedStream, CompressionLevel.Optimal, true))
-        {
-            zlibStream.Write(textBytes);
-        }
-        var compressed = compressedStream.ToArray();
+        Span<byte> keyword = stackalloc byte[chunk.Keyword.Length];
+        Encoding.Latin1.GetBytes(chunk.Keyword, keyword);
 
-        var size = keyword.Length + 1 + 1 + compressed.Length;
+        var size = keyword.Length + 1 + 1 + chunk.CompressedData.Length;
         WriteChunkHeader(new ChunkHeader { Id = HeaderIds.ZTXT, ChunkSizeInBytes = size });
         WriteBytes(keyword);
         WriteByte(0); // null separator
         WriteByte(0); // compression method = deflate
-        WriteBytes(compressed);
+        WriteBytes(chunk.CompressedData);
         WriteCrc32();
     }
 
-    private void WriteItxtChunk(TextChunkData textChunkData)
+    public void WriteInternationalTextChunk(InternationalTextChunkData chunk)
     {
-        Span<byte> keyword = stackalloc byte[textChunkData.Keyword.Length];
-        Encoding.Latin1.GetBytes(textChunkData.Keyword, keyword);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(chunk.Keyword.Length, MaxKeywordLength, nameof(chunk.Keyword));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(chunk.LanguageTag.Length, MaxLanguageTagLength, nameof(chunk.LanguageTag));
 
-        var langStr = textChunkData.LanguageTag ?? "";
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(langStr.Length, MaxLanguageTagLength, nameof(textChunkData.LanguageTag));
-        Span<byte> languageTag = stackalloc byte[langStr.Length];
-        Encoding.ASCII.GetBytes(langStr, languageTag);
+        Span<byte> keyword = stackalloc byte[chunk.Keyword.Length];
+        Encoding.Latin1.GetBytes(chunk.Keyword, keyword);
 
-        var transStr = textChunkData.TranslatedKeyword ?? "";
-        var translatedKeyword = Encoding.UTF8.GetBytes(transStr);
+        Span<byte> languageTag = stackalloc byte[chunk.LanguageTag.Length];
+        Encoding.ASCII.GetBytes(chunk.LanguageTag, languageTag);
 
-        byte[] textBytes;
-        if (textChunkData.IsCompressed)
-        {
-            var rawText = Encoding.UTF8.GetBytes(textChunkData.Text);
-            using var compressedStream = new MemoryStream();
-            using (var zlibStream = new ZLibStream(compressedStream, CompressionLevel.Optimal, true))
-            {
-                zlibStream.Write(rawText);
-            }
-            textBytes = compressedStream.ToArray();
-        }
-        else
-        {
-            textBytes = Encoding.UTF8.GetBytes(textChunkData.Text);
-        }
+        var translatedKeyword = Encoding.UTF8.GetBytes(chunk.TranslatedKeyword);
 
-        var size = keyword.Length + 1 + 1 + 1 + languageTag.Length + 1 + translatedKeyword.Length + 1 + textBytes.Length;
+        var size = keyword.Length + 1 + 1 + 1 + languageTag.Length + 1 + translatedKeyword.Length + 1 + chunk.Data.Length;
         WriteChunkHeader(new ChunkHeader { Id = HeaderIds.ITXT, ChunkSizeInBytes = size });
         WriteBytes(keyword);
         WriteByte(0); // null separator
-        WriteByte((byte)(textChunkData.IsCompressed ? 1 : 0)); // compression flag
+        WriteByte((byte)(chunk.IsCompressed ? 1 : 0)); // compression flag
         WriteByte(0); // compression method = deflate
         WriteBytes(languageTag);
         WriteByte(0); // null separator
         WriteBytes(translatedKeyword);
         WriteByte(0); // null separator
-        WriteBytes(textBytes);
+        WriteBytes(chunk.Data);
         WriteCrc32();
     }
 

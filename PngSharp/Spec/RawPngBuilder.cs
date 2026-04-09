@@ -19,6 +19,8 @@ internal sealed class RawPngBuilder : IRawPngBuilder
     private GammaChunkData? m_Gama;
     private PhysChunkData? m_Phys;
     private readonly List<TextChunkData> m_TextChunks = [];
+    private readonly List<CompressedTextChunkData> m_CompressedTextChunks = [];
+    private readonly List<InternationalTextChunkData> m_InternationalTextChunks = [];
 
     public IRawPngBuilder WithIhdr(IhdrChunkData ihdr)
     {
@@ -68,6 +70,18 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         return this;
     }
 
+    public IRawPngBuilder WithCompressedTextChunk(CompressedTextChunkData textChunk)
+    {
+        m_CompressedTextChunks.Add(textChunk);
+        return this;
+    }
+
+    public IRawPngBuilder WithInternationalTextChunk(InternationalTextChunkData textChunk)
+    {
+        m_InternationalTextChunks.Add(textChunk);
+        return this;
+    }
+
     public IRawPng Build()
     {
         if (m_Ihdr is null)
@@ -85,7 +99,7 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         ValidateBitDepth(ihdr.BitDepth, ihdr.ColorType);
         ValidatePlte(ihdr, m_Plte);
         ValidateTrns(ihdr, m_Trns, m_Plte);
-        ValidateTextChunks(m_TextChunks);
+        ValidateTextKeywords(m_TextChunks, m_CompressedTextChunks, m_InternationalTextChunks);
 
         var expectedLength = (int)ihdr.Width * (int)ihdr.Height * ihdr.GetBytesPerPixel();
         if (m_PixelData.Length != expectedLength)
@@ -103,6 +117,8 @@ internal sealed class RawPngBuilder : IRawPngBuilder
             Gama = m_Gama,
             Phys = m_Phys,
             TextChunks = m_TextChunks,
+            CompressedTextChunks = m_CompressedTextChunks,
+            InternationalTextChunks = m_InternationalTextChunks,
         };
     }
 
@@ -158,16 +174,26 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         }
     }
 
-    private static void ValidateTextChunks(List<TextChunkData> textChunks)
+    private static void ValidateTextKeywords(
+        List<TextChunkData> text,
+        List<CompressedTextChunkData> compressed,
+        List<InternationalTextChunkData> international)
     {
-        foreach (var chunk in textChunks)
-        {
-            if (string.IsNullOrEmpty(chunk.Keyword))
-                throw new InvalidOperationException("Text chunk keyword must not be empty.");
-            if (chunk.Keyword.Length > 79)
-                throw new InvalidOperationException(
-                    $"Text chunk keyword '{chunk.Keyword}' exceeds maximum length of 79 bytes.");
-        }
+        foreach (var chunk in text)
+            ValidateKeyword(chunk.Keyword);
+        foreach (var chunk in compressed)
+            ValidateKeyword(chunk.Keyword);
+        foreach (var chunk in international)
+            ValidateKeyword(chunk.Keyword);
+    }
+
+    private static void ValidateKeyword(string keyword)
+    {
+        if (string.IsNullOrEmpty(keyword))
+            throw new InvalidOperationException("Text chunk keyword must not be empty.");
+        if (keyword.Length > 79)
+            throw new InvalidOperationException(
+                $"Text chunk keyword '{keyword}' exceeds maximum length of 79 bytes.");
     }
 
     private static void ValidateBitDepth(byte bitDepth, ColorType colorType)

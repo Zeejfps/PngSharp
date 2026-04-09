@@ -60,10 +60,11 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         }
 
         foreach (var textChunk in png.TextChunks)
-        {
-            m_Logger.Debug($"Writing text chunk: {textChunk.Keyword}");
             writer.WriteTextChunk(textChunk);
-        }
+        foreach (var textChunk in png.CompressedTextChunks)
+            writer.WriteCompressedTextChunk(textChunk);
+        foreach (var textChunk in png.InternationalTextChunks)
+            writer.WriteInternationalTextChunk(textChunk);
 
         m_Logger.Debug($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);

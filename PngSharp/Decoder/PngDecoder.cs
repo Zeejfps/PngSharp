@@ -23,6 +23,8 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public GammaChunkData? Gama { get; set; }
     public PhysChunkData? Phys { get; set; }
     public List<TextChunkData> TextChunks { get; } = [];
+    public List<CompressedTextChunkData> CompressedTextChunks { get; } = [];
+    public List<InternationalTextChunkData> InternationalTextChunks { get; } = [];
 
     
     // States

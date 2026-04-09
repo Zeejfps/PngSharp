@@ -65,6 +65,8 @@ public static class Png
             Gama = decoder.Gama,
             Phys = decoder.Phys,
             TextChunks = decoder.TextChunks,
+            CompressedTextChunks = decoder.CompressedTextChunks,
+            InternationalTextChunks = decoder.InternationalTextChunks,
         };
     }
 

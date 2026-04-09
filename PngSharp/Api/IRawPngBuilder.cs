@@ -18,5 +18,7 @@ public interface IRawPngBuilder
     IRawPngBuilder WithGama(GammaChunkData gama);
     IRawPngBuilder WithPhys(PhysChunkData phys);
     IRawPngBuilder WithTextChunk(TextChunkData textChunk);
+    IRawPngBuilder WithCompressedTextChunk(CompressedTextChunkData textChunk);
+    IRawPngBuilder WithInternationalTextChunk(InternationalTextChunkData textChunk);
     IRawPng Build();
 }
