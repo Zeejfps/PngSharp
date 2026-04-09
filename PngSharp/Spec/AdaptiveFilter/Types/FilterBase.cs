@@ -1,6 +1,6 @@
 ﻿namespace PngSharp.Spec.AdaptiveFilter.Types;
 
-public abstract class FilterBase : ITypeFilter
+internal abstract class FilterBase : ITypeFilter
 {
     private readonly int m_BytesPerPixel;
     

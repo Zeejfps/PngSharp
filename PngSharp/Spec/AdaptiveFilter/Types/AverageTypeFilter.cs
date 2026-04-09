@@ -1,6 +1,6 @@
 ﻿namespace PngSharp.Spec.AdaptiveFilter.Types;
 
-public class AverageTypeFilter : FilterBase
+internal class AverageTypeFilter : FilterBase
 {
     public AverageTypeFilter(int bytesPerPixel) : base(bytesPerPixel)
     {

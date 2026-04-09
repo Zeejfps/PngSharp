@@ -1,6 +1,6 @@
 ﻿namespace PngSharp.Spec.AdaptiveFilter;
 
-public enum AdaptiveFilterTypeKind : byte
+internal enum AdaptiveFilterTypeKind : byte
 {
     None,
     Sub,
