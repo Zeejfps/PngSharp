@@ -8,56 +8,56 @@ namespace PngSharp.Spec;
 
 internal sealed class RawPngBuilder : IRawPngBuilder
 {
-    private IhdrChunkData? _ihdr;
-    private byte[]? _pixelData;
-    private SrgbChunkData? _srgb;
-    private GammaChunkData? _gama;
-    private PhysChunkData? _phys;
+    private IhdrChunkData? m_Ihdr;
+    private byte[]? m_PixelData;
+    private SrgbChunkData? m_Srgb;
+    private GammaChunkData? m_Gama;
+    private PhysChunkData? m_Phys;
 
     public IRawPngBuilder WithIhdr(IhdrChunkData ihdr)
     {
-        _ihdr = ihdr;
+        m_Ihdr = ihdr;
         return this;
     }
 
     public IRawPngBuilder WithPixelData(byte[] pixels)
     {
-        _pixelData = pixels;
+        m_PixelData = pixels;
         return this;
     }
 
     public IRawPngBuilder WithSrgb(SrgbChunkData srgb)
     {
-        _srgb = srgb;
+        m_Srgb = srgb;
         return this;
     }
 
     public IRawPngBuilder WithGama(GammaChunkData gama)
     {
-        _gama = gama;
+        m_Gama = gama;
         return this;
     }
 
     public IRawPngBuilder WithPhys(PhysChunkData phys)
     {
-        _phys = phys;
+        m_Phys = phys;
         return this;
     }
 
     public IRawPng Build()
     {
-        if (_ihdr is null)
+        if (m_Ihdr is null)
             throw new InvalidOperationException("Ihdr is required.");
-        if (_pixelData is null)
+        if (m_PixelData is null)
             throw new InvalidOperationException("PixelData is required.");
 
         return new RawPng
         {
-            Ihdr = _ihdr.Value,
-            PixelData = _pixelData,
-            Srgb = _srgb,
-            Gama = _gama,
-            Phys = _phys,
+            Ihdr = m_Ihdr.Value,
+            PixelData = m_PixelData,
+            Srgb = m_Srgb,
+            Gama = m_Gama,
+            Phys = m_Phys,
         };
     }
 }
