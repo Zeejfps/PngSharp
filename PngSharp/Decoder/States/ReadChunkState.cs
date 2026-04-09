@@ -1,4 +1,4 @@
-﻿using PngSharp.Api;
+using PngSharp.Api;
 using PngSharp.Api.Exceptions;
 using PngSharp.Spec;
 using PngSharp.Spec.Chunks.IHDR;
@@ -9,20 +9,29 @@ internal sealed class ReadChunkState : IDecoderState
 {
     private readonly PngDecoder m_Decoder;
     private readonly ILogger m_Logger;
-    
+
+    private bool m_SeenPlte;
+    private bool m_SeenIdat;
+    private bool m_IdatFinished;
+
     public ReadChunkState(PngDecoder decoder, ILogger logger)
     {
         m_Decoder = decoder;
         m_Logger = logger;
     }
-    
+
     public void Execute()
     {
         var decoder = m_Decoder;
         var reader = decoder.Reader;
         reader.ReadChunkHeader(out var header);
         m_Logger.Debug(header.ToString());
-        
+
+        // Track IDAT consecutive requirement: if we've seen IDAT and this is not IDAT or IEND,
+        // then the IDAT run is finished.
+        if (m_SeenIdat && header.Id != HeaderIds.IDAT && header.Id != HeaderIds.IEND)
+            m_IdatFinished = true;
+
         if (header.Id == HeaderIds.IEND)
         {
             reader.ReadAndValidateCrc(HeaderIds.IEND);
@@ -34,12 +43,20 @@ internal sealed class ReadChunkState : IDecoderState
 
         if (header.Id == HeaderIds.IDAT)
         {
+            if (m_IdatFinished)
+                throw new PngFormatException("IDAT chunks must be consecutive.");
+            m_SeenIdat = true;
             decoder.State = new ReadIdataChunkState(header, decoder);
             return;
         }
 
         if (header.Id == HeaderIds.PLTE)
         {
+            if (m_SeenPlte)
+                throw new PngFormatException("Multiple PLTE chunks are not allowed.");
+            if (m_SeenIdat)
+                throw new PngFormatException("PLTE chunk must appear before IDAT.");
+            m_SeenPlte = true;
             var plteData = reader.ReadPlteChunkData(header.ChunkSizeInBytes);
             decoder.Plte = plteData;
             reader.ReadAndValidateCrc(HeaderIds.PLTE);
@@ -48,6 +65,10 @@ internal sealed class ReadChunkState : IDecoderState
 
         if (header.Id == HeaderIds.TRNS)
         {
+            if (!m_SeenPlte && decoder.IhdrChunkData.ColorType == ColorType.IndexedColor)
+                throw new PngFormatException("tRNS chunk must appear after PLTE for IndexedColor.");
+            if (m_SeenIdat)
+                throw new PngFormatException("tRNS chunk must appear before IDAT.");
             var trnsData = reader.ReadTrnsChunkData(header.ChunkSizeInBytes);
             decoder.Trns = trnsData;
             reader.ReadAndValidateCrc(HeaderIds.TRNS);
@@ -56,6 +77,12 @@ internal sealed class ReadChunkState : IDecoderState
 
         if (header.Id == HeaderIds.SRGB)
         {
+            if (decoder.Srgb.HasValue)
+                throw new PngFormatException("Multiple sRGB chunks are not allowed.");
+            if (m_SeenPlte)
+                throw new PngFormatException("sRGB chunk must appear before PLTE.");
+            if (m_SeenIdat)
+                throw new PngFormatException("sRGB chunk must appear before IDAT.");
             var srgbData = reader.ReadSrgbChunkData();
             decoder.Srgb = srgbData;
             reader.ReadAndValidateCrc(HeaderIds.SRGB);
@@ -64,6 +91,12 @@ internal sealed class ReadChunkState : IDecoderState
 
         if (header.Id == HeaderIds.GAMA)
         {
+            if (decoder.Gama.HasValue)
+                throw new PngFormatException("Multiple gAMA chunks are not allowed.");
+            if (m_SeenPlte)
+                throw new PngFormatException("gAMA chunk must appear before PLTE.");
+            if (m_SeenIdat)
+                throw new PngFormatException("gAMA chunk must appear before IDAT.");
             var gamaData = reader.ReadGamaChunkData();
             decoder.Gama = gamaData;
             reader.ReadAndValidateCrc(HeaderIds.GAMA);
@@ -72,9 +105,49 @@ internal sealed class ReadChunkState : IDecoderState
 
         if (header.Id == HeaderIds.PHYS)
         {
+            if (decoder.Phys.HasValue)
+                throw new PngFormatException("Multiple pHYs chunks are not allowed.");
+            if (m_SeenIdat)
+                throw new PngFormatException("pHYs chunk must appear before IDAT.");
             var physChunkData = reader.ReadPhysChunkData();
             decoder.Phys = physChunkData;
             reader.ReadAndValidateCrc(HeaderIds.PHYS);
+            return;
+        }
+
+        if (header.Id == HeaderIds.CHRM)
+        {
+            if (decoder.Chrm.HasValue)
+                throw new PngFormatException("Multiple cHRM chunks are not allowed.");
+            if (m_SeenPlte)
+                throw new PngFormatException("cHRM chunk must appear before PLTE.");
+            if (m_SeenIdat)
+                throw new PngFormatException("cHRM chunk must appear before IDAT.");
+            var chrmData = reader.ReadChrmChunkData();
+            decoder.Chrm = chrmData;
+            reader.ReadAndValidateCrc(HeaderIds.CHRM);
+            return;
+        }
+
+        if (header.Id == HeaderIds.TIME)
+        {
+            if (decoder.Time.HasValue)
+                throw new PngFormatException("Multiple tIME chunks are not allowed.");
+            var timeData = reader.ReadTimeChunkData();
+            decoder.Time = timeData;
+            reader.ReadAndValidateCrc(HeaderIds.TIME);
+            return;
+        }
+
+        if (header.Id == HeaderIds.BKGD)
+        {
+            if (decoder.Bkgd.HasValue)
+                throw new PngFormatException("Multiple bKGD chunks are not allowed.");
+            if (m_SeenIdat)
+                throw new PngFormatException("bKGD chunk must appear before IDAT.");
+            var bkgdData = reader.ReadBkgdChunkData(header.ChunkSizeInBytes);
+            decoder.Bkgd = bkgdData;
+            reader.ReadAndValidateCrc(HeaderIds.BKGD);
             return;
         }
 

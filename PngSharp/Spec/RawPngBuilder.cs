@@ -5,6 +5,9 @@ using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
 using PngSharp.Spec.Chunks.Text;
+using PngSharp.Spec.Chunks.bKGD;
+using PngSharp.Spec.Chunks.cHRM;
+using PngSharp.Spec.Chunks.tIME;
 using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Spec;
@@ -18,6 +21,9 @@ internal sealed class RawPngBuilder : IRawPngBuilder
     private SrgbChunkData? m_Srgb;
     private GammaChunkData? m_Gama;
     private PhysChunkData? m_Phys;
+    private ChrmChunkData? m_Chrm;
+    private TimeChunkData? m_Time;
+    private BkgdChunkData? m_Bkgd;
     private readonly List<TextChunk> m_TxtChunks = [];
     private readonly List<ZTextChunk> m_ZTxtChunks = [];
     private readonly List<ITextChunk> m_ITxtChunks = [];
@@ -64,6 +70,24 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         return this;
     }
 
+    public IRawPngBuilder WithChrm(ChrmChunkData chrm)
+    {
+        m_Chrm = chrm;
+        return this;
+    }
+
+    public IRawPngBuilder WithTime(TimeChunkData time)
+    {
+        m_Time = time;
+        return this;
+    }
+
+    public IRawPngBuilder WithBkgd(BkgdChunkData bkgd)
+    {
+        m_Bkgd = bkgd;
+        return this;
+    }
+
     public IRawPngBuilder WithTxtChunk(TextChunk textChunk)
     {
         m_TxtChunks.Add(textChunk);
@@ -99,6 +123,8 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         ValidateBitDepth(ihdr.BitDepth, ihdr.ColorType);
         ValidatePlte(ihdr, m_Plte);
         ValidateTrns(ihdr, m_Trns, m_Plte);
+        ValidateBkgd(ihdr, m_Bkgd);
+        ValidateTime(m_Time);
         ValidateTextKeywords(m_TxtChunks, m_ZTxtChunks, m_ITxtChunks);
 
         var expectedLength = (int)ihdr.Width * (int)ihdr.Height * ihdr.GetBytesPerPixel();
@@ -116,6 +142,9 @@ internal sealed class RawPngBuilder : IRawPngBuilder
             Srgb = m_Srgb,
             Gama = m_Gama,
             Phys = m_Phys,
+            Chrm = m_Chrm,
+            Time = m_Time,
+            Bkgd = m_Bkgd,
             TxtChunks = m_TxtChunks,
             ZTxtChunks = m_ZTxtChunks,
             ITxtChunks = m_ITxtChunks,
@@ -194,6 +223,52 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         if (keyword.Length > 79)
             throw new InvalidOperationException(
                 $"Text chunk keyword '{keyword}' exceeds maximum length of 79 bytes.");
+    }
+
+    private static void ValidateBkgd(IhdrChunkData ihdr, BkgdChunkData? bkgd)
+    {
+        if (!bkgd.HasValue)
+            return;
+
+        var data = bkgd.Value.Data;
+        switch (ihdr.ColorType)
+        {
+            case ColorType.Grayscale:
+            case ColorType.GrayscaleWithAlpha:
+                if (data.Length != 2)
+                    throw new InvalidOperationException(
+                        $"bKGD data length for {ihdr.ColorType} must be 2, got {data.Length}.");
+                break;
+            case ColorType.TrueColor:
+            case ColorType.TrueColorWithAlpha:
+                if (data.Length != 6)
+                    throw new InvalidOperationException(
+                        $"bKGD data length for {ihdr.ColorType} must be 6, got {data.Length}.");
+                break;
+            case ColorType.IndexedColor:
+                if (data.Length != 1)
+                    throw new InvalidOperationException(
+                        $"bKGD data length for IndexedColor must be 1, got {data.Length}.");
+                break;
+        }
+    }
+
+    private static void ValidateTime(TimeChunkData? time)
+    {
+        if (!time.HasValue)
+            return;
+
+        var t = time.Value;
+        if (t.Month is < 1 or > 12)
+            throw new InvalidOperationException($"tIME month must be 1-12, got {t.Month}.");
+        if (t.Day is < 1 or > 31)
+            throw new InvalidOperationException($"tIME day must be 1-31, got {t.Day}.");
+        if (t.Hour > 23)
+            throw new InvalidOperationException($"tIME hour must be 0-23, got {t.Hour}.");
+        if (t.Minute > 59)
+            throw new InvalidOperationException($"tIME minute must be 0-59, got {t.Minute}.");
+        if (t.Second > 60)
+            throw new InvalidOperationException($"tIME second must be 0-60, got {t.Second}.");
     }
 
     private static void ValidateBitDepth(byte bitDepth, ColorType colorType)

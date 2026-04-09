@@ -8,6 +8,9 @@ using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
 using PngSharp.Spec.Chunks.Text;
+using PngSharp.Spec.Chunks.bKGD;
+using PngSharp.Spec.Chunks.cHRM;
+using PngSharp.Spec.Chunks.tIME;
 using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Encoder;
@@ -163,6 +166,51 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteCrc32();
     }
 
+    public void WriteCHRMChunk(ChrmChunkData chrmChunkData)
+    {
+        WriteChunkHeader(new ChunkHeader
+        {
+            Id = HeaderIds.CHRM,
+            ChunkSizeInBytes = 32
+        });
+        WriteUInt32(chrmChunkData.WhitePointX);
+        WriteUInt32(chrmChunkData.WhitePointY);
+        WriteUInt32(chrmChunkData.RedX);
+        WriteUInt32(chrmChunkData.RedY);
+        WriteUInt32(chrmChunkData.GreenX);
+        WriteUInt32(chrmChunkData.GreenY);
+        WriteUInt32(chrmChunkData.BlueX);
+        WriteUInt32(chrmChunkData.BlueY);
+        WriteCrc32();
+    }
+
+    public void WriteTIMEChunk(TimeChunkData timeChunkData)
+    {
+        WriteChunkHeader(new ChunkHeader
+        {
+            Id = HeaderIds.TIME,
+            ChunkSizeInBytes = 7
+        });
+        WriteUInt16(timeChunkData.Year);
+        WriteByte(timeChunkData.Month);
+        WriteByte(timeChunkData.Day);
+        WriteByte(timeChunkData.Hour);
+        WriteByte(timeChunkData.Minute);
+        WriteByte(timeChunkData.Second);
+        WriteCrc32();
+    }
+
+    public void WriteBKGDChunk(BkgdChunkData bkgdChunkData)
+    {
+        WriteChunkHeader(new ChunkHeader
+        {
+            Id = HeaderIds.BKGD,
+            ChunkSizeInBytes = bkgdChunkData.Data.Length
+        });
+        WriteBytes(bkgdChunkData.Data);
+        WriteCrc32();
+    }
+
     public void WritePHYSChunk(PhysChunkData physChunkData)
     {
         WriteChunkHeader(new ChunkHeader
@@ -210,6 +258,15 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     private void WriteHeaderSize(uint size)
     {
         WriteUInt32(size);
+    }
+
+    private void WriteUInt16(ushort value)
+    {
+        Span<byte> buffer = stackalloc byte[sizeof(ushort)];
+        MemoryMarshal.Write(buffer, in value);
+        if (BitConverter.IsLittleEndian)
+            buffer.Reverse();
+        WriteBytes(buffer);
     }
 
     private void WriteUInt32(uint value)
