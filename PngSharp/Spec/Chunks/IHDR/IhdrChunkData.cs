@@ -4,7 +4,6 @@ public readonly struct IhdrChunkData
 {
     public uint Width { get; init; }
     public uint Height { get; init; }
-
     public byte BitDepth { get; init; }
     public ColorType ColorType { get; init; }
     public CompressionMethod CompressionMethod { get; init; }
