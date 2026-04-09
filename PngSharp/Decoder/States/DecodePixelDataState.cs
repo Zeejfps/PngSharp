@@ -38,10 +38,10 @@ internal sealed class DecodePixelDataState : IDecoderState
             var widthInPixels = (int)ihdr.Width;
             var heightInPixels = (int)ihdr.Height;
             const int stackAllocThreshold = 1024;
-            Span<byte> packedRow = scanlineByteWidth <= stackAllocThreshold
+            var packedRow = scanlineByteWidth <= stackAllocThreshold
                 ? stackalloc byte[scanlineByteWidth]
                 : new byte[scanlineByteWidth];
-            Span<byte> unpackedRow = widthInPixels <= stackAllocThreshold
+            var unpackedRow = widthInPixels <= stackAllocThreshold
                 ? stackalloc byte[widthInPixels]
                 : new byte[widthInPixels];
 
