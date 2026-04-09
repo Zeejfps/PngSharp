@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using PngSharp.Api.Exceptions;
 using PngSharp.Spec;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.pHYS;
@@ -85,6 +86,14 @@ public sealed class PngReader
         return ReadUInt32();
     }
 
+    public void ReadAndValidateCrc(string chunkId)
+    {
+        var computed = CurrentCrcValue;
+        var expected = ReadCrc();
+        if (computed != expected)
+            throw new PngCrcException(chunkId, computed, expected);
+    }
+
     private UInt32 ReadUInt32()
     {
         Span<byte> buffer = stackalloc byte[sizeof(uint)];
@@ -115,6 +124,7 @@ public sealed class PngReader
         {
             var bytesToRead = m_Buffer.Length < remainingBytesToRead ? m_Buffer.Length : remainingBytesToRead;
             var bytesRead = m_Stream.Read(m_Buffer, 0, bytesToRead);
+            m_Crc32.Update(m_Buffer.AsSpan(0, bytesRead));
             stream.Write(m_Buffer, 0, bytesRead);
             remainingBytesToRead -= bytesRead;
         }
@@ -148,6 +158,7 @@ public sealed class PngReader
         {
             var bytesToRead = m_Buffer.Length < totalBytesToRead ? m_Buffer.Length : totalBytesToRead;
             var bytesRead = m_Stream.Read(m_Buffer, 0, bytesToRead);
+            m_Crc32.Update(m_Buffer.AsSpan(0, bytesRead));
             totalBytesToRead -= bytesRead;
         }
     }

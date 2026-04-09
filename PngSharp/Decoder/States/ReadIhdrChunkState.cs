@@ -1,4 +1,5 @@
 ﻿using PngSharp.Api;
+using PngSharp.Api.Exceptions;
 using PngSharp.Spec;
 
 namespace PngSharp.Decoder.States;
@@ -20,10 +21,9 @@ internal sealed class ReadIhdrChunkState : IDecoderState
         var reader = decoder.Reader;
         reader.ReadChunkHeader(out var header);
         if (header.Id != HeaderIds.IHDR)
-            throw new Exception("Expected IHDR chunk");
+            throw new PngFormatException("Expected IHDR chunk");
         var data = reader.ReadIhdrChunkData();
-        var outCrc = reader.CurrentCrcValue;
-        var crc = reader.ReadCrc();
+        reader.ReadAndValidateCrc(HeaderIds.IHDR);
 
         decoder.IhdrChunkData = data;
         decoder.State = decoder.ReadChunkState;

@@ -1,4 +1,5 @@
 ﻿using PngSharp.Api;
+using PngSharp.Api.Exceptions;
 using PngSharp.Spec;
 using PngSharp.Spec.Chunks.pHYS;
 using PngSharp.Spec.Chunks.sGAMA;
@@ -26,7 +27,7 @@ internal sealed class ReadChunkState : IDecoderState
         
         if (PngSpecUtils.IsIENDChunkHeader(header))
         {
-            reader.ReadCrc();
+            reader.ReadAndValidateCrc(HeaderIds.IEND);
             decoder.State = decoder.DecodePixelDataState;
             return;
         }
@@ -41,9 +42,7 @@ internal sealed class ReadChunkState : IDecoderState
         {
             var srgbData = reader.ReadSrgbChunkData();
             decoder.Srgb = AncillaryChunk<SrgbChunkData>.Of(srgbData);
-            var crc = reader.CurrentCrcValue;
-            var newCrc = reader.ReadCrc();
-            m_Logger.Debug($"Our CRC: {crc}, Read CRC: {newCrc}");
+            reader.ReadAndValidateCrc(HeaderIds.SRGB);
             return;
         }
 
@@ -51,9 +50,7 @@ internal sealed class ReadChunkState : IDecoderState
         {
             var gamaData = reader.ReadGamaChunkData();
             decoder.Gama = AncillaryChunk<GammaChunkData>.Of(gamaData);
-            var crc = reader.CurrentCrcValue;
-            var newCrc = reader.ReadCrc();
-            m_Logger.Debug($"Our CRC: {crc}, Read CRC: {newCrc}");
+            reader.ReadAndValidateCrc(HeaderIds.GAMA);
             return;
         }
         
@@ -61,13 +58,14 @@ internal sealed class ReadChunkState : IDecoderState
         {
             var physChunkData = reader.ReadPhysChunkData();
             decoder.Phys = AncillaryChunk<PhysChunkData>.Of(physChunkData);
-            var crc = reader.CurrentCrcValue;
-            var newCrc = reader.ReadCrc();
-            m_Logger.Debug($"Our CRC: {crc}, Read CRC: {newCrc}");
+            reader.ReadAndValidateCrc(HeaderIds.PHYS);
             return;
         }
 
+        if (PngSpecUtils.IsCriticalChunk(header))
+            throw new PngFormatException($"Unrecognized critical chunk: '{header.Id}'");
+
         reader.ReadChunkData(header.ChunkSizeInBytes);
-        reader.ReadCrc();
+        reader.ReadAndValidateCrc(header.Id);
     }
 }

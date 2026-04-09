@@ -33,4 +33,9 @@ public static class PngSpecUtils
     {
         return chunkHeader.Id == HeaderIds.PHYS;
     }
+
+    public static bool IsCriticalChunk(ChunkHeader chunkHeader)
+    {
+        return char.IsUpper(chunkHeader.Id[0]);
+    }
 }

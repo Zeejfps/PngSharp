@@ -19,7 +19,7 @@ internal sealed class ReadIdataChunkState : IDecoderState
         var header = m_Header;
         var reader = decoder.Reader;
         reader.ReadIdatChunkDataIntoStream(header, decoder.CompressedPixelDataStream);
-        reader.ReadCrc();
+        reader.ReadAndValidateCrc(HeaderIds.IDAT);
         decoder.State = decoder.ReadChunkState;
     }
 }
