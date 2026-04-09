@@ -12,7 +12,7 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public Stream CompressedPixelDataStream { get; }
     public Stream PixelDataStream { get; }
     public int BytesPerPixel => IhdrChunkData.GetBytesPerPixel();
-    public DecodedPng DecodedPng { get; } = new();
+    public RawPng RawPng { get; } = new();
 
     
     // States

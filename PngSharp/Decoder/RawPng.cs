@@ -1,5 +1,4 @@
 ﻿using PngSharp.Api;
-using PngSharp.Spec;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.pHYS;
 using PngSharp.Spec.Chunks.sGAMA;
@@ -7,7 +6,7 @@ using PngSharp.Spec.Chunks.sRGB;
 
 namespace PngSharp.Decoder;
 
-internal sealed class DecodedPng : IDecodedPng
+internal sealed class RawPng : IDecodedPng
 {
     public int Width { get; set; }
     public int Height { get; set; }

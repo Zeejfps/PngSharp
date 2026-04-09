@@ -1,6 +1,7 @@
 ﻿using PngSharp.Decoder;
 using PngSharp.Encoder;
 using PngSharp.Spec;
+using PngSharp.Spec.Chunks.IHDR;
 
 namespace PngSharp.Api;
 
@@ -49,7 +50,7 @@ public static class Png
         var pixelsRead = decoder.PixelDataStream.Read(pixelData);
         // TODO: verify pixelsRead matches?
 
-        var decodedPng = decoder.DecodedPng;
+        var decodedPng = decoder.RawPng;
         decodedPng.BytesPerPixel = decoder.BytesPerPixel;
         decodedPng.PixelData = pixelData;
 
@@ -89,5 +90,53 @@ public static class Png
         {
             return new FileStream(pathToFile, FileMode.Open);
         }
+    }
+
+    public static IDecodedPng CreateGrayscale(int width, int height, byte[] pixels)
+    {
+        return new RawPng
+        {
+            Width = width,
+            Height = height,
+            BytesPerPixel = 1,
+            ColorType = ColorType.Grayscale,
+            PixelData = pixels
+        };
+    }
+
+    public static IDecodedPng CreateGrayscaleWithAlpha(int width, int height, byte[] pixels)
+    {
+        return new RawPng
+        {
+            Width = width,
+            Height = height,
+            BytesPerPixel = 2,
+            ColorType = ColorType.GrayscaleWithAlpha,
+            PixelData = pixels
+        };
+    }
+
+    public static IDecodedPng CreateRgb(int width, int height, byte[] pixels)
+    {
+        return new RawPng
+        {
+            Width = width,
+            Height = height,
+            BytesPerPixel = 3,
+            ColorType = ColorType.TrueColor,
+            PixelData = pixels
+        };
+    }
+
+    public static IDecodedPng CreateRgba(int width, int height, byte[] pixels)
+    {
+        return new RawPng
+        {
+            Width = width,
+            Height = height,
+            BytesPerPixel = 4,
+            ColorType = ColorType.TrueColorWithAlpha,
+            PixelData = pixels
+        };
     }
 }

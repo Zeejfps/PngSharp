@@ -25,9 +25,9 @@ internal sealed class ReadIhdrChunkState : IDecoderState
         var outCrc = reader.CurrentCrcValue;
         var crc = reader.ReadCrc();
 
-        decoder.DecodedPng.Width = (int)data.Width;
-        decoder.DecodedPng.Height = (int)data.Height;
-        decoder.DecodedPng.ColorType = data.ColorType;
+        decoder.RawPng.Width = (int)data.Width;
+        decoder.RawPng.Height = (int)data.Height;
+        decoder.RawPng.ColorType = data.ColorType;
         decoder.IhdrChunkData = data;
         decoder.State = decoder.ReadChunkState;
     }
