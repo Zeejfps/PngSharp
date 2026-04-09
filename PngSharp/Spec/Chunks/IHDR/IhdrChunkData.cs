@@ -10,9 +10,9 @@ public readonly record struct IhdrChunkData
     public FilterMethod FilterMethod { get; init; }
     public InterlaceMethod InterlaceMethod { get; init; }
 
-    public int GetBytesPerPixel()
+    public int GetBitsPerPixel()
     {
-        var bitsPerPixel = ColorType switch
+        return ColorType switch
         {
             ColorType.Grayscale => BitDepth,
             ColorType.TrueColor => BitDepth * 3,
@@ -21,6 +21,9 @@ public readonly record struct IhdrChunkData
             ColorType.TrueColorWithAlpha => BitDepth * 4,
             _ => throw new ArgumentOutOfRangeException()
         };
-        return (bitsPerPixel + 7) / 8;
     }
+
+    public int GetBytesPerPixel() => (GetBitsPerPixel() + 7) / 8;
+
+    public int GetScanlineByteWidth() => ((int)Width * GetBitsPerPixel() + 7) / 8;
 }

@@ -4,16 +4,14 @@ namespace PngSharp.Spec.AdaptiveFilter;
 
 internal sealed class PngAdaptiveFilter
 {
-    private readonly int m_Width;
     private readonly int m_Height;
-    private readonly int m_BytesPerPixel;
+    private readonly int m_ScanlineByteWidth;
     private readonly Dictionary<AdaptiveFilterTypeKind, ITypeFilter> m_AllFilterTypes = new();
-    
-    public PngAdaptiveFilter(int width, int height, int bytesPerPixel)
+
+    public PngAdaptiveFilter(int height, int scanlineByteWidth, int bytesPerPixel)
     {
-        m_Width = width;
         m_Height = height;
-        m_BytesPerPixel = bytesPerPixel;
+        m_ScanlineByteWidth = scanlineByteWidth;
 
         var allFilterTypes = new ITypeFilter[]
         {
@@ -30,11 +28,9 @@ internal sealed class PngAdaptiveFilter
 
     public void Reverse(Stream outputStream, Stream inputStream)
     {
-        var width = m_Width;
         var height = m_Height;
-        var bytesPerPixel = m_BytesPerPixel;
 
-        var strideUnfiltered = width * bytesPerPixel;
+        var strideUnfiltered = m_ScanlineByteWidth;
         var strideFiltered = strideUnfiltered + 1;
         var buffer = new byte[strideUnfiltered + strideUnfiltered + strideFiltered];
         var outputRow = new Span<byte>(buffer, 0, strideUnfiltered);
@@ -61,12 +57,10 @@ internal sealed class PngAdaptiveFilter
 
     public void Apply(Stream outputStream, Stream inputStream)
     {
-        var width = m_Width;
         var height = m_Height;
-        var bytesPerPixel = m_BytesPerPixel;
         var allFilters = m_AllFilterTypes.Values;
-        
-        var strideUnfiltered = width * bytesPerPixel;
+
+        var strideUnfiltered = m_ScanlineByteWidth;
         var strideFiltered = strideUnfiltered + 1;
         var buffer = new byte[strideUnfiltered + strideUnfiltered + strideFiltered];
         var currRow = new Span<byte>(buffer, 0, strideUnfiltered);
