@@ -3,8 +3,10 @@ using System.Text;
 using PngSharp.Spec;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.pHYS;
+using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
+using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Encoder;
 
@@ -38,6 +40,28 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteByte((byte)data.CompressionMethod);
         WriteByte((byte)data.FilterMethod);
         WriteByte((byte)data.InterlaceMethod);
+        WriteCrc32();
+    }
+
+    public void WritePLTEChunk(PlteChunkData plteChunkData)
+    {
+        WriteChunkHeader(new ChunkHeader
+        {
+            Id = HeaderIds.PLTE,
+            ChunkSizeInBytes = plteChunkData.Entries.Length
+        });
+        WriteBytes(plteChunkData.Entries);
+        WriteCrc32();
+    }
+
+    public void WriteTRNSChunk(TrnsChunkData trnsChunkData)
+    {
+        WriteChunkHeader(new ChunkHeader
+        {
+            Id = HeaderIds.TRNS,
+            ChunkSizeInBytes = trnsChunkData.Data.Length
+        });
+        WriteBytes(trnsChunkData.Data);
         WriteCrc32();
     }
 

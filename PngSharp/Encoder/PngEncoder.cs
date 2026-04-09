@@ -46,7 +46,19 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             m_Logger.Debug($"Has Phys Data: {png.Phys.Value}");
             writer.WritePHYSChunk(png.Phys.Value);
         }
-        
+
+        if (png.Plte.HasValue)
+        {
+            m_Logger.Debug($"Has PLTE Data: {png.Plte.Value.EntryCount} entries");
+            writer.WritePLTEChunk(png.Plte.Value);
+        }
+
+        if (png.Trns.HasValue)
+        {
+            m_Logger.Debug($"Has tRNS Data: {png.Trns.Value.Data.Length} bytes");
+            writer.WriteTRNSChunk(png.Trns.Value);
+        }
+
         m_Logger.Debug($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);
         using var compressedDataStream = new MemoryStream();

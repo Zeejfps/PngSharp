@@ -3,8 +3,10 @@ using PngSharp.Api.Exceptions;
 using PngSharp.Spec;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.pHYS;
+using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
+using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Decoder;
 
@@ -70,6 +72,23 @@ internal sealed class PngReader
             ChunkSizeInBytes = (int)chunkSize,
             Id = chunkName
         };
+    }
+
+    public PlteChunkData ReadPlteChunkData(int chunkSize)
+    {
+        if (chunkSize == 0 || chunkSize % 3 != 0)
+            throw new PngFormatException($"PLTE chunk data length {chunkSize} must be a positive multiple of 3.");
+
+        var entries = new byte[chunkSize];
+        ReadBytes(entries);
+        return new PlteChunkData { Entries = entries };
+    }
+
+    public TrnsChunkData ReadTrnsChunkData(int chunkSize)
+    {
+        var data = new byte[chunkSize];
+        ReadBytes(data);
+        return new TrnsChunkData { Data = data };
     }
 
     public SrgbChunkData ReadSrgbChunkData()

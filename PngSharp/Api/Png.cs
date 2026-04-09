@@ -59,6 +59,8 @@ public static class Png
         {
             Ihdr = ihdr,
             PixelData = pixelData,
+            Plte = decoder.Plte,
+            Trns = decoder.Trns,
             Srgb = decoder.Srgb,
             Gama = decoder.Gama,
             Phys = decoder.Phys,
