@@ -92,7 +92,7 @@ internal sealed class PngReader
         return new TrnsChunkData { Data = data };
     }
 
-    public TextChunkData ReadTextChunkData(int chunkSize)
+    public TxtChunkData ReadTxtChunkData(int chunkSize)
     {
         var data = new byte[chunkSize];
         ReadBytes(data);
@@ -103,10 +103,10 @@ internal sealed class PngReader
             ? Encoding.Latin1.GetString(data, nullIndex + 1, data.Length - nullIndex - 1)
             : "";
 
-        return new TextChunkData { Keyword = keyword, Text = text };
+        return new TxtChunkData { Keyword = keyword, Text = text };
     }
 
-    public CompressedTextChunkData ReadZtxtChunkData(int chunkSize)
+    public ZTxtChunkData ReadZtxtChunkData(int chunkSize)
     {
         var data = new byte[chunkSize];
         ReadBytes(data);
@@ -117,10 +117,10 @@ internal sealed class PngReader
         var compressedStart = nullIndex + 2;
         var compressedData = data[compressedStart..];
 
-        return new CompressedTextChunkData { Keyword = keyword, CompressedData = compressedData };
+        return new ZTxtChunkData { Keyword = keyword, CompressedData = compressedData };
     }
 
-    public InternationalTextChunkData ReadItxtChunkData(int chunkSize)
+    public ITxtChunkData ReadItxtChunkData(int chunkSize)
     {
         var data = new byte[chunkSize];
         ReadBytes(data);
@@ -141,7 +141,7 @@ internal sealed class PngReader
 
         var textData = pos < data.Length ? data[pos..] : [];
 
-        return new InternationalTextChunkData
+        return new ITxtChunkData
         {
             Keyword = keyword,
             LanguageTag = languageTag,

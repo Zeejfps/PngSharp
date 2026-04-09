@@ -70,7 +70,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
     private const int MaxKeywordLength = 79;
     private const int MaxLanguageTagLength = 255;
 
-    public void WriteTextChunk(TextChunkData textChunkData)
+    public void WriteTxtChunk(TxtChunkData textChunkData)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(textChunkData.Keyword.Length, MaxKeywordLength, nameof(textChunkData.Keyword));
 
@@ -86,7 +86,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteCrc32();
     }
 
-    public void WriteCompressedTextChunk(CompressedTextChunkData chunk)
+    public void WriteZTxtChunk(ZTxtChunkData chunk)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(chunk.Keyword.Length, MaxKeywordLength, nameof(chunk.Keyword));
 
@@ -102,7 +102,7 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
         WriteCrc32();
     }
 
-    public void WriteInternationalTextChunk(InternationalTextChunkData chunk)
+    public void WriteITxtChunk(ITxtChunkData chunk)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(chunk.Keyword.Length, MaxKeywordLength, nameof(chunk.Keyword));
         ArgumentOutOfRangeException.ThrowIfGreaterThan(chunk.LanguageTag.Length, MaxLanguageTagLength, nameof(chunk.LanguageTag));

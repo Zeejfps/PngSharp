@@ -7,7 +7,7 @@ namespace PngSharp.Spec.Chunks.Text;
 /// zTXt chunk: deflate-compressed Latin-1 text metadata.
 /// CompressedData contains the raw deflate bytes.
 /// </summary>
-public readonly record struct CompressedTextChunkData
+public readonly record struct ZTxtChunkData
 {
     public string Keyword { get; init; }
     public byte[] CompressedData { get; init; }
@@ -21,7 +21,7 @@ public readonly record struct CompressedTextChunkData
         return Encoding.Latin1.GetString(resultStream.ToArray());
     }
 
-    public static CompressedTextChunkData Create(string keyword, string text)
+    public static ZTxtChunkData Create(string keyword, string text)
     {
         var raw = Encoding.Latin1.GetBytes(text);
         using var compressedStream = new MemoryStream();
@@ -29,6 +29,6 @@ public readonly record struct CompressedTextChunkData
         {
             zlibStream.Write(raw);
         }
-        return new CompressedTextChunkData { Keyword = keyword, CompressedData = compressedStream.ToArray() };
+        return new ZTxtChunkData { Keyword = keyword, CompressedData = compressedStream.ToArray() };
     }
 }

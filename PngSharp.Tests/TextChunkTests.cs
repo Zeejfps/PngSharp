@@ -10,61 +10,67 @@ public class TextChunkTests
     [Fact]
     public void RoundTrip_tEXt_Preserved()
     {
-        var text = new TextChunkData { Keyword = "Comment", Text = "Hello, PNG!" };
+        var text = new TxtChunkData { Keyword = "Comment", Text = "Hello, PNG!" };
         var png = CreatePngWithText(text);
         var decoded = RoundTrip(png);
 
-        Assert.Single(decoded.TextChunks);
-        Assert.Equal("Comment", decoded.TextChunks[0].Keyword);
-        Assert.Equal("Hello, PNG!", decoded.TextChunks[0].Text);
+        Assert.Single(decoded.TxtChunks);
+        Assert.Equal("Comment", decoded.TxtChunks[0].Keyword);
+        Assert.Equal("Hello, PNG!", decoded.TxtChunks[0].Text);
     }
 
     [Fact]
     public void RoundTrip_tEXt_EmptyText_Preserved()
     {
-        var text = new TextChunkData { Keyword = "Comment", Text = "" };
+        var text = new TxtChunkData { Keyword = "Comment", Text = "" };
         var png = CreatePngWithText(text);
         var decoded = RoundTrip(png);
 
-        Assert.Single(decoded.TextChunks);
-        Assert.Equal("Comment", decoded.TextChunks[0].Keyword);
-        Assert.Equal("", decoded.TextChunks[0].Text);
+        Assert.Single(decoded.TxtChunks);
+        Assert.Equal("Comment", decoded.TxtChunks[0].Keyword);
+        Assert.Equal("", decoded.TxtChunks[0].Text);
     }
 
     [Fact]
     public void RoundTrip_zTXt_CompressedDataPreserved()
     {
         var originalText = "This is a longer description that benefits from compression.";
-        var chunk = CompressedTextChunkData.Create("Description", originalText);
+        var chunk = ZTxtChunkData.Create("Description", originalText);
 
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())
             .WithPixelData([0, 0, 0, 255])
-            .WithCompressedTextChunk(chunk)
+            .WithZTxtChunk(chunk)
             .Build();
         var decoded = RoundTrip(png);
 
-        Assert.Single(decoded.CompressedTextChunks);
-        Assert.Equal("Description", decoded.CompressedTextChunks[0].Keyword);
+        Assert.Single(decoded.ZTxtChunks);
+        Assert.Equal("Description", decoded.ZTxtChunks[0].Keyword);
 
-        var decompressed = decoded.CompressedTextChunks[0].Decompress();
+        var decompressed = decoded.ZTxtChunks[0].Decompress();
         Assert.Equal(originalText, decompressed);
     }
 
     [Fact]
     public void RoundTrip_iTXt_Uncompressed_Preserved()
     {
-        var chunk = InternationalTextChunkData.Create("Title", "PNG test image", "en", "Title");
+        var chunk = ITxtChunkData.Create(new ITxtContent
+        {
+            Keyword = "Title",
+            Text = "PNG test image",
+            LanguageTag = "en",
+            TranslatedKeyword = "Title",
+        });
 
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())
             .WithPixelData([0, 0, 0, 255])
-            .WithInternationalTextChunk(chunk)
+            .WithITxtChunk(chunk)
             .Build();
         var decoded = RoundTrip(png);
 
-        Assert.Single(decoded.InternationalTextChunks);
-        var result = decoded.InternationalTextChunks[0];
+        Assert.Single(decoded.ITxtChunks);
+        var result = decoded.ITxtChunks[0];
         Assert.Equal("Title", result.Keyword);
         Assert.Equal("en", result.LanguageTag);
         Assert.Equal("Title", result.TranslatedKeyword);
@@ -76,17 +82,23 @@ public class TextChunkTests
     public void RoundTrip_iTXt_Compressed_Preserved()
     {
         var originalText = "A compressed international text chunk with UTF-8 support.";
-        var chunk = InternationalTextChunkData.CreateCompressed("Description", originalText, "en", "Description");
+        var chunk = ITxtChunkData.Create(new ITxtCompressedContent
+        {
+            Keyword = "Description",
+            Text = originalText,
+            LanguageTag = "en",
+            TranslatedKeyword = "Description",
+        });
 
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())
             .WithPixelData([0, 0, 0, 255])
-            .WithInternationalTextChunk(chunk)
+            .WithITxtChunk(chunk)
             .Build();
         var decoded = RoundTrip(png);
 
-        Assert.Single(decoded.InternationalTextChunks);
-        var result = decoded.InternationalTextChunks[0];
+        Assert.Single(decoded.ITxtChunks);
+        var result = decoded.ITxtChunks[0];
         Assert.True(result.IsCompressed);
         Assert.Equal(originalText, result.GetText());
     }
@@ -97,43 +109,49 @@ public class TextChunkTests
         var png = Png.Builder()
             .WithIhdr(MakeIhdr())
             .WithPixelData([0, 0, 0, 255])
-            .WithTextChunk(new TextChunkData { Keyword = "Title", Text = "Test" })
-            .WithTextChunk(new TextChunkData { Keyword = "Author", Text = "PngSharp" })
-            .WithCompressedTextChunk(new CompressedTextChunkData
+            .WithTxtChunk(new TxtChunkData { Keyword = "Title", Text = "Test" })
+            .WithTxtChunk(new TxtChunkData { Keyword = "Author", Text = "PngSharp" })
+            .WithZTxtChunk(new ZTxtChunkData
             {
                 Keyword = "Description",
-                CompressedData = CompressedTextChunkData.Create("Description", "Compressed text").CompressedData,
+                CompressedData = ZTxtChunkData.Create("Description", "Compressed text").CompressedData,
             })
-            .WithInternationalTextChunk(
-                InternationalTextChunkData.Create("Comment", "テスト", "ja", "コメント"))
+            .WithITxtChunk(
+                ITxtChunkData.Create(new ITxtContent
+                {
+                    Keyword = "Comment",
+                    Text = "テスト",
+                    LanguageTag = "ja",
+                    TranslatedKeyword = "コメント",
+                }))
             .Build();
         var decoded = RoundTrip(png);
 
-        Assert.Equal(2, decoded.TextChunks.Count);
-        Assert.Single(decoded.CompressedTextChunks);
-        Assert.Single(decoded.InternationalTextChunks);
-        Assert.Equal("Title", decoded.TextChunks[0].Keyword);
-        Assert.Equal("Author", decoded.TextChunks[1].Keyword);
-        Assert.Equal("Description", decoded.CompressedTextChunks[0].Keyword);
-        Assert.Equal("Comment", decoded.InternationalTextChunks[0].Keyword);
+        Assert.Equal(2, decoded.TxtChunks.Count);
+        Assert.Single(decoded.ZTxtChunks);
+        Assert.Single(decoded.ITxtChunks);
+        Assert.Equal("Title", decoded.TxtChunks[0].Keyword);
+        Assert.Equal("Author", decoded.TxtChunks[1].Keyword);
+        Assert.Equal("Description", decoded.ZTxtChunks[0].Keyword);
+        Assert.Equal("Comment", decoded.ITxtChunks[0].Keyword);
     }
 
     [Fact]
     public void Build_EmptyKeyword_Throws()
     {
-        var text = new TextChunkData { Keyword = "", Text = "test" };
+        var text = new TxtChunkData { Keyword = "", Text = "test" };
         Assert.Throws<InvalidOperationException>(() =>
             Png.Builder().WithIhdr(MakeIhdr()).WithPixelData([0, 0, 0, 255])
-                .WithTextChunk(text).Build());
+                .WithTxtChunk(text).Build());
     }
 
     [Fact]
     public void Build_KeywordTooLong_Throws()
     {
-        var text = new TextChunkData { Keyword = new string('x', 80), Text = "test" };
+        var text = new TxtChunkData { Keyword = new string('x', 80), Text = "test" };
         Assert.Throws<InvalidOperationException>(() =>
             Png.Builder().WithIhdr(MakeIhdr()).WithPixelData([0, 0, 0, 255])
-                .WithTextChunk(text).Build());
+                .WithTxtChunk(text).Build());
     }
 
     private static IRawPng RoundTrip(IRawPng png)
@@ -155,12 +173,12 @@ public class TextChunkTests
         };
     }
 
-    private static IRawPng CreatePngWithText(TextChunkData text)
+    private static IRawPng CreatePngWithText(TxtChunkData text)
     {
         return Png.Builder()
             .WithIhdr(MakeIhdr())
             .WithPixelData([0, 0, 0, 255])
-            .WithTextChunk(text)
+            .WithTxtChunk(text)
             .Build();
     }
 }

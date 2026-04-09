@@ -77,8 +77,8 @@ internal sealed class ReadChunkState : IDecoderState
 
         if (header.Id == HeaderIds.TEXT)
         {
-            var textData = reader.ReadTextChunkData(header.ChunkSizeInBytes);
-            decoder.TextChunks.Add(textData);
+            var textData = reader.ReadTxtChunkData(header.ChunkSizeInBytes);
+            decoder.TxtChunks.Add(textData);
             reader.ReadAndValidateCrc(HeaderIds.TEXT);
             return;
         }
@@ -86,7 +86,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (header.Id == HeaderIds.ZTXT)
         {
             var textData = reader.ReadZtxtChunkData(header.ChunkSizeInBytes);
-            decoder.CompressedTextChunks.Add(textData);
+            decoder.ZTxtChunks.Add(textData);
             reader.ReadAndValidateCrc(HeaderIds.ZTXT);
             return;
         }
@@ -94,7 +94,7 @@ internal sealed class ReadChunkState : IDecoderState
         if (header.Id == HeaderIds.ITXT)
         {
             var textData = reader.ReadItxtChunkData(header.ChunkSizeInBytes);
-            decoder.InternationalTextChunks.Add(textData);
+            decoder.ITxtChunks.Add(textData);
             reader.ReadAndValidateCrc(HeaderIds.ITXT);
             return;
         }

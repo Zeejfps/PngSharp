@@ -7,7 +7,7 @@ namespace PngSharp.Spec.Chunks.Text;
 /// iTXt chunk: international UTF-8 text metadata with language tag.
 /// Data contains raw bytes — UTF-8 text if uncompressed, deflate bytes if compressed.
 /// </summary>
-public readonly record struct InternationalTextChunkData
+public readonly record struct ITxtChunkData
 {
     public string Keyword { get; init; }
     public string LanguageTag { get; init; }
@@ -27,34 +27,32 @@ public readonly record struct InternationalTextChunkData
         return Encoding.UTF8.GetString(resultStream.ToArray());
     }
 
-    public static InternationalTextChunkData Create(
-        string keyword, string text, string languageTag, string translatedKeyword)
+    public static ITxtChunkData Create(ITxtContent content)
     {
-        return new InternationalTextChunkData
+        return new ITxtChunkData
         {
-            Keyword = keyword,
-            LanguageTag = languageTag,
-            TranslatedKeyword = translatedKeyword,
+            Keyword = content.Keyword,
+            LanguageTag = content.LanguageTag,
+            TranslatedKeyword = content.TranslatedKeyword,
             IsCompressed = false,
-            Data = Encoding.UTF8.GetBytes(text),
+            Data = Encoding.UTF8.GetBytes(content.Text),
         };
     }
 
-    public static InternationalTextChunkData CreateCompressed(
-        string keyword, string text, string languageTag, string translatedKeyword)
+    public static ITxtChunkData Create(ITxtCompressedContent content)
     {
-        var raw = Encoding.UTF8.GetBytes(text);
+        var raw = Encoding.UTF8.GetBytes(content.Text);
         using var compressedStream = new MemoryStream();
         using (var zlibStream = new ZLibStream(compressedStream, CompressionLevel.Optimal, true))
         {
             zlibStream.Write(raw);
         }
 
-        return new InternationalTextChunkData
+        return new ITxtChunkData
         {
-            Keyword = keyword,
-            LanguageTag = languageTag,
-            TranslatedKeyword = translatedKeyword,
+            Keyword = content.Keyword,
+            LanguageTag = content.LanguageTag,
+            TranslatedKeyword = content.TranslatedKeyword,
             IsCompressed = true,
             Data = compressedStream.ToArray(),
         };
