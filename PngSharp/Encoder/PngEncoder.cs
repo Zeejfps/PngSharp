@@ -70,8 +70,13 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             var scanlineByteWidth = ihdr.GetScanlineByteWidth();
             var widthInPixels = (int)ihdr.Width;
             var heightInPixels = (int)ihdr.Height;
-            Span<byte> unpackedRow = stackalloc byte[widthInPixels];
-            Span<byte> packedRow = stackalloc byte[scanlineByteWidth];
+            const int stackAllocThreshold = 1024;
+            Span<byte> unpackedRow = widthInPixels <= stackAllocThreshold
+                ? stackalloc byte[widthInPixels]
+                : new byte[widthInPixels];
+            Span<byte> packedRow = scanlineByteWidth <= stackAllocThreshold
+                ? stackalloc byte[scanlineByteWidth]
+                : new byte[scanlineByteWidth];
 
             for (var y = 0; y < heightInPixels; y++)
             {
