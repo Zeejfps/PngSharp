@@ -47,8 +47,22 @@ jobs:
       - name: Pack
         run: dotnet pack PngSharp/PngSharp.csproj --configuration Release --no-restore -p:Version=${{ steps.resolve.outputs.version }} --output ./nupkgs
 
+      - name: Get NuGet API key via OIDC
+        id: nuget-auth
+        run: |
+          JWT=$(curl -sLS \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=api://AzureADTokenExchange" \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            | jq -r '.value')
+          API_KEY=$(curl -sLS -X POST \
+            https://api.nuget.org/v3/oidc/exchange \
+            -H "Content-Type: application/json" \
+            -d "{\"token\":\"${JWT}\"}")
+          echo "::add-mask::${API_KEY}"
+          echo "api-key=${API_KEY}" >> "$GITHUB_OUTPUT"
+
       - name: Push to NuGet.org
-        run: dotnet nuget push ./nupkgs/*.nupkg --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./nupkgs/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget-auth.outputs.api-key }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
