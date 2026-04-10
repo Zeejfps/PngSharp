@@ -1,0 +1,88 @@
+name: Auto Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version bump
+        id: version
+        run: |
+          # Get the latest semver tag
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+            RANGE="HEAD"
+          else
+            RANGE="${LATEST_TAG}..HEAD"
+          fi
+
+          echo "Latest tag: $LATEST_TAG"
+
+          # Parse current version
+          CURRENT="${LATEST_TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          # Analyze commits since last tag
+          BUMP=""
+          while IFS= read -r line; do
+            if echo "$line" | grep -qE '^[a-z]+(\(.+\))?!:' || echo "$line" | grep -q 'BREAKING CHANGE'; then
+              BUMP="major"
+              break
+            fi
+            if echo "$line" | grep -qE '^feat(\(.+\))?:'; then
+              if [ "$BUMP" != "major" ]; then
+                BUMP="minor"
+              fi
+            fi
+            if echo "$line" | grep -qE '^fix(\(.+\))?:'; then
+              if [ -z "$BUMP" ]; then
+                BUMP="patch"
+              fi
+            fi
+          done <<< "$(git log "$RANGE" --pretty=format:'%s')"
+
+          if [ -z "$BUMP" ]; then
+            echo "No conventional commits found that require a release."
+            echo "bump=none" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          case "$BUMP" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "Bump type: $BUMP"
+          echo "New version: $NEW_VERSION"
+          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch publish workflow
+        if: steps.version.outputs.bump != 'none' && steps.version.outputs.bump != ''
+        run: |
+          gh workflow run publish.yml -f version=${{ steps.version.outputs.version }}
+        env:
+          GH_TOKEN: ${{ github.token }}

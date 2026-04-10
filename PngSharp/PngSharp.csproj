@@ -5,7 +5,23 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <!-- NuGet package metadata -->
+        <PackageId>PngSharp</PackageId>
+        <Version>0.0.0</Version>
+        <Authors>Zeejfps</Authors>
+        <Description>A pure C# PNG encoder/decoder with zero native dependencies.</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/Zeejfps/PngSharp.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageProjectUrl>https://github.com/Zeejfps/PngSharp</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>png;image;decoder;encoder;codec</PackageTags>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
     <ItemGroup>
         <InternalsVisibleTo Include="PngSharp.Tests" />
