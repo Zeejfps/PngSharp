@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   check-release:
@@ -81,9 +81,8 @@ jobs:
           echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
           echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Summary
+      - name: Create tag
         if: steps.version.outputs.bump != 'none' && steps.version.outputs.bump != ''
         run: |
-          echo "### Release Ready :rocket:" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Version:** v${{ steps.version.outputs.version }} (${{ steps.version.outputs.bump }})" >> "$GITHUB_STEP_SUMMARY"
-          echo "Trigger the **Publish NuGet Package** workflow manually with version \`${{ steps.version.outputs.version }}\`." >> "$GITHUB_STEP_SUMMARY"
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
