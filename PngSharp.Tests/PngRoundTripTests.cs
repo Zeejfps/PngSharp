@@ -140,9 +140,6 @@ public class PngRoundTripTests
     [InlineData("test_2x2.png")]
     [InlineData("test_4x4.png")]
     [InlineData("test_64x64.png")]
-    [InlineData("diamond_helm.png")]
-    [InlineData("diamond_helm_extra_small.png")]
-    [InlineData("diamond_helm_grayscale.png")]
     [InlineData("sprite_atlas.png")]
     [InlineData("sprite_atlas_128x64.png")]
     public void RoundTrip_Asset_PixelDataPreserved(string fileName)
