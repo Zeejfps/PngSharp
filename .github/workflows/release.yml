@@ -1,4 +1,5 @@
 name: Auto Release
+run-name: "Version Check (${{ github.event.head_commit.message }})"
 
 on:
   push:
@@ -6,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  actions: write
 
 jobs:
   check-release:
@@ -81,9 +81,9 @@ jobs:
           echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
           echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Dispatch publish workflow
+      - name: Summary
         if: steps.version.outputs.bump != 'none' && steps.version.outputs.bump != ''
         run: |
-          gh workflow run publish.yml -f version=${{ steps.version.outputs.version }}
-        env:
-          GH_TOKEN: ${{ github.token }}
+          echo "### Release Ready :rocket:" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Version:** v${{ steps.version.outputs.version }} (${{ steps.version.outputs.bump }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "Trigger the **Publish NuGet Package** workflow manually with version \`${{ steps.version.outputs.version }}\`." >> "$GITHUB_STEP_SUMMARY"
