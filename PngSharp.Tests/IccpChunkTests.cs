@@ -14,7 +14,8 @@ public class IccpChunkTests
     [Fact]
     public void RoundTrip_Iccp_Preserved()
     {
-        var iccp = IccpChunkData.Create("TestProfile", SampleProfile);
+        var content = new IccpChunkContent { ProfileName = "TestProfile", RawProfile = SampleProfile };
+        var iccp = IccpChunkData.Encode(content);
         var png = Png.Builder()
             .WithIhdr(CreateIhdr(ColorType.TrueColorWithAlpha))
             .WithIccp(iccp)
@@ -24,14 +25,15 @@ public class IccpChunkTests
         var decoded = RoundTrip(png);
 
         Assert.NotNull(decoded.Iccp);
-        Assert.Equal("TestProfile", decoded.Iccp.Value.ProfileName);
-        Assert.Equal(SampleProfile, decoded.Iccp.Value.DecompressProfile());
+        var decodedContent = decoded.Iccp.Value.Decode();
+        Assert.Equal("TestProfile", decodedContent.ProfileName);
+        Assert.Equal(SampleProfile, decodedContent.RawProfile);
     }
 
     [Fact]
     public void RoundTrip_Iccp_CompressedDataPreserved()
     {
-        var iccp = IccpChunkData.Create("MyProfile", SampleProfile);
+        var iccp = IccpChunkData.Encode(new IccpChunkContent { ProfileName = "MyProfile", RawProfile = SampleProfile });
         var png = Png.Builder()
             .WithIhdr(CreateIhdr(ColorType.TrueColor))
             .WithIccp(iccp)
@@ -47,10 +49,11 @@ public class IccpChunkTests
     [Fact]
     public void Builder_Iccp_WithSrgb_Throws()
     {
+        var iccp = IccpChunkData.Encode(new IccpChunkContent { ProfileName = "Test", RawProfile = SampleProfile });
         Assert.Throws<InvalidOperationException>(() =>
             Png.Builder()
                 .WithIhdr(CreateIhdr(ColorType.TrueColorWithAlpha))
-                .WithIccp(IccpChunkData.Create("Test", SampleProfile))
+                .WithIccp(iccp)
                 .WithSrgb(new SrgbChunkData { RenderingIntent = RenderingIntent.Perceptual })
                 .WithPixelData(new byte[2 * 2 * 4])
                 .Build());

@@ -12,25 +12,29 @@ public readonly record struct IccpChunkData
     public string ProfileName { get; init; }
     public byte[] CompressedProfile { get; init; }
 
-    public byte[] DecompressProfile()
+    public IccpChunkContent Decode()
     {
         using var compressedStream = new MemoryStream(CompressedProfile);
         using var deflateStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
         using var resultStream = new MemoryStream();
         deflateStream.CopyTo(resultStream);
-        return resultStream.ToArray();
+        return new IccpChunkContent
+        {
+            ProfileName = ProfileName,
+            RawProfile = resultStream.ToArray(),
+        };
     }
 
-    public static IccpChunkData Create(string profileName, byte[] rawProfile)
+    public static IccpChunkData Encode(IccpChunkContent content)
     {
         using var compressedStream = new MemoryStream();
         using (var zlibStream = new ZLibStream(compressedStream, CompressionLevel.Optimal, true))
         {
-            zlibStream.Write(rawProfile);
+            zlibStream.Write(content.RawProfile);
         }
         return new IccpChunkData
         {
-            ProfileName = profileName,
+            ProfileName = content.ProfileName,
             CompressedProfile = compressedStream.ToArray(),
         };
     }
