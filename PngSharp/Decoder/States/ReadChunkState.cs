@@ -75,6 +75,20 @@ internal sealed class ReadChunkState : IDecoderState
             return;
         }
 
+        if (header.Id == HeaderIds.ICCP)
+        {
+            if (decoder.Iccp.HasValue)
+                throw new PngFormatException("Multiple iCCP chunks are not allowed.");
+            if (m_SeenPlte)
+                throw new PngFormatException("iCCP chunk must appear before PLTE.");
+            if (m_SeenIdat)
+                throw new PngFormatException("iCCP chunk must appear before IDAT.");
+            var iccpData = reader.ReadIccpChunkData(header.ChunkSizeInBytes);
+            decoder.Iccp = iccpData;
+            reader.ReadAndValidateCrc(HeaderIds.ICCP);
+            return;
+        }
+
         if (header.Id == HeaderIds.SRGB)
         {
             if (decoder.Srgb.HasValue)
@@ -129,6 +143,20 @@ internal sealed class ReadChunkState : IDecoderState
             return;
         }
 
+        if (header.Id == HeaderIds.SBIT)
+        {
+            if (decoder.Sbit.HasValue)
+                throw new PngFormatException("Multiple sBIT chunks are not allowed.");
+            if (m_SeenPlte)
+                throw new PngFormatException("sBIT chunk must appear before PLTE.");
+            if (m_SeenIdat)
+                throw new PngFormatException("sBIT chunk must appear before IDAT.");
+            var sbitData = reader.ReadSbitChunkData(header.ChunkSizeInBytes);
+            decoder.Sbit = sbitData;
+            reader.ReadAndValidateCrc(HeaderIds.SBIT);
+            return;
+        }
+
         if (header.Id == HeaderIds.TIME)
         {
             if (decoder.Time.HasValue)
@@ -148,6 +176,18 @@ internal sealed class ReadChunkState : IDecoderState
             var bkgdData = reader.ReadBkgdChunkData(header.ChunkSizeInBytes);
             decoder.Bkgd = bkgdData;
             reader.ReadAndValidateCrc(HeaderIds.BKGD);
+            return;
+        }
+
+        if (header.Id == HeaderIds.EXIF)
+        {
+            if (decoder.Exif.HasValue)
+                throw new PngFormatException("Multiple eXIf chunks are not allowed.");
+            if (m_SeenIdat)
+                throw new PngFormatException("eXIf chunk must appear before IDAT.");
+            var exifData = reader.ReadExifChunkData(header.ChunkSizeInBytes);
+            decoder.Exif = exifData;
+            reader.ReadAndValidateCrc(HeaderIds.EXIF);
             return;
         }
 

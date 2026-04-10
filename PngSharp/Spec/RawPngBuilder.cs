@@ -9,6 +9,9 @@ using PngSharp.Spec.Chunks.bKGD;
 using PngSharp.Spec.Chunks.cHRM;
 using PngSharp.Spec.Chunks.tIME;
 using PngSharp.Spec.Chunks.tRNS;
+using PngSharp.Spec.Chunks.sBIT;
+using PngSharp.Spec.Chunks.iCCP;
+using PngSharp.Spec.Chunks.eXIf;
 
 namespace PngSharp.Spec;
 
@@ -24,6 +27,9 @@ internal sealed class RawPngBuilder : IRawPngBuilder
     private ChrmChunkData? m_Chrm;
     private TimeChunkData? m_Time;
     private BkgdChunkData? m_Bkgd;
+    private SbitChunkData? m_Sbit;
+    private IccpChunkData? m_Iccp;
+    private ExifChunkData? m_Exif;
     private readonly List<TextChunk> m_TxtChunks = [];
     private readonly List<ZTextChunk> m_ZTxtChunks = [];
     private readonly List<ITextChunk> m_ITxtChunks = [];
@@ -88,6 +94,24 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         return this;
     }
 
+    public IRawPngBuilder WithSbit(SbitChunkData sbit)
+    {
+        m_Sbit = sbit;
+        return this;
+    }
+
+    public IRawPngBuilder WithIccp(IccpChunkData iccp)
+    {
+        m_Iccp = iccp;
+        return this;
+    }
+
+    public IRawPngBuilder WithExif(ExifChunkData exif)
+    {
+        m_Exif = exif;
+        return this;
+    }
+
     public IRawPngBuilder WithTxtChunk(TextChunk textChunk)
     {
         m_TxtChunks.Add(textChunk);
@@ -124,6 +148,9 @@ internal sealed class RawPngBuilder : IRawPngBuilder
         ValidatePlte(ihdr, m_Plte);
         ValidateTrns(ihdr, m_Trns, m_Plte);
         ValidateBkgd(ihdr, m_Bkgd);
+        ValidateSbit(ihdr, m_Sbit);
+        ValidateIccp(m_Iccp, m_Srgb);
+        ValidateExif(m_Exif);
         ValidateTime(m_Time);
         ValidateTextKeywords(m_TxtChunks, m_ZTxtChunks, m_ITxtChunks);
 
@@ -145,6 +172,9 @@ internal sealed class RawPngBuilder : IRawPngBuilder
             Chrm = m_Chrm,
             Time = m_Time,
             Bkgd = m_Bkgd,
+            Sbit = m_Sbit,
+            Iccp = m_Iccp,
+            Exif = m_Exif,
             TxtChunks = m_TxtChunks,
             ZTxtChunks = m_ZTxtChunks,
             ITxtChunks = m_ITxtChunks,
@@ -269,6 +299,74 @@ internal sealed class RawPngBuilder : IRawPngBuilder
             throw new InvalidOperationException($"tIME minute must be 0-59, got {t.Minute}.");
         if (t.Second > 60)
             throw new InvalidOperationException($"tIME second must be 0-60, got {t.Second}.");
+    }
+
+    private static void ValidateSbit(IhdrChunkData ihdr, SbitChunkData? sbit)
+    {
+        if (!sbit.HasValue)
+            return;
+
+        var data = sbit.Value.Data;
+        var expectedLength = ihdr.ColorType switch
+        {
+            ColorType.Grayscale => 1,
+            ColorType.TrueColor => 3,
+            ColorType.IndexedColor => 3,
+            ColorType.GrayscaleWithAlpha => 2,
+            ColorType.TrueColorWithAlpha => 4,
+            _ => throw new InvalidOperationException($"Unknown ColorType: {ihdr.ColorType}."),
+        };
+
+        if (data.Length != expectedLength)
+            throw new InvalidOperationException(
+                $"sBIT data length for {ihdr.ColorType} must be {expectedLength}, got {data.Length}.");
+
+        var maxBits = ihdr.ColorType == ColorType.IndexedColor ? (byte)8 : ihdr.BitDepth;
+
+        for (var i = 0; i < data.Length; i++)
+        {
+            if (data[i] == 0)
+                throw new InvalidOperationException(
+                    $"sBIT value at index {i} must be greater than 0.");
+            if (data[i] > maxBits)
+                throw new InvalidOperationException(
+                    $"sBIT value {data[i]} at index {i} exceeds maximum of {maxBits}.");
+        }
+    }
+
+    private static void ValidateIccp(IccpChunkData? iccp, SrgbChunkData? srgb)
+    {
+        if (!iccp.HasValue)
+            return;
+
+        if (srgb.HasValue)
+            throw new InvalidOperationException(
+                "iCCP and sRGB chunks are mutually exclusive. Only one may be present.");
+
+        var name = iccp.Value.ProfileName;
+        if (string.IsNullOrEmpty(name))
+            throw new InvalidOperationException("iCCP profile name must not be empty.");
+        if (name.Length > 79)
+            throw new InvalidOperationException(
+                $"iCCP profile name exceeds maximum length of 79 bytes.");
+
+        if (iccp.Value.CompressedProfile is null || iccp.Value.CompressedProfile.Length == 0)
+            throw new InvalidOperationException("iCCP compressed profile data must not be empty.");
+    }
+
+    private static void ValidateExif(ExifChunkData? exif)
+    {
+        if (!exif.HasValue)
+            return;
+
+        var data = exif.Value.Data;
+        if (data.Length < 4)
+            throw new InvalidOperationException(
+                $"eXIf data must be at least 4 bytes, got {data.Length}.");
+
+        if (!((data[0] == 0x4D && data[1] == 0x4D) || (data[0] == 0x49 && data[1] == 0x49)))
+            throw new InvalidOperationException(
+                "eXIf data must start with 'MM' (0x4D4D) or 'II' (0x4949) byte order mark.");
     }
 
     private static void ValidateBitDepth(byte bitDepth, ColorType colorType)

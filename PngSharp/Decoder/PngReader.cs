@@ -11,6 +11,9 @@ using PngSharp.Spec.Chunks.bKGD;
 using PngSharp.Spec.Chunks.cHRM;
 using PngSharp.Spec.Chunks.tIME;
 using PngSharp.Spec.Chunks.tRNS;
+using PngSharp.Spec.Chunks.sBIT;
+using PngSharp.Spec.Chunks.iCCP;
+using PngSharp.Spec.Chunks.eXIf;
 
 namespace PngSharp.Decoder;
 
@@ -263,6 +266,34 @@ internal sealed class PngReader
         var data = new byte[chunkSize];
         ReadBytes(data);
         return new BkgdChunkData { Data = data };
+    }
+
+    public SbitChunkData ReadSbitChunkData(int chunkSize)
+    {
+        var data = new byte[chunkSize];
+        ReadBytes(data);
+        return new SbitChunkData { Data = data };
+    }
+
+    public IccpChunkData ReadIccpChunkData(int chunkSize)
+    {
+        var data = new byte[chunkSize];
+        ReadBytes(data);
+
+        var nullIndex = Array.IndexOf(data, (byte)0);
+        var profileName = Encoding.Latin1.GetString(data, 0, nullIndex);
+        // byte after null is compression method (must be 0 = deflate), then compressed data
+        var compressedStart = nullIndex + 2;
+        var compressedData = data[compressedStart..];
+
+        return new IccpChunkData { ProfileName = profileName, CompressedProfile = compressedData };
+    }
+
+    public ExifChunkData ReadExifChunkData(int chunkSize)
+    {
+        var data = new byte[chunkSize];
+        ReadBytes(data);
+        return new ExifChunkData { Data = data };
     }
 
     public PhysChunkData ReadPhysChunkData()

@@ -16,4 +16,7 @@ internal static class HeaderIds
     public const string TEXT = "tEXt";
     public const string ZTXT = "zTXt";
     public const string ITXT = "iTXt";
+    public const string SBIT = "sBIT";
+    public const string ICCP = "iCCP";
+    public const string EXIF = "eXIf";
 }

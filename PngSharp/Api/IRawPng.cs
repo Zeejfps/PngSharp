@@ -8,6 +8,9 @@ using PngSharp.Spec.Chunks.bKGD;
 using PngSharp.Spec.Chunks.cHRM;
 using PngSharp.Spec.Chunks.tIME;
 using PngSharp.Spec.Chunks.tRNS;
+using PngSharp.Spec.Chunks.sBIT;
+using PngSharp.Spec.Chunks.iCCP;
+using PngSharp.Spec.Chunks.eXIf;
 
 namespace PngSharp.Api;
 
@@ -29,6 +32,9 @@ public interface IRawPng
     ChrmChunkData? Chrm { get; }
     TimeChunkData? Time { get; }
     BkgdChunkData? Bkgd { get; }
+    SbitChunkData? Sbit { get; }
+    IccpChunkData? Iccp { get; }
+    ExifChunkData? Exif { get; }
     IReadOnlyList<TextChunk> TxtChunks { get; }
     IReadOnlyList<ZTextChunk> ZTxtChunks { get; }
     IReadOnlyList<ITextChunk> ITxtChunks { get; }
