@@ -2,6 +2,7 @@ using PngSharp.Api;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.PLTE;
 using Xunit;
+using static PngSharp.Tests.PngTestHelpers;
 
 namespace PngSharp.Tests;
 
@@ -120,11 +121,6 @@ public class PlteChunkTests
 
         Assert.Throws<InvalidOperationException>(() =>
             Png.Builder().WithIhdr(ihdr).WithPixelData([0]).WithPlte(plte).Build());
-    }
-
-    private static IRawPng RoundTrip(IRawPng png)
-    {
-        return Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
     }
 
     private static IRawPng CreateIndexedPng(int width, int height, byte bitDepth, PlteChunkData plte, byte[] pixels)

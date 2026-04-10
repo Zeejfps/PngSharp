@@ -3,6 +3,7 @@ using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.tRNS;
 using Xunit;
+using static PngSharp.Tests.PngTestHelpers;
 
 namespace PngSharp.Tests;
 
@@ -135,11 +136,6 @@ public class TrnsChunkTests
 
         Assert.Throws<InvalidOperationException>(() =>
             Png.Builder().WithIhdr(ihdr).WithTrns(trns).WithPixelData([255, 0, 0]).Build());
-    }
-
-    private static IRawPng RoundTrip(IRawPng png)
-    {
-        return Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
     }
 
     private static IRawPng CreatePngWithTrns(

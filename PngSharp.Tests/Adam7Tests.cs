@@ -3,6 +3,7 @@ using PngSharp.Spec;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.PLTE;
 using Xunit;
+using static PngSharp.Tests.PngTestHelpers;
 
 namespace PngSharp.Tests;
 
@@ -225,11 +226,6 @@ public class Adam7Tests
     }
 
     // --- Helpers ---
-
-    private static IRawPng RoundTrip(IRawPng png)
-    {
-        return Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
-    }
 
     private static byte[] CreateTestPixels(int width, int height, int bytesPerPixel)
     {

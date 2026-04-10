@@ -1,17 +1,19 @@
 using PngSharp.Api;
+using PngSharp.Spec.Chunks.bKGD;
+using PngSharp.Spec.Chunks.cHRM;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.PLTE;
+using PngSharp.Spec.Chunks.sGAMA;
+using PngSharp.Spec.Chunks.sRGB;
+using static PngSharp.Spec.Chunks.sRGB.RenderingIntent;
+using PngSharp.Spec.Chunks.tIME;
 using Xunit;
+using static PngSharp.Tests.PngTestHelpers;
 
 namespace PngSharp.Tests;
 
 public class PngRoundTripTests
 {
-    private static IRawPng RoundTrip(IRawPng png)
-    {
-        return Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
-    }
-
     [Fact]
     public void RoundTrip_Rgba_PixelDataPreserved()
     {
@@ -272,6 +274,38 @@ public class PngRoundTripTests
 
         Assert.Equal(pixels, decoded.PixelData);
         Assert.Equal(ColorType.IndexedColor, decoded.Ihdr.ColorType);
+    }
+
+    [Fact]
+    public void RoundTrip_AllAncillaryChunks_Together()
+    {
+        var chrm = new ChrmChunkData
+        {
+            WhitePointX = 31270, WhitePointY = 32900,
+            RedX = 64000, RedY = 33000,
+            GreenX = 30000, GreenY = 60000,
+            BlueX = 15000, BlueY = 6000,
+        };
+        var time = new TimeChunkData { Year = 2026, Month = 4, Day = 9, Hour = 12, Minute = 0, Second = 0 };
+        byte[] bkgdData = [0, 0, 0, 0, 0, 0];
+
+        var png = Png.Builder()
+            .WithIhdr(CreateIhdr(ColorType.TrueColorWithAlpha))
+            .WithChrm(chrm)
+            .WithSrgb(new SrgbChunkData { RenderingIntent = Perceptual })
+            .WithGama(new GammaChunkData { Value = 45455 })
+            .WithBkgd(new BkgdChunkData { Data = bkgdData })
+            .WithTime(time)
+            .WithPixelData(new byte[4 * 4])
+            .Build();
+
+        var decoded = RoundTrip(png);
+
+        Assert.Equal(chrm, decoded.Chrm!.Value);
+        Assert.Equal(time, decoded.Time!.Value);
+        Assert.Equal(bkgdData, decoded.Bkgd!.Value.Data);
+        Assert.NotNull(decoded.Srgb);
+        Assert.NotNull(decoded.Gama);
     }
 
     private static IRawPng CreateIndexedPng(int width, int height, byte bitDepth, PlteChunkData plte, byte[] pixels)

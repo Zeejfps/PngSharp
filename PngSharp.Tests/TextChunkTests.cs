@@ -2,6 +2,7 @@ using PngSharp.Api;
 using PngSharp.Spec.Chunks.IHDR;
 using PngSharp.Spec.Chunks.Text;
 using Xunit;
+using static PngSharp.Tests.PngTestHelpers;
 
 namespace PngSharp.Tests;
 
@@ -157,11 +158,6 @@ public class TextChunkTests
         Assert.Throws<InvalidOperationException>(() =>
             Png.Builder().WithIhdr(MakeIhdr()).WithPixelData([0, 0, 0, 255])
                 .WithTxtChunk(text).Build());
-    }
-
-    private static IRawPng RoundTrip(IRawPng png)
-    {
-        return Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
     }
 
     private static IhdrChunkData MakeIhdr()
