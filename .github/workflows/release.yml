@@ -81,24 +81,6 @@ jobs:
           echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
           echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Setup .NET
-        if: steps.version.outputs.bump != 'none' && steps.version.outputs.bump != ''
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Restore
-        if: steps.version.outputs.bump != 'none' && steps.version.outputs.bump != ''
-        run: dotnet restore
-
-      - name: Build
-        if: steps.version.outputs.bump != 'none' && steps.version.outputs.bump != ''
-        run: dotnet build --no-restore --configuration Release
-
-      - name: Test
-        if: steps.version.outputs.bump != 'none' && steps.version.outputs.bump != ''
-        run: dotnet test --no-restore --configuration Release
-
       - name: Create tag
         if: steps.version.outputs.bump != 'none' && steps.version.outputs.bump != ''
         run: |
