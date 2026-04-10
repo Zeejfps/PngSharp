@@ -40,6 +40,12 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             writer.WriteGAMAChunk(png.Gama.Value);
         }
 
+        if (png.Chrm.HasValue)
+        {
+            m_Logger.Debug("Has cHRM Data");
+            writer.WriteCHRMChunk(png.Chrm.Value);
+        }
+
         if (png.Phys.HasValue)
         {
             m_Logger.Debug($"Has Phys Data: {png.Phys.Value}");
@@ -58,12 +64,24 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             writer.WriteTRNSChunk(png.Trns.Value);
         }
 
+        if (png.Bkgd.HasValue)
+        {
+            m_Logger.Debug($"Has bKGD Data: {png.Bkgd.Value.Data.Length} bytes");
+            writer.WriteBKGDChunk(png.Bkgd.Value);
+        }
+
         foreach (var textChunk in png.TxtChunks)
             writer.WriteTxtChunk(textChunk);
         foreach (var textChunk in png.ZTxtChunks)
             writer.WriteZTxtChunk(textChunk);
         foreach (var textChunk in png.ITxtChunks)
             writer.WriteITxtChunk(textChunk);
+
+        if (png.Time.HasValue)
+        {
+            m_Logger.Debug("Has tIME Data");
+            writer.WriteTIMEChunk(png.Time.Value);
+        }
 
         m_Logger.Debug($"Uncompressed Size: {png.PixelData.Length} bytes");
         using var pixelDataStream = new MemoryStream(png.PixelData);
@@ -76,9 +94,22 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
                 EncodePixels(compressionStream, pixelDataStream);
         }
         m_Logger.Debug($"Compressed Size: {compressedDataStream.Length} bytes");
-        writer.WriteIDATChunk(compressedDataStream.ToArray());
+        WriteIdatChunks(writer, compressedDataStream);
 
         writer.WriteIENDChunk();
+    }
+
+    private const int MaxIdatChunkSize = 8192;
+
+    private static void WriteIdatChunks(PngWriter writer, MemoryStream compressedDataStream)
+    {
+        var data = compressedDataStream.GetBuffer().AsSpan(0, (int)compressedDataStream.Length);
+        while (data.Length > 0)
+        {
+            var chunkSize = Math.Min(data.Length, MaxIdatChunkSize);
+            writer.WriteIDATChunk(data[..chunkSize]);
+            data = data[chunkSize..];
+        }
     }
 
     private void EncodePixels(Stream outputStream, Stream inputStream)

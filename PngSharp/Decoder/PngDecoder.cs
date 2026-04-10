@@ -6,6 +6,9 @@ using PngSharp.Spec.Chunks.PLTE;
 using PngSharp.Spec.Chunks.sGAMA;
 using PngSharp.Spec.Chunks.sRGB;
 using PngSharp.Spec.Chunks.Text;
+using PngSharp.Spec.Chunks.bKGD;
+using PngSharp.Spec.Chunks.cHRM;
+using PngSharp.Spec.Chunks.tIME;
 using PngSharp.Spec.Chunks.tRNS;
 
 namespace PngSharp.Decoder;
@@ -22,6 +25,9 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public SrgbChunkData? Srgb { get; set; }
     public GammaChunkData? Gama { get; set; }
     public PhysChunkData? Phys { get; set; }
+    public ChrmChunkData? Chrm { get; set; }
+    public TimeChunkData? Time { get; set; }
+    public BkgdChunkData? Bkgd { get; set; }
     public List<TextChunk> TxtChunks { get; } = [];
     public List<ZTextChunk> ZTxtChunks { get; } = [];
     public List<ITextChunk> ITxtChunks { get; } = [];
