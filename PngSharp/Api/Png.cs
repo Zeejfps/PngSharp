@@ -96,6 +96,18 @@ public static class Png
         using var encoder = new PngEncoder(rawPng, writer, Logger);
         encoder.Encode();
     }
+    
+    /// <summary>
+    /// Encodes a PNG image to a byte array
+    /// </summary>
+    /// <param name="rawPng">The PNG image data to encode</param>
+    /// <returns>The encoded PNG data as a byte array</returns>
+    public static byte[] EncodeToByteArray(IRawPng rawPng)
+    {
+        using var memoryStream = new MemoryStream();
+        EncodeToStream(rawPng, memoryStream);
+        return memoryStream.ToArray();
+    }
 
     /// <summary>
     /// Creates a new builder for constructing an IRawPng instance
