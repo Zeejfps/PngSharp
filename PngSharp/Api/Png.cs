@@ -2,6 +2,7 @@
 using PngSharp.Encoder;
 using PngSharp.Spec;
 using PngSharp.Spec.Chunks.IHDR;
+using PngSharp.Spec.Chunks.PLTE;
 
 namespace PngSharp.Api;
 
@@ -241,6 +242,127 @@ public static class Png
     public static bool IsGrayscale(this IRawPng png)
     {
         return png.Ihdr.ColorType is ColorType.Grayscale or ColorType.GrayscaleWithAlpha;
+    }
+
+    /// <summary>
+    /// Returns the effective file gamma resolved from chunk precedence: sRGB > gAMA.
+    /// Returns null if no gamma information is available (no sRGB or gAMA chunk),
+    /// or if only an iCCP chunk is present (ICC profile parsing is not supported).
+    /// </summary>
+    public static double? GetFileGamma(this IRawPng png)
+    {
+        if (png.Srgb.HasValue)
+            return 1.0 / 2.2;
+        if (png.Gama.HasValue)
+            return png.Gama.Value.ToDouble();
+        return null;
+    }
+
+    /// <summary>
+    /// Applies PNG spec gamma correction to the pixel data.
+    /// Formula: output = input ^ (1.0 / (fileGamma * displayGamma))
+    /// Alpha channels are never corrected. For indexed color images, the pixel data
+    /// is expanded to RGB (3 bytes per pixel) with corrected palette values.
+    /// </summary>
+    /// <param name="png">The PNG image</param>
+    /// <param name="displayGamma">The display gamma exponent (default 2.2 for sRGB monitors)</param>
+    /// <returns>A new byte array with gamma-corrected pixel data</returns>
+    public static byte[] ApplyGammaCorrection(this IRawPng png, double displayGamma = 2.2)
+    {
+        GammaUtils.GuardBitDepth(png);
+        if (displayGamma <= 0)
+            throw new ArgumentOutOfRangeException(nameof(displayGamma), "Display gamma must be greater than zero.");
+
+        var fileGamma = png.GetFileGamma()
+            ?? throw new InvalidOperationException(
+                "No gamma information available. The image has no sRGB or gAMA chunk.");
+
+        var exponent = 1.0 / (fileGamma * displayGamma);
+        var lut = GammaUtils.BuildLut(c => Math.Pow(c, exponent));
+        return GammaUtils.ApplyLutToPixels(png, lut);
+    }
+
+    /// <summary>
+    /// Converts pixel data to linear light (gamma 1.0).
+    /// Uses the precise sRGB piecewise transfer function when an sRGB chunk is present,
+    /// otherwise uses power-law inversion from the gAMA chunk.
+    /// Alpha channels are never corrected. For indexed color images, the pixel data
+    /// is expanded to RGB (3 bytes per pixel).
+    /// </summary>
+    public static byte[] ToLinear(this IRawPng png)
+    {
+        GammaUtils.GuardBitDepth(png);
+
+        byte[] lut;
+        if (png.Srgb.HasValue)
+        {
+            lut = GammaUtils.BuildLut(GammaUtils.SrgbToLinear);
+        }
+        else if (png.Gama.HasValue)
+        {
+            var fileGamma = png.Gama.Value.ToDouble();
+            var exponent = 1.0 / fileGamma;
+            lut = GammaUtils.BuildLut(c => Math.Pow(c, exponent));
+        }
+        else
+        {
+            throw new InvalidOperationException(
+                "No gamma information available. The image has no sRGB or gAMA chunk.");
+        }
+
+        return GammaUtils.ApplyLutToPixels(png, lut);
+    }
+
+    /// <summary>
+    /// Converts pixel data to sRGB encoding.
+    /// If the image already has an sRGB chunk, returns a clone of the pixel data.
+    /// Otherwise linearizes via the gAMA value and applies the linear-to-sRGB transfer function.
+    /// Alpha channels are never corrected. For indexed color images, the pixel data
+    /// is expanded to RGB (3 bytes per pixel).
+    /// </summary>
+    public static byte[] ToSrgb(this IRawPng png)
+    {
+        GammaUtils.GuardBitDepth(png);
+
+        if (png.Srgb.HasValue)
+        {
+            if (png.Ihdr.ColorType == ColorType.IndexedColor)
+                return GammaUtils.ExpandIndexedToRgb(png, null);
+            return (byte[])png.PixelData.Clone();
+        }
+
+        if (png.Gama.HasValue)
+        {
+            var fileGamma = png.Gama.Value.ToDouble();
+            var exponent = 1.0 / fileGamma;
+            var lut = GammaUtils.BuildLut(c => GammaUtils.LinearToSrgb(Math.Pow(c, exponent)));
+            return GammaUtils.ApplyLutToPixels(png, lut);
+        }
+
+        throw new InvalidOperationException(
+            "No gamma information available. The image has no sRGB or gAMA chunk.");
+    }
+
+    /// <summary>
+    /// Returns a new <see cref="PlteChunkData"/> with gamma-corrected RGB entries.
+    /// Returns null if the image has no palette.
+    /// </summary>
+    /// <param name="png">The PNG image</param>
+    /// <param name="displayGamma">The display gamma exponent (default 2.2 for sRGB monitors)</param>
+    public static PlteChunkData? GetGammaCorrectedPalette(this IRawPng png, double displayGamma = 2.2)
+    {
+        if (!png.Plte.HasValue)
+            return null;
+        if (displayGamma <= 0)
+            throw new ArgumentOutOfRangeException(nameof(displayGamma), "Display gamma must be greater than zero.");
+
+        var fileGamma = png.GetFileGamma()
+            ?? throw new InvalidOperationException(
+                "No gamma information available. The image has no sRGB or gAMA chunk.");
+
+        var exponent = 1.0 / (fileGamma * displayGamma);
+        var lut = GammaUtils.BuildLut(c => Math.Pow(c, exponent));
+        return GammaUtils.CorrectPalette(png.Plte.Value, lut);
     }
 
     private sealed class NullLogger : ILogger
