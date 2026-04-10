@@ -1,5 +1,10 @@
 # PngSharp
 
+[![NuGet](https://img.shields.io/nuget/v/PngSharp)](https://www.nuget.org/packages/PngSharp)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/PngSharp)](https://www.nuget.org/packages/PngSharp)
+[![CI](https://github.com/Zeejfps/PngSharp/actions/workflows/ci.yml/badge.svg)](https://github.com/Zeejfps/PngSharp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/Zeejfps/PngSharp/blob/main/LICENSE)
+
 A fast, low-allocation, pure C# PNG encoder/decoder with zero native dependencies.
 
 ## Features
