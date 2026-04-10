@@ -10,6 +10,9 @@ using PngSharp.Spec.Chunks.bKGD;
 using PngSharp.Spec.Chunks.cHRM;
 using PngSharp.Spec.Chunks.tIME;
 using PngSharp.Spec.Chunks.tRNS;
+using PngSharp.Spec.Chunks.sBIT;
+using PngSharp.Spec.Chunks.iCCP;
+using PngSharp.Spec.Chunks.eXIf;
 
 namespace PngSharp.Decoder;
 
@@ -28,6 +31,9 @@ internal sealed class PngDecoder : IDisposable, IAsyncDisposable
     public ChrmChunkData? Chrm { get; set; }
     public TimeChunkData? Time { get; set; }
     public BkgdChunkData? Bkgd { get; set; }
+    public SbitChunkData? Sbit { get; set; }
+    public IccpChunkData? Iccp { get; set; }
+    public ExifChunkData? Exif { get; set; }
     public List<TextChunk> TxtChunks { get; } = [];
     public List<ZTextChunk> ZTxtChunks { get; } = [];
     public List<ITextChunk> ITxtChunks { get; } = [];

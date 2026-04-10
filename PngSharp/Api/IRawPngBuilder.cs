@@ -8,6 +8,9 @@ using PngSharp.Spec.Chunks.bKGD;
 using PngSharp.Spec.Chunks.cHRM;
 using PngSharp.Spec.Chunks.tIME;
 using PngSharp.Spec.Chunks.tRNS;
+using PngSharp.Spec.Chunks.sBIT;
+using PngSharp.Spec.Chunks.iCCP;
+using PngSharp.Spec.Chunks.eXIf;
 
 namespace PngSharp.Api;
 
@@ -23,6 +26,9 @@ public interface IRawPngBuilder
     IRawPngBuilder WithChrm(ChrmChunkData chrm);
     IRawPngBuilder WithTime(TimeChunkData time);
     IRawPngBuilder WithBkgd(BkgdChunkData bkgd);
+    IRawPngBuilder WithSbit(SbitChunkData sbit);
+    IRawPngBuilder WithIccp(IccpChunkData iccp);
+    IRawPngBuilder WithExif(ExifChunkData exif);
     IRawPngBuilder WithTxtChunk(TextChunk textChunk);
     IRawPngBuilder WithZTxtChunk(ZTextChunk textChunk);
     IRawPngBuilder WithITxtChunk(ITextChunk textChunk);

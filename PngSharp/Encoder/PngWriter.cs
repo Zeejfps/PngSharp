@@ -12,6 +12,9 @@ using PngSharp.Spec.Chunks.bKGD;
 using PngSharp.Spec.Chunks.cHRM;
 using PngSharp.Spec.Chunks.tIME;
 using PngSharp.Spec.Chunks.tRNS;
+using PngSharp.Spec.Chunks.sBIT;
+using PngSharp.Spec.Chunks.iCCP;
+using PngSharp.Spec.Chunks.eXIf;
 
 namespace PngSharp.Encoder;
 
@@ -208,6 +211,45 @@ internal sealed class PngWriter : IDisposable, IAsyncDisposable
             ChunkSizeInBytes = bkgdChunkData.Data.Length
         });
         WriteBytes(bkgdChunkData.Data);
+        WriteCrc32();
+    }
+
+    public void WriteSBITChunk(SbitChunkData sbitChunkData)
+    {
+        WriteChunkHeader(new ChunkHeader
+        {
+            Id = HeaderIds.SBIT,
+            ChunkSizeInBytes = sbitChunkData.Data.Length
+        });
+        WriteBytes(sbitChunkData.Data);
+        WriteCrc32();
+    }
+
+    public void WriteICCPChunk(IccpChunkData iccpChunkData)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(
+            iccpChunkData.ProfileName.Length, MaxKeywordLength, nameof(iccpChunkData.ProfileName));
+
+        Span<byte> profileName = stackalloc byte[iccpChunkData.ProfileName.Length];
+        Encoding.Latin1.GetBytes(iccpChunkData.ProfileName, profileName);
+
+        var size = profileName.Length + 1 + 1 + iccpChunkData.CompressedProfile.Length;
+        WriteChunkHeader(new ChunkHeader { Id = HeaderIds.ICCP, ChunkSizeInBytes = size });
+        WriteBytes(profileName);
+        WriteByte(0); // null separator
+        WriteByte(0); // compression method = deflate
+        WriteBytes(iccpChunkData.CompressedProfile);
+        WriteCrc32();
+    }
+
+    public void WriteEXIFChunk(ExifChunkData exifChunkData)
+    {
+        WriteChunkHeader(new ChunkHeader
+        {
+            Id = HeaderIds.EXIF,
+            ChunkSizeInBytes = exifChunkData.Data.Length
+        });
+        WriteBytes(exifChunkData.Data);
         WriteCrc32();
     }
 

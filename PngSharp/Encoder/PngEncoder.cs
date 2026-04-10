@@ -34,6 +34,12 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
             writer.WriteSRGBChunk(png.Srgb.Value);
         }
 
+        if (png.Iccp.HasValue)
+        {
+            m_Logger.Debug("Has iCCP Data");
+            writer.WriteICCPChunk(png.Iccp.Value);
+        }
+
         if (png.Gama.HasValue)
         {
             m_Logger.Debug($"Has Gama data: {png.Gama.Value}");
@@ -44,6 +50,12 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         {
             m_Logger.Debug("Has cHRM Data");
             writer.WriteCHRMChunk(png.Chrm.Value);
+        }
+
+        if (png.Sbit.HasValue)
+        {
+            m_Logger.Debug("Has sBIT Data");
+            writer.WriteSBITChunk(png.Sbit.Value);
         }
 
         if (png.Phys.HasValue)
@@ -81,6 +93,12 @@ internal sealed class PngEncoder : IDisposable, IAsyncDisposable
         {
             m_Logger.Debug("Has tIME Data");
             writer.WriteTIMEChunk(png.Time.Value);
+        }
+
+        if (png.Exif.HasValue)
+        {
+            m_Logger.Debug($"Has eXIf Data: {png.Exif.Value.Data.Length} bytes");
+            writer.WriteEXIFChunk(png.Exif.Value);
         }
 
         m_Logger.Debug($"Uncompressed Size: {png.PixelData.Length} bytes");
