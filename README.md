@@ -272,6 +272,34 @@ int bitsPerPixel = ihdr.GetBitsPerPixel();
 int scanlineBytes = ihdr.GetScanlineByteWidth();
 ```
 
+## Gamma Correction
+
+Extension methods for applying gamma correction to decoded pixel data. All methods return a new `byte[]` — the original `PixelData` is never mutated. Alpha channels are never gamma corrected per the PNG spec.
+
+```C#
+var png = Png.DecodeFromFile("image.png");
+
+// Query the effective file gamma (sRGB > gAMA precedence)
+double? gamma = png.GetFileGamma(); // ~0.45455 for sRGB, or the gAMA value, or null
+
+// Apply PNG spec gamma correction: output = input ^ (1 / (fileGamma * displayGamma))
+byte[] corrected = png.ApplyGammaCorrection();          // default displayGamma = 2.2
+byte[] corrected = png.ApplyGammaCorrection(1.8);       // custom display gamma
+
+// Convert to linear light (gamma 1.0)
+// Uses precise sRGB piecewise transfer when sRGB chunk is present
+byte[] linear = png.ToLinear();
+
+// Convert to sRGB encoding
+// If already sRGB-tagged, returns a clone; otherwise linearizes then applies sRGB transfer
+byte[] srgb = png.ToSrgb();
+
+// Get a gamma-corrected palette (for indexed color images)
+PlteChunkData? palette = png.GetGammaCorrectedPalette();
+```
+
+For indexed color images, `ApplyGammaCorrection`, `ToLinear`, and `ToSrgb` expand the pixel data to RGB (3 bytes per pixel) with corrected palette values. Use `GetGammaCorrectedPalette` if you want to keep the indexed format.
+
 ## Configuration
 
 ```C#
