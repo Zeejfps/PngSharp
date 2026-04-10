@@ -9,10 +9,7 @@ public class PngRoundTripTests
 {
     private static IRawPng RoundTrip(IRawPng png)
     {
-        var ms = new MemoryStream();
-        Png.EncodeToStream(png, ms);
-        var bytes = ms.ToArray();
-        return Png.DecodeFromByteArray(bytes);
+        return Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
     }
 
     [Fact]
@@ -65,9 +62,7 @@ public class PngRoundTripTests
         // RFC 2083 §3.1: PNG signature is 8 bytes: 137 80 78 71 13 10 26 10
         // RFC 2083 §4.1.1: First chunk must be IHDR with 13 bytes of data
         var png = Png.CreateRgba(2, 2, new byte[16]);
-        var ms = new MemoryStream();
-        Png.EncodeToStream(png, ms);
-        var bytes = ms.ToArray();
+        var bytes = Png.EncodeToByteArray(png);
 
         // PNG signature
         byte[] expectedSignature = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
@@ -121,9 +116,7 @@ public class PngRoundTripTests
             .WithPixelData(new byte[16])
             .Build();
 
-        var ms = new MemoryStream();
-        Png.EncodeToStream(png, ms);
-        var bytes = ms.ToArray();
+        var bytes = Png.EncodeToByteArray(png);
 
         // Byte 28 is the interlace method in the IHDR chunk
         Assert.Equal((byte)InterlaceMethod.Adam7, bytes[28]);

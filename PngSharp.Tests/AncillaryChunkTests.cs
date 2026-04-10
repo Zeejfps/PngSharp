@@ -16,9 +16,7 @@ public class AncillaryChunkTests
 {
     private static IRawPng RoundTrip(IRawPng png)
     {
-        var ms = new MemoryStream();
-        Png.EncodeToStream(png, ms);
-        return Png.DecodeFromByteArray(ms.ToArray());
+        return Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
     }
 
     #region cHRM
@@ -216,9 +214,7 @@ public class AncillaryChunkTests
         new Random(42).NextBytes(pixels);
         var png = Png.CreateRgba(64, 64, pixels);
 
-        var ms = new MemoryStream();
-        Png.EncodeToStream(png, ms);
-        var encoded = ms.ToArray();
+        var encoded = Png.EncodeToByteArray(png);
 
         // Count IDAT chunks in the encoded bytes
         var idatCount = CountChunks(encoded, "IDAT");
@@ -235,9 +231,7 @@ public class AncillaryChunkTests
         byte[] pixels = [255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 128, 128, 128, 255];
         var png = Png.CreateRgba(2, 2, pixels);
 
-        var ms = new MemoryStream();
-        Png.EncodeToStream(png, ms);
-        var decoded = Png.DecodeFromByteArray(ms.ToArray());
+        var decoded = Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
         Assert.Equal(pixels, decoded.PixelData);
     }
 

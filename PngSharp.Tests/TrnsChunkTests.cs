@@ -139,9 +139,7 @@ public class TrnsChunkTests
 
     private static IRawPng RoundTrip(IRawPng png)
     {
-        var ms = new MemoryStream();
-        Png.EncodeToStream(png, ms);
-        return Png.DecodeFromByteArray(ms.ToArray());
+        return Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
     }
 
     private static IRawPng CreatePngWithTrns(

@@ -228,9 +228,7 @@ public class Adam7Tests
 
     private static IRawPng RoundTrip(IRawPng png)
     {
-        var ms = new MemoryStream();
-        Png.EncodeToStream(png, ms);
-        return Png.DecodeFromByteArray(ms.ToArray());
+        return Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
     }
 
     private static byte[] CreateTestPixels(int width, int height, int bytesPerPixel)

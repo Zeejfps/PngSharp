@@ -124,9 +124,7 @@ public class PlteChunkTests
 
     private static IRawPng RoundTrip(IRawPng png)
     {
-        var ms = new MemoryStream();
-        Png.EncodeToStream(png, ms);
-        return Png.DecodeFromByteArray(ms.ToArray());
+        return Png.DecodeFromByteArray(Png.EncodeToByteArray(png));
     }
 
     private static IRawPng CreateIndexedPng(int width, int height, byte bitDepth, PlteChunkData plte, byte[] pixels)
