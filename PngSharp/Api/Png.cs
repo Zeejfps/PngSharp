@@ -189,6 +189,57 @@ public static class Png
         };
     }
     
+    /// <summary>
+    /// Returns the image dimensions as a <see cref="PngSize"/>
+    /// </summary>
+    /// <param name="png">The PNG image to query</param>
+    /// <returns>The width and height of the image</returns>
+    public static PngSize GetDimensions(this IRawPng png)
+    {
+        return new PngSize((int)png.Ihdr.Width, (int)png.Ihdr.Height);
+    }
+
+    /// <summary>
+    /// Returns the total byte count of the decompressed pixel data
+    /// </summary>
+    /// <param name="png">The PNG image to query</param>
+    /// <returns>The size in bytes of the pixel data</returns>
+    public static long GetMemorySize(this IRawPng png)
+    {
+        return (long)png.Ihdr.Width * png.Ihdr.Height * png.Ihdr.GetBytesPerPixel();
+    }
+
+    /// <summary>
+    /// Returns true if the image has an alpha channel, either natively or via a tRNS chunk
+    /// </summary>
+    /// <param name="png">The PNG image to query</param>
+    /// <returns>True if the image has transparency information</returns>
+    public static bool HasAlphaChannel(this IRawPng png)
+    {
+        return png.Ihdr.ColorType is ColorType.GrayscaleWithAlpha or ColorType.TrueColorWithAlpha
+               || png.Trns.HasValue;
+    }
+
+    /// <summary>
+    /// Returns true if the image has a palette (PLTE chunk)
+    /// </summary>
+    /// <param name="png">The PNG image to query</param>
+    /// <returns>True if the image contains a palette</returns>
+    public static bool HasPalette(this IRawPng png)
+    {
+        return png.Plte.HasValue;
+    }
+
+    /// <summary>
+    /// Returns true if the image color type is grayscale or grayscale with alpha
+    /// </summary>
+    /// <param name="png">The PNG image to query</param>
+    /// <returns>True if the image is grayscale</returns>
+    public static bool IsGrayscale(this IRawPng png)
+    {
+        return png.Ihdr.ColorType is ColorType.Grayscale or ColorType.GrayscaleWithAlpha;
+    }
+
     private sealed class NullLogger : ILogger
     {
         public void Debug(string message) { }
@@ -210,3 +261,10 @@ public static class Png
         }
     }
 }
+
+/// <summary>
+/// Represents the dimensions of a PNG image
+/// </summary>
+/// <param name="Width">The width of the image in pixels</param>
+/// <param name="Height">The height of the image in pixels</param>
+public readonly record struct PngSize(int Width, int Height);
