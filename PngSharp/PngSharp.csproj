@@ -1,7 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
+        <!-- iOS compile coverage is opt-in: `dotnet build -p:BuildIos=true` (needs the ios workload). -->
+        <TargetFrameworks Condition="'$(BuildIos)'=='true'">net9.0;net10.0;net10.0-ios</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
