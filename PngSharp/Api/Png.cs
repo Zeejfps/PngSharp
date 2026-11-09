@@ -382,7 +382,7 @@ public static class Png
 
         public Stream OpenFile(string pathToFile)
         {
-            return new FileStream(pathToFile, FileMode.Open);
+            return new FileStream(pathToFile, FileMode.Open, FileAccess.Read, FileShare.Read);
         }
     }
 }
