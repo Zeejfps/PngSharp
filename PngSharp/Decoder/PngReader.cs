@@ -63,8 +63,10 @@ internal sealed class PngReader
 
     private byte ReadByte()
     {
-        // NOTE(Zee): Potential bug -1 is returned?
-        var b = (byte)m_Stream.ReadByte();
+        var value = m_Stream.ReadByte();
+        if (value < 0)
+            throw UnexpectedEndOfStream();
+        var b = (byte)value;
         m_Crc32.Update(b);
         return b;
     }
@@ -206,7 +208,14 @@ internal sealed class PngReader
 
     public void ReadBytes(Span<byte> buffer)
     {
-        m_Stream.ReadExactly(buffer);
+        try
+        {
+            m_Stream.ReadExactly(buffer);
+        }
+        catch (EndOfStreamException)
+        {
+            throw UnexpectedEndOfStream();
+        }
         m_Crc32.Update(buffer);
     }
 
@@ -218,10 +227,18 @@ internal sealed class PngReader
         {
             var bytesToRead = m_Buffer.Length < remainingBytesToRead ? m_Buffer.Length : remainingBytesToRead;
             var bytesRead = m_Stream.Read(m_Buffer, 0, bytesToRead);
+            // Stream.Read returns 0 at the end of the stream; without this check the loop never ends
+            if (bytesRead == 0)
+                throw UnexpectedEndOfStream();
             m_Crc32.Update(m_Buffer.AsSpan(0, bytesRead));
             stream.Write(m_Buffer, 0, bytesRead);
             remainingBytesToRead -= bytesRead;
         }
+    }
+
+    private static PngFormatException UnexpectedEndOfStream()
+    {
+        return new PngFormatException("Unexpected end of stream: the PNG data is truncated.");
     }
 
     public GammaChunkData ReadGamaChunkData()
@@ -315,6 +332,9 @@ internal sealed class PngReader
         {
             var bytesToRead = m_Buffer.Length < totalBytesToRead ? m_Buffer.Length : totalBytesToRead;
             var bytesRead = m_Stream.Read(m_Buffer, 0, bytesToRead);
+            // Stream.Read returns 0 at the end of the stream; without this check the loop never ends
+            if (bytesRead == 0)
+                throw UnexpectedEndOfStream();
             m_Crc32.Update(m_Buffer.AsSpan(0, bytesRead));
             totalBytesToRead -= bytesRead;
         }
